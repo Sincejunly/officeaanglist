@@ -1,0 +1,12 @@
+[Unit]
+Description=alist
+After=network.target
+ 
+[Service]
+Type=simple
+WorkingDirectory=/var/www/app/AList
+ExecStart=/var/www/app/AList/alist server
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target

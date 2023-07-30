@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>倒计时</title>
+</head>
+<body>
+  <input type="text" id="inputField" disabled>
+  <button id="startButton">开始倒计时</button>
+
+  <script>
+    var inputField = document.getElementById("inputField");
+    var startButton = document.getElementById("startButton");
+    var countdown = 0; // 倒计时秒数
+    var timerId = null; // 计时器ID
+
+    // 检查是否存在正在进行的倒计时
+    var startTime = sessionStorage.getItem("startTime");
+    if (startTime) {
+      var elapsedTime = Math.floor((Date.now() - startTime) / 1000); // 已经过去的秒数
+      countdown = 10 - elapsedTime;
+
+      if (countdown <= 0) {
+        inputField.disabled = false; // 解锁输入框
+        startButton.disabled = false; // 解锁开始按钮
+      } else {
+        startButton.disabled = true; // 禁用开始按钮
+        inputField.disabled = true; // 禁用输入框
+        startCountdown(); // 开始倒计时
+      }
+    }
+
+    startButton.addEventListener("click", function() {
+      startButton.disabled = true; // 禁用开始按钮
+      inputField.disabled = true; // 禁用输入框
+      countdown = 10; // 重置倒计时秒数
+      startTime = Date.now(); // 记录倒计时开始时间
+
+      // 将倒计时的开始时间保存到sessionStorage
+      sessionStorage.setItem("startTime", startTime.toString());
+
+      startCountdown();
+    });
+
+    function startCountdown() {
+      inputField.value = countdown; // 将剩余秒数显示在输入框中
+
+      timerId = setInterval(function() {
+        countdown--;
+
+        if (countdown <= 0) {
+          clearInterval(timerId);
+          inputField.value = ""; // 清空输入框内容
+          inputField.disabled = false; // 解锁输入框
+          startButton.disabled = false; // 解锁开始按钮
+          // 清除sessionStorage中的倒计时开始时间
+          sessionStorage.removeItem("startTime");
+        } else {
+          inputField.value = countdown; // 更新剩余秒数显示在输入框中
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

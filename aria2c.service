@@ -1,0 +1,11 @@
+[Unit]
+Description=Aria2c Download Manager
+After=network.target
+
+[Service]
+ExecStart=aria2c --conf-path=/var/www/app/aria2/aria2.conf
+User=your_username
+Restart=always
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,16 @@
+   /* Apply some basic styles to the entire page */
+   html, body {
+    height: 100vh; /* Set the height of html and body to fill the entire viewport */
+    margin: 0;
+    padding: 0;
+  }
+
+
+  /* Add some basic styling for the container */
+  .container {
+    background-image: url("../images/mm.jpg");
+    background-size: cover;
+    display: flex;
+    height: 100%; 
+  }
+

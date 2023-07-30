@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cookie 示例</title>
+</head>
+<body>
+    <h1>Cookie 示例</h1>
+    <button onclick="setAndGetCookie()">设置并获取 Cookie</button>
+    <button onclick="getDecryptedData()">获取解密后的数据</button>
+    <div id="message"></div>
+
+    <script>
+        // 设置并获取 Cookie
+        function setAndGetCookie() {
+            fetch('http://127.0.0.1:5000/set_cookie').then(response => {
+                if (response.ok) {
+                    alert("Cookie 已设置。");
+                    getDecryptedData(); // 获取解密后的数据
+                } else {
+                    alert("设置 Cookie 时发生错误。");
+                }
+            });
+        }
+
+        // 获取解密后的数据
+        function getDecryptedData() {
+            fetch('http://127.0.0.1:5000/').then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else if (response.status === 200) {
+                    alert("Cookie 未设置。");
+                    return null;
+                } else {
+                    alert("获取解密信息时发生错误。");
+                    return null;
+                }
+            }).then(data => {
+                if (data) {
+                    document.getElementById('message').innerText = data;
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

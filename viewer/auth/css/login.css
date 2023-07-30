@@ -1,0 +1,253 @@
+    /* CSS样式定义 */
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Tahoma, sans-serif;
+    }
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 1;
+    }.background-fadeOut {
+      opacity: 1;
+      animation: background-fadeOut 5s forwards;
+    }
+    @keyframes background-fadeOut {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+      backdrop-filter: blur(8px);
+      transform: translateX(-100%);
+      transition: transform 1s, opacity 1s;
+    }.hide-overlay {
+      animation: hideOverlay 1s forwards;
+    }
+    .show-overlay {
+      animation: showOverlay 1s forwards;
+    }.element {
+      animation: curlUp 1s forwards;
+    }.close-button {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    @keyframes hideOverlay {
+      0% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+    }
+    @keyframes showOverlay {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes curlUp {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0);
+        opacity: 0;
+      }
+    }
+
+    #overlay::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      backdrop-filter: blur(8px);
+      z-index: -1;
+    }
+    
+    #overlay-content {
+      background-color: transparent;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .input-group input {
+      margin-top: 5px;
+      padding: 5px;
+      border: none;
+      background-color: transparent;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+      width: 100%;
+      color: white;
+      font-size: 16px;
+      border-radius: 0;
+    }
+    
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    #message{
+      color: red;
+      font-size: 12px;
+      display: none;
+    }
+    
+    #loginB {
+      margin: 0 10px;
+      /* margin-top: 10px; */
+
+      padding: 10px 20px;
+      border: 1px solid white;
+      border-radius: 5px;
+      background-color: transparent;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    #loginB:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    #registerB {
+      margin: 0 10px;
+      /* //margin-top: 10px; */
+
+      padding: 10px 20px;
+      border: 1px solid white;
+      border-radius: 5px;
+      background-color: transparent;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display:none;
+    }
+    #registerB:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    #countB{
+      margin: 0 10px;
+      /* margin-top: 10px; */
+      padding: 10px 20px;
+      border: 1px solid white;
+      border-radius: 5px;
+      background-color: transparent;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display:none;
+    }
+    #countB:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    #logOutB{
+      margin: 0 10px;
+      /* margin-top: 10px; */
+      padding: 10px 20px;
+      border: 1px solid white;
+      border-radius: 5px;
+      background-color: transparent;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display:none;
+    }
+    #logOutB:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    #Commd {
+      max-width: 80%;
+      margin: 0 auto; /* 这将使元素在父容器中水平居中 */
+      margin: 0 10px; 
+      color: rgba(255, 255, 255, 0.8); 
+      font-family: inherit; 
+      display: block;
+    }
+
+    #manage-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 30px;
+      height: 30px;
+      background-color: #333;
+      color: white;
+      border: 1px solid white;
+      border-radius: 50%;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 1;
+      display: none;
+    }
+    
+    #manage-button:hover {
+      background-color: #555;
+    }
+    #placeholder{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 1;
+      display: none;
+      z-index: 9999;
+    }.placeholder-fadein {
+      opacity: 1;
+      animation: placeholder-fadeIn 5s forwards;
+    }
+    @keyframes placeholder-fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  
+  #captcha-input{
+    margin-top: 5px;
+    padding: 5px;
+    border: none;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    width: 100%;
+    color: white;
+    font-size: 16px;
+    border-radius: 0;
+  }

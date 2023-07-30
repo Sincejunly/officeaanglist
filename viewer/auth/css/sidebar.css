@@ -1,0 +1,69 @@
+  .sidebar {
+    flex-shrink: 0;
+    width: 250px;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    box-shadow: 2px 0px 4px rgba(0, 0, 0, 0.2);
+
+    overflow-y: auto; /* 添加滚动效果 */
+    overflow-x: hidden; /* 隐藏水平滚动条 */
+    position: relative; /* 使用相对定位 */
+    max-height: calc(100vh - 40px); /* 最大高度为视口高度减去上下 padding 的高度 */
+    display: flex;
+    flex-direction: column;
+  }
+  .btnt{
+    margin: 0 10px;
+    /* margin-top: 10px; */
+    border: 1px solid white;
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+
+    border-radius: 10px; 
+    backdrop-filter: blur(10px);
+  }   
+  .btnt:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  .btnt:active {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  .active {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+.divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: none;
+    margin: 10px 0;
+  }
+  
+
+  .btn-logout {
+    color: #fff;
+    background-color: red;
+    font-weight: bold;
+  }
+  
+ 
+  .divider:hover {
+    background-color: #aaa;
+  }
+  
+
+  .btnt:last-child {
+    margin-bottom: 40px; 
+  }
+  
+  .sidebar-bottom {
+    margin-top: auto; 
+  }

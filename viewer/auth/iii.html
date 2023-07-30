@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password Show/Hide</title>
+  <style>
+    /* Optional: Add some styling to the password container */
+    .passwordContainer {
+      padding: 5px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      width: 200px;
+      cursor: text; /* Make the container look like a text input */
+    }
+  </style>
+</head>
+<body>
+  <label for="passwordContainer1">Password 1:</label>
+  <div class="passwordContainer" id="passwordContainer1" onmouseover="showPassword(this)" onmouseout="hidePassword(this)">*********</div>
+
+  <label for="passwordContainer2">Password 2:</label>
+  <div class="passwordContainer" id="passwordContainer2" onmouseover="showPassword(this)" onmouseout="hidePassword(this)">*********</div>
+
+  <!-- Add more password containers if needed -->
+
+  <script>
+    var passwords = {
+      passwordContainer1: "YourPassword123",
+      passwordContainer2: "AnotherPassword456",
+      // Add more password containers and their respective passwords here
+    };
+
+    var isPasswordVisible = {}; // Track password visibility state for each container
+ 
+    function showPassword(container) {
+      if (!isPasswordVisible[container.id]) {
+        container.textContent = passwords[container.id];
+        isPasswordVisible[container.id] = true;
+      }
+    }
+
+    function hidePassword(container) {
+      if (isPasswordVisible[container.id]) {
+        var password = passwords[container.id];
+        var hiddenPassword = "*".repeat(password.length);
+        container.textContent = hiddenPassword;
+        isPasswordVisible[container.id] = false;
+      }
+    }
+  </script>
+</body>
+</html>

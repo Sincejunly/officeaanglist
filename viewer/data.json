@@ -1,0 +1,10 @@
+{
+    "mysqlHost":"127.0.0.1",
+    "mysqlPort":3306,
+    "mysqlPassword":"1234",
+    "mysqldataBase":"officeaanglist",
+    "mysqlUser":"root",
+    "redisHost":"127.0.0.1",
+    "redisPort":6379,
+    "redisPassword":"1234"
+}

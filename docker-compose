@@ -1,0 +1,52 @@
+version: '3'
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 159756
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+
+  onlyoffice:
+    image: officeaanglist
+    #build: .
+    container_name: anly
+    restart: always
+    privileged: true
+    #network_mode: "bridge"
+    # dns:
+      # - 192.168.0.37
+    ports:
+      - "8088:80"
+      - "6800:6800"
+      - "5244:5244"
+    environment:
+      - JWT_ENABLEN=false
+      - PUID=1026
+      - PGID=100
+      - DB_TYPE=mariadb
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=onlyoffic
+      - DB_USER=onlyoffic
+      - DB_PWD=1wPmxs0bbJ3aILxZ
+      - REDIS_SERVER_HOST=192.168.5.4
+      - REDIS_SERVER_PORT=6379
+      - REDIS_PASSWORD=159756
+      - DOMAIN=https://office.homura.top:82
+      - AListdb_ty=mysql
+      - AListdb_host=db
+      - AListdb_port=3306
+      - AListdb_us=root
+      - AListdb_pw=GA/89JAHDZmVBFW6
+      - AListdb_name=AList
+
+    volumes:
+      - /volume1/docker/onlyoffice/logs:/var/log/onlyoffice
+      - /volume1/docker/onlyoffice/app:/var/www/app:rw
+      - /volume1/AList:/AList
+      - /volume1/docker/onlyoffice/lib:/var/lib/onlyoffice
+      - /volume1/docker/onlyoffice/db:/var/lib/postgresql
+      - /volume1/docker/onlyoffice/nginx-conf:/etc/nginx/conf.d

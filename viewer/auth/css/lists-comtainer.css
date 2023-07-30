@@ -1,0 +1,153 @@
+  /* Add some basic styling for the lists container */
+  .lists-container {
+    flex: 1; /* Allow the lists container to take up the remaining space on the right */
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  /* Limit the size of each list */
+  .list {
+    padding: 10px;
+    overflow-y: auto;
+    display: none; /* Initially hide all lists */
+    border: none;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+  }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+
+
+  /* Show the first list initially */
+  #list1 {
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+  }
+
+  /* Add some basic styling for the list */
+  ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    justify-content: space-between;
+  }
+
+  .text {
+    flex: 1;
+  }
+  .add-row{
+    display: inline-flex;
+    justify-content: center; /* 水平居中对齐 */
+    align-items: center; /* 垂直居中对齐 */
+    margin: 0 10px;
+    /* margin-top: 10px; */
+    padding: 10px 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    width: 60px;
+    height: 30px;
+
+  }
+  .add-row:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  .add-row:active {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+    
+  .btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .btn-approve {
+    background-color: green;
+    border-radius: 10px;
+    color: white;
+  }
+
+  .btn-reject {
+    background-color: red;
+    color: white;
+  }
+  .user-row {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 5px;
+ }
+ .smallB{
+  display: inline-flex; /* 将按钮容器设置为 Flexbox 布局 */
+  justify-content: center; /* 水平居中对齐 */
+  align-items: center; /* 垂直居中对齐 */
+  margin: 0 10px;
+  /* margin-top: 10px; */
+  padding: 10px 20px;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  width: 40px;
+  height: 20px;
+ } .smallB:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.smallB:active {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.smallS{
+  display: inline-flex; /* 将按钮容器设置为 Flexbox 布局 */
+  justify-content: center; /* 水平居中对齐 */
+  align-items: center; /* 垂直居中对齐 */
+  margin: 0 10px;
+  /* margin-top: 10px; */
+  padding: 10px 20px;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  width: 40px;
+  height: 20px;
+ } .smallS:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+.smallS:active {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.input{
+  margin-top: 5px;
+  padding: 5px;
+  border: none;
+  background-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  color: white;
+  font-size: 16px;
+  border-radius: 0;
+  width: 150px;
+}

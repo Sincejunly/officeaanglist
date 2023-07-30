@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Lists</title>
+  <link rel="stylesheet" href="./css/user.css">
+  <link rel="stylesheet" href="./css/sidebar.css">
+  <link rel="stylesheet" href="./css/lists-comtainer.css">
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <button id="button1" class="btnt" onclick="toggleList('list1','button1')">域名白名单</button>
+      <button id="button2" class="btnt" onclick="toggleList('list2','button2')">IP黑名单</button>
+      <button id="button3" class="btnt" onclick="toggleList('list3','button3')">用户列表</button>
+      <!-- <button id="button4" class="btnt" onclick="toggleList('list4','button4')">Show List 4</button> -->
+      <div class="sidebar-bottom">
+        <hr class="divider">
+        <button class="btnt btn-logout" id="logOut">Logout</button>
+      </div>
+    </div>
+
+    <div class="lists-container">
+      <div class="list" id="list1">
+        <div>
+          <button class='add-row' type="button" onclick="addRow('list1','x_domain','believe')">ADD</button>
+          <label for="x_domain">DOMAIN:</label>
+          <input class="input" type="text" id="x_domain" name="x_domain">
+          <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">重启容器生效</h5>
+        </div>
+        <!-- <li>
+
+        </li> -->
+      </div>
+
+      <div class="list" id="list2">
+        <!-- This list will be initially hidden -->
+          <div>
+            <button class='add-row' type="button" onclick="addRow('list2','x_domaind','distrust')">ADD</button>
+            <label for="x_domaind">DOMAIN:</label>
+            <input class="input" type="text" id="x_domaind" name="x_domaind">
+            <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">直接生效</h5>
+          </div>
+          <!-- More items can be added dynamically -->
+
+      </div>
+
+      <div class="list" id="list3">
+        <form>
+          <button class='add-row' type="button" onclick="addRow('list3','x_user','believe')">Add</button>
+          <label for="x_user">New Username:</label>
+          <input class="input" type="text" id="x_user" name="x_user">
+  
+          <label for="new-username">New Password:</label>
+          <input class="input" type="password" id="new-username" name="new-username">
+  
+          <label for="confirm-password">Confirm Password:</label>
+          <input class="input" type="password" id="confirm-password" name="confirm-password">
+          <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">直接生效</h5>
+        </form>
+      </div>
+
+      <!-- <div class="list" id="list4">
+      
+        <ul>
+          <button class='add-row' onclick="addRow('list4')">Add Row</button>
+          <li>
+            
+            <div class="text">Text Z</div>
+            <button class="btn btn-approve">Approve</button>
+            <button class="btn btn-reject">Reject</button>
+          </li>
+      
+        </ul>
+      </div> -->
+    </div>
+  </div>
+  <script src="./js/login/GetDomain.js" ></script>
+  <script src="./js/login/request.js" ></script>
+  <script src="./js/user/user.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+    "trusted_domains":[
+        "http://127.0.0.1:5501",
+        "http://127.0.0.1"
+    ],
+    "BackendAddress":"http://127.0.0.1:5501",
+    "serverAddress":"http://192.168.5.4",
+    "serverHost":"192.168.5.4"
+}

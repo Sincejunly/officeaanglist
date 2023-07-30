@@ -1,0 +1,12 @@
+CREATE DATABASE onlyoffic;
+
+GRANT ALL PRIVILEGES ON onlyoffic_* TO 'onlyoffic'@'%' IDENTIFIED BY '1wPmxs0bbJ3aILxZ';
+GRANT ALL PRIVILEGES ON onlyoffic.* TO 'onlyoffic'@'%';
+
+CREATE DATABASE AList;
+
+GRANT ALL PRIVILEGES ON AList_* TO 'AList'@'%' IDENTIFIED BY '1wPmxs0bbJ3aILxZ';
+GRANT ALL PRIVILEGES ON AList.* TO 'AList'@'%';
+FLUSH PRIVILEGES;
+
+EXIT;

@@ -1,0 +1,109 @@
+version: '3'
+services:
+  db:
+    image: mariadb
+    restart: always
+    container_name: officeaanglist-db
+    environment:
+
+      MYSQL_ROOT_PASSWORD: ${db_r}
+      MYSQL_DATABASE: officeaanglist
+      MYSQL_USER: officeaanglist
+      MYSQL_PASSWORD: ${officedb_pw}
+    volumes:
+      - /volume1/docker/officeaanglist/db:/var/lib/mysql
+    networks:
+      - officeaanglist
+
+  services:
+    redis:
+      image: redis
+      container_name: officeaanglist-redis
+      restart: always
+      command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass 115099
+      volumes:
+        #- /volume1/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
+        - /volume1/docker/officeaanglist/redis/data:/data
+      ports:
+        - "6379:6379"
+      logging:
+        options:
+          max-size: "100m"
+          max-file: "2"
+
+  # phpmyadmin:
+  #   image: phpmyadmin
+  #   restart: always
+  #   container_name: phpmyadminOffic
+  #   ports:
+  #     - "8051:80"
+  #   environment:
+  #     PMA_HOST: db
+  #     MYSQL_ROOT_PASSWORD: $db_r
+
+  qbittorrent-nox:
+    image: qbittorrentofficial/qbittorrent-nox:latest
+    container_name: qbittorrent-nox
+    tmpfs:
+      - /tmp
+    environment:
+      - QBT_EULA=y
+      - QBT_WEBUI_PORT=6901
+    ports:
+      - "6901:6901/tcp"
+      - "6881:6881/tcp"
+      - "6881:6881/udp"
+    volumes:
+      - "/volume1/docker/qbittorrent/config:/config"
+      - "/volume1/Download/qbittorrent:/downloads"
+    networks:
+      - officeaanglist
+
+  onlyoffice:
+    image: officeaanglist
+    #build: .
+    container_name: officeaanglist
+    restart: always
+    privileged: true
+    #network_mode: "bridge"
+    # dns:
+      # - 192.168.0.37
+    ports:
+      - "8088:80"
+      #- "443:443"
+    environment:
+      - JWT_ENABLEN=false
+      - PUID=1026
+      - PGID=100
+      - TZ=Asia/Shanghai
+      - DB_TYPE=mariadb
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=officeaanglist
+      - DB_USER=officeaanglist
+      - DB_PWD=${officedb_pw}
+      - REDIS_SERVER_HOST=redis
+      - REDIS_SERVER_PORT=6379
+      - REDIS_PASSWORD=115099
+      - DOMAIN=${office_domain}
+      - AListdb_ty=mysql
+      - AListdb_host=db
+      - AListdb_port=3306
+      - AListdb_us=officeaanglist
+      - AListdb_pw=${officedb_pw}
+      - AListdb_name=officeaanglist
+
+#是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
+    volumes:
+      - /volume1/docker/onlyoffice/logs:/var/log/onlyoffice
+      - /volume1/docker/onlyoffice/app:/var/www/app:rw
+      - /volume1/AList:/AList
+      - /volume1/docker/onlyoffice/lib:/var/lib/onlyoffice
+      #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
+      - /volume1/docker/onlyoffice/nginx-conf:/etc/nginx/conf.d
+      #- /volume1/docker/onlyoffice/ssl:/ssl
+    networks:
+      - officeaanglist
+      
+networks:
+  officeaanglist:
