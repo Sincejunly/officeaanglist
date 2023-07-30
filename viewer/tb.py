@@ -20,6 +20,8 @@ tracemalloc.start()
 pydith = os.path.dirname(os.path.realpath(__file__))
 
 auth_manager = QuartAuth()
+userEditFile = {
+}
 CaptchaPrefix = 'officeaanglist:Captcha:'
 def create_app():
     origin = readjson_sync(os.path.join(pydith, 'data.json'))
@@ -104,6 +106,55 @@ async def query():
         return jsonify(user)
     
     return jsonify(user)
+
+@app.route('/AListPath', methods=['GET', 'POST'])
+async def AListPath():
+    global userEditFile
+    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.remote_addr)    
+    userU = await request.get_json()
+    if not userU:
+        return jsonify({'Error':"not json"})
+    
+    userEditFile.setdefault(userU['username'],userU['AListPath'])
+
+    return jsonify({'farewell':"ok"})
+
+
+async def download_file(url, path_for_save):
+    try:
+        async with request.client.get(url) as response:
+            if response.status == 200:
+                with open(path_for_save, "wb") as file:
+                    while True:
+                        chunk = await response.receive(1024)
+                        if not chunk:
+                            break
+                        file.write(chunk)
+                return True
+            else:
+                return False
+    except Exception:
+        return False
+
+
+    
+@app.route('/save', methods=['GET', 'POST'])
+async def save():
+    global userEditFile
+    data = await request.get_json()
+
+    if data.get("status") == 2:
+        downloadUri = data.get("url")
+        path_for_save = userEditFile['users']  # 替换为实际保存路径
+        userEditFile.pop('users')
+        if await download_file(downloadUri, path_for_save):
+            return jsonify({"error": 0})
+        else:
+            return "Bad Response", 500
+    else:
+        return "Bad Request", 400
+    
 
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required

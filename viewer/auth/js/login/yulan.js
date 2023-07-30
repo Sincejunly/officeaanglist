@@ -22,13 +22,14 @@ async function getMyProfile(id) {
     const fileExtension = fileName.split('.').pop();
     const Domain = await getDomain();
     const body = {
-      "AListPath": AListPath,
+      "AListPath": AListPath + '/' + fileName,
       "fileName": fileName,
     }
-    await sendRequest(Domain+'/AListPath',body,'POST');
+    //await sendRequest(serverAddress+'/query','POST',{'table':inPut,'Domain':input.value})
+    await sendRequest(serverAddress+'/AListPath',body,'POST');
     try {
-      const DomainFront = await getDomain('front');
-      api = DomainFront + '/api/me'
+      // const DomainFront = await getDomain('front');
+      // api = DomainFront + '/api/me'
 
       // const data = await getUserNames(api,Authorization);
       // username = data.data.username;
@@ -52,7 +53,7 @@ async function getMyProfile(id) {
         "editorConfig": {
           "lang": "zh-CN",
           "mode": "edit",
-          "callbackUrl": Domain+"/office/save",
+          "callbackUrl": Domain+"/save",
           "customization": {
             "chat": false,
             "comments": false,

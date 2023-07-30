@@ -17,7 +17,6 @@ channels==4.0.0
 charset-normalizer==3.2.0
 click==8.1.4
 colorama==0.4.6
-database-utils==0.1
 databases==0.7.0
 Django==4.2.3
 django-redis==5.3.0
