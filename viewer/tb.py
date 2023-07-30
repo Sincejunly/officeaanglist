@@ -427,7 +427,7 @@ async def proxy_aria2_jsonrpc():
 
     # Forward the request to the backend server (Aria2 in this case)
     import httpx
-    response = await httpx.post(origin['serverHost']+'/jsonrpc', data=data)
+    response = await httpx.post('http://127.0.0.1:6800'+'/aria2/jsonrpc', data=data)
 
     # Create a response with the data from the backend server
     headers = [(key.encode(), value.encode()) for key, value in response.headers.items()]

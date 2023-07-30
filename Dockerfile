@@ -5,7 +5,7 @@ COPY ./system /system
 WORKDIR /system
 
 RUN chmod +x /system/* \
-    && ./update-mirror.sh --apt python3-pip \
+    && ./update-mirror.sh --apt python3-pip pkg-config libmariadb-dev \
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database-utils --index-url=https://homura:glpat-o-b638z3PY5R6_RVs3Bb@gitlab.homura.top:86/api/v4/projects/11/packages/pypi
 	
