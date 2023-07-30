@@ -15,21 +15,21 @@ services:
     networks:
       - officeaanglist
 
-  services:
-    redis:
-      image: redis
-      container_name: officeaanglist-redis
-      restart: always
-      command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass 115099
-      volumes:
-        #- /volume1/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
-        - /volume1/docker/officeaanglist/redis/data:/data
-      ports:
-        - "6379:6379"
-      logging:
-        options:
-          max-size: "100m"
-          max-file: "2"
+
+  redis:
+    image: redis
+    container_name: officeaanglist-redis
+    restart: always
+    command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass 115099
+    volumes:
+      #- /volume1/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
+      - /volume1/docker/officeaanglist/redis/data:/data
+    ports:
+      - "6379:6379"
+    logging:
+      options:
+        max-size: "100m"
+        max-file: "2"
 
   # phpmyadmin:
   #   image: phpmyadmin
