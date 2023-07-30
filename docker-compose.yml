@@ -62,7 +62,7 @@ services:
   onlyoffice:
     image: officeaanglist
     #build: .
-    container_name: officeaanglist
+    container_name: officeaanglistest
     restart: always
     privileged: true
     #network_mode: "bridge"
