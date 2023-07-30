@@ -101,7 +101,7 @@ services:
       - /volume1/docker/onlyoffice/lib:/var/lib/onlyoffice
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
       - /volume1/docker/onlyoffice/nginx-conf:/etc/nginx/conf.d
-      #- /volume1/docker/onlyoffice/ssl:/ssl
+      - /volume1/docker/onlyoffice/ssl:/ssl
     networks:
       - officeaanglist
       
