@@ -497,7 +497,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
 
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
-  python3 initdatabase.py
+  
   python3 init.py -d $DOMAIN
   
 	# 		&& sed -i "58i \          \"callbackUrl\": \"$DOMAIN/callback/\"," /var/www/app/js/yulan.js
@@ -529,7 +529,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   rm -r /etc/nginx/conf.d/ds.conf
   cp /var/www/app1/ds.conf /etc/nginx/conf.d/
   rm -r /var/www/app/ds.conf
-  sed -i "87s/.*/    proxy_pass: $qbit_host:6901;/" /etc/nginx/conf.d/ds.conf
+  
   sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
 
   sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
@@ -549,6 +549,9 @@ echo '
 '
 echo '............................................................'
 echo 'starting server...'
+qbip=$(ping -c 1 $qbit_host | awk -F'[()]' '/PING/{print $2}')
+sed -i "87s/.*/    proxy_pass: http://$qbip:6901;/" /etc/nginx/conf.d/ds.conf
+python3 initjson.py
 
 #/usr/sbin/php-fpm7.4
 cd /var/www/app/AList/
