@@ -5,7 +5,7 @@ COPY ./system /system
 WORKDIR /system
 
 RUN chmod +x /system/* \
-    && ./update-mirror.sh --apt python3-pip pkg-config libmariadb-dev aria2c\
+    && ./update-mirror.sh --apt python3-pip pkg-config libmariadb-dev aria2c iputils-ping\
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl
 	

@@ -10,7 +10,7 @@ data['mysqlPort'] = os.environ.get("DB_PORT")
 data['mysqlDatabase'] = os.environ.get("DB_NAME")
 data['mysqlUser'] = os.environ.get("DB_USER")
 data['mysqlPassword'] = os.environ.get("DB_PWD")
-
+print(os.environ.get("REDIS_SERVER_HOST"))
 data['redisHost'] = socket.gethostbyname(os.environ.get("REDIS_SERVER_HOST"))
 data['redisPort'] = os.environ.get("REDIS_SERVER_PORT")
 data['redisPassword'] = os.environ.get("REDIS_PASSWORD")
