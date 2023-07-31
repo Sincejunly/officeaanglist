@@ -59,7 +59,7 @@ services:
       - officeaanglist
 
   onlyoffice:
-    image: officeaanglist
+    image: $d_route/officeaanglist:v0.1
     #build: .
     container_name: ${dd_name}
     restart: always
@@ -94,12 +94,12 @@ services:
 
 #是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
     volumes:
-      - /volume1/docker/onlyoffice/logs:/var/log/onlyoffice
-      - /volume1/docker/onlyoffice/app:/var/www/app:rw
+      - /volume1/docker/officeaanglist/logs:/var/log/onlyoffice
+      - /volume1/docker/officeaanglist/app:/var/www/app:rw
       - /volume1/AList:/AList
-      - /volume1/docker/onlyoffice/lib:/var/lib/onlyoffice
+      - /volume1/docker/officeaanglist/lib:/var/lib/onlyoffice
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
-      - /volume1/docker/onlyoffice/nginx-conf:/etc/nginx/conf.d
+      - /volume1/docker/officeaanglist/nginx-conf:/etc/nginx/conf.d
       - /volume1/ssl/homura.top:/ssl
     networks:
       - officeaanglist
