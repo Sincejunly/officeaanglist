@@ -23,7 +23,7 @@ install_package() {
       ;;
     --pip)
       if [[ -n "$requirements_file" ]]; then
-        $SUDO_CMD pip install -r "$requirements_file" --index-url=https://homura:glpat-o-b638z3PY5R6_RVs3Bb@gitlab.homura.top:86/api/v4/projects/11/packages/pypi 
+        $SUDO_CMD pip install -r "$requirements_file"
       else
         $SUDO_CMD pip install "$package"
       fi

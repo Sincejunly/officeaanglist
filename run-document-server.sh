@@ -549,6 +549,8 @@ echo '
 '
 echo '............................................................'
 echo 'starting server...'
+apt-get update
+apt-get install -y aria2c
 qbip=$(ping -c 1 $qbit_host | awk -F'[()]' '/PING/{print $2}')
 sed -i "87s/.*/    proxy_pass: http://$qbip:6901;/" /etc/nginx/conf.d/ds.conf
 python3 initjson.py
