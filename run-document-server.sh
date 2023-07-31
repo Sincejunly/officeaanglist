@@ -551,8 +551,8 @@ echo 'starting server...'
 cd /var/www/app/AList/
 nohup ./alist server &
 cd $CURRENT_DIR
-python3 /var/www/app/init.py -d $DOMAIN
 python3 initdatabase.py
+python3 init.py -d $DOMAIN
 nohup python3 tb.py &
 nohup aria2c --conf-path=/var/www/app/aria2/aria2.conf &
 
