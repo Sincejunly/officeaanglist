@@ -526,8 +526,8 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   rm -r /etc/nginx/conf.d/ds.conf
   cp /var/www/app1/ds.conf /etc/nginx/conf.d/
   rm -r /var/www/app/ds.conf
-
-  
+  sed -i "87s/.*/    proxy_pass: $qbit_host:6901;/" /etc/nginx/conf.d/ds.conf
+  sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
 
   sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
@@ -539,14 +539,14 @@ if [ ! -f "/var/www/app/AListInit" ]; then
       sed -i "15s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
   fi
 fi
-sed -i "87s/.*/    proxy_pass: $qbit_host:6901;/" /etc/nginx/conf.d/ds.conf
+
 
 
 echo '
 '
 echo '............................................................'
 echo 'starting server...'
-sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
+
 #/usr/sbin/php-fpm7.4
 cd /var/www/app/AList/
 nohup ./alist server &

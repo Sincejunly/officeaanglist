@@ -25,7 +25,7 @@ services:
         #- /volume1/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
         - /volume1/docker/officeaanglist/redis/data:/data
       ports:
-        - "6379:6379"
+        - "6380:6379"
       logging:
         options:
           max-size: "100m"
@@ -83,7 +83,7 @@ services:
       - DB_USER=officeaanglist
       - DB_PWD=${officedb_pw}
       - REDIS_SERVER_HOST=redis
-      - REDIS_SERVER_PORT=6379
+      - REDIS_SERVER_PORT=6380
       - REDIS_PASSWORD=115099
       - DOMAIN=${office_domain}
       - AListdb_ty=mysql
