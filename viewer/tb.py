@@ -30,7 +30,7 @@ def create_app():
     app.config['MYSQL_HOST'] = origin['mysqlHost']
     app.config['MYSQL_USER'] = origin['mysqlUser']
     app.config['MYSQL_PASSWORD'] = origin['mysqlPassword']
-    app.config['MYSQL_DB'] = origin['mysqldataBase']
+    app.config['MYSQL_DB'] = origin['mysqlDataBase']
     app.config['SESSION_TYPE'] = 'redis'
     app.config['SESSION_PROTECTION'] = True
     auth_manager.init_app(app)
@@ -66,7 +66,7 @@ async def setup():
         password=origin['redisPassword']
     )
     pool = await AsyncMysqlPool.initialize_pool(
-        int(origin['mysqlPort']), origin['mysqlPort'], origin['mysqlUser'], origin['mysqlPassword'], origin['mysqldataBase'])
+        origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
     
     domains = await pool.getAllrow('x_domain')
 

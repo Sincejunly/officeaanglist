@@ -47,6 +47,7 @@ if [ -f "/etc/apt/sources.list" ]; then
   # 判断是否包含 'ubuntu.com' 字符串
   if echo "$sources_list" | grep -q 'ubuntu.com'; then
     $sed_cmd -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
+    $sed_cmd -i 's#http://security.ubuntu.com/ubuntu#http://mirrors.tuna.tsinghua.edu.cn/ubuntu#g' /etc/apt/sources.list
     $apt_cmd update
     OS='Ubuntu'
   else
