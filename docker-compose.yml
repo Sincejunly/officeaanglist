@@ -7,13 +7,13 @@ services:
     environment:
 
       MYSQL_ROOT_PASSWORD: ${db_r}
-      MYSQL_DATABASE: officeaanglist
-      MYSQL_USER: officeaanglist
+      MYSQL_DATABASE: ${dd_name}
+      MYSQL_USER: ${dd_name}
       MYSQL_PASSWORD: ${officedb_pw}
     volumes:
-      - /volume1/docker/officeaanglist/db:/var/lib/mysql
+      - /volume1/docker/${dd_name}/db:/var/lib/mysql
     networks:
-      - officeaanglist
+      - ${dd_name}
 
   redis:
     image: redis
@@ -21,8 +21,8 @@ services:
     restart: always
     command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass 115099
     volumes:
-      - /volume1/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
-      - /volume1/docker/officeaanglist/redis/data:/data
+      - /volume1/docker/${dd_name}/redis/redis.conf:/etc/redis/redis.conf
+      - /volume1/docker/${dd_name}/redis/data:/data
     ports:
       - "6380:6379"
     logging:
@@ -56,10 +56,10 @@ services:
       - "/volume1/docker/qbittorrent/config:/config"
       - "/volume1/Download/qbittorrent:/downloads"
     networks:
-      - officeaanglist
+      - ${dd_name}
 
   onlyoffice:
-    image: officeaanglist
+    image: ${dd_name}
     #build: .
     container_name: ${dd_name}
     restart: always
@@ -78,8 +78,8 @@ services:
       - DB_TYPE=mariadb
       - DB_HOST=db
       - DB_PORT=3306
-      - DB_NAME=officeaanglist
-      - DB_USER=officeaanglist
+      - DB_NAME=${dd_name}
+      - DB_USER=${dd_name}
       - DB_PWD=${officedb_pw}
       - REDIS_SERVER_HOST=redis
       - REDIS_SERVER_PORT=6379
@@ -88,9 +88,9 @@ services:
       - AListdb_ty=mysql
       - AListdb_host=db
       - AListdb_port=3306
-      - AListdb_us=officeaanglist
+      - AListdb_us=${dd_name}
       - AListdb_pw=${officedb_pw}
-      - AListdb_name=officeaanglist
+      - AListdb_name=${dd_name}
 
 #是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
     volumes:
@@ -102,7 +102,8 @@ services:
       - /volume1/docker/onlyoffice/nginx-conf:/etc/nginx/conf.d
       - /volume1/ssl/homura.top:/ssl
     networks:
-      - officeaanglist
+      - ${dd_name}
       
 networks:
-  officeaanglist:
+  ${dd_name}:
+    name: ${dd_name}
