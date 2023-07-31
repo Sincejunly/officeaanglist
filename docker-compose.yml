@@ -3,7 +3,7 @@ services:
   db:
     image: mariadb
     restart: always
-    container_name: officeaanglist-db
+    container_name: ${dd_name}-db
     environment:
 
       MYSQL_ROOT_PASSWORD: ${db_r}
@@ -17,14 +17,14 @@ services:
 
   redis:
     image: redis
-    container_name: officeaanglist-redis
+    container_name: ${dd_name}-redis
     restart: always
     command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass 115099
     volumes:
       #- /volume1/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
       - /volume1/docker/officeaanglist/redis/data:/data
     ports:
-      - "6379:6379"
+      - "6380:6379"
     logging:
       options:
         max-size: "100m"
@@ -61,7 +61,7 @@ services:
   onlyoffice:
     image: officeaanglist
     #build: .
-    container_name: officeaanglistest
+    container_name: ${dd_name}
     restart: always
     privileged: true
     #network_mode: "bridge"
@@ -82,7 +82,7 @@ services:
       - DB_USER=officeaanglist
       - DB_PWD=${officedb_pw}
       - REDIS_SERVER_HOST=redis
-      - REDIS_SERVER_PORT=6380
+      - REDIS_SERVER_PORT=6379
       - REDIS_PASSWORD=115099
       - DOMAIN=${office_domain}
       - AListdb_ty=mysql

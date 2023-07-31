@@ -16,12 +16,12 @@ build:
   stage: build
   script:
     #- /bin/sh init.sh
-    - docker build -t $di_name .
-    - docker login -u homura -p $lab_token $d_route
-    - docker tag $di_name $dd_route
-    - docker push $dd_route
+    # - docker build -t $di_name .
+    # - docker login -u homura -p $lab_token $d_route
+    # - docker tag $di_name $dd_route
+    # - docker push $dd_route
     - docker-compose up -d
 
-    - docker login -u homuras -p $docker_token
-    - docker tag $di_name $ddd_rout
-    - docker push $ddd_rout
+    # - docker login -u homuras -p $docker_token
+    # - docker tag $di_name $ddd_rout
+    # - docker push $ddd_rout
