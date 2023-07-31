@@ -20,7 +20,6 @@ async function getMyProfile(id) {
     const fileName = await getDomain('fileName');
     const AListPath = await getDomain('AListPath');
     const fileExtension = fileName.split('.').pop();
-    const Domain = await getDomain();
     const body = {
       "AListPath": AListPath + '/' + fileName,
       "fileName": fileName,
@@ -53,7 +52,7 @@ async function getMyProfile(id) {
         "editorConfig": {
           "lang": "zh-CN",
           "mode": "edit",
-          "callbackUrl": Domain+"/save",
+          "callbackUrl": serverAddress+"/save",
           "customization": {
             "chat": false,
             "comments": false,
