@@ -66,7 +66,7 @@ async def setup():
         password=origin['redisPassword']
     )
     pool = await AsyncMysqlPool.initialize_pool(
-        origin['serverHost'], origin['mysqlPort'], origin['mysqlUser'], origin['mysqlPassword'], origin['mysqldataBase'])
+        origin['mysqlHost'], origin['mysqlPort'], origin['mysqlUser'], origin['mysqlPassword'], origin['mysqldataBase'])
     
     domains = await pool.getAllrow('x_domain')
 

@@ -10,3 +10,4 @@ init.sh
 init-scripts
 docker-compose
 Auth
+backend.py

@@ -495,11 +495,10 @@ update_release_date(){
 CURRENT_DIR=$(pwd)
 if [ ! -f "/var/www/app/AListInit" ]; then
 
-  python3 initdatabase.py
-  python3 init.py -d $DOMAIN
-
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
+  python3 initdatabase.py
+  python3 init.py -d $DOMAIN
   
 	# 		&& sed -i "58i \          \"callbackUrl\": \"$DOMAIN/callback/\"," /var/www/app/js/yulan.js
   if [[ $DOMAIN == "https://"* ]]; then
