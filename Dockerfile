@@ -5,7 +5,8 @@ COPY ./system /system
 WORKDIR /system
 
 RUN chmod +x /system/* \
-    && ./update-mirror.sh --apt python3-pip pkg-config libmariadb-dev  iputils-ping vim \
+	&& apt-get update \
+    && apt-get install -y python3-pip pkg-config libmariadb-dev  iputils-ping vim \
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl
 	

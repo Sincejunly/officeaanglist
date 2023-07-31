@@ -12,6 +12,8 @@ variables:
 cache:
   paths:
     - .cache/pip/
+    - /var/lib/apt/lists/
+
 
 stages:
   - build

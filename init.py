@@ -77,7 +77,7 @@ async def main():
         port=int(origin['mysqlPort']), 
         user=origin['mysqlUser'], 
         password=origin['mysqlPassword'], 
-        db=origin['mysqldataBase'])
+        db=origin['mysqlDataBase'])
     
     user = await pool.get_row_by_value('x_users', 'username', 'admin')
     user['password'] = 'admin'
