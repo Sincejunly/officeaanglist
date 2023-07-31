@@ -510,17 +510,17 @@ if [ ! -f "/var/www/app/AListInit" ]; then
     sed -i "s|office.xxx.com|${DOMAIN//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
   fi
 
-  sed -i "13s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/backend.py
-  sed -i "14s/.*/    \"port\": \"$AListdb_port\",/" /var/www/app/backend.py
-  sed -i "15s/.*/    \"database\": \"$AListdb_name\",/" /var/www/app/backend.py
-  sed -i "16s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/backend.py
-  sed -i "17s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/backend.py
+  # sed -i "13s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/backend.py
+  # sed -i "14s/.*/    \"port\": \"$AListdb_port\",/" /var/www/app/backend.py
+  # sed -i "15s/.*/    \"database\": \"$AListdb_name\",/" /var/www/app/backend.py
+  # sed -i "16s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/backend.py
+  # sed -i "17s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/backend.py
 
-  sed -i "3s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/initmysql.py
-  sed -i "4s/.*/    \"port\": \"$AListdb_port\",/" /var/www/app/initmysql.py
-  sed -i "5s/.*/    \"database\": \"$AListdb_name\",/" /var/www/app/initmysql.py
-  sed -i "6s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/initmysql.py
-  sed -i "7s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/initmysql.py
+  # sed -i "3s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/initmysql.py
+  # sed -i "4s/.*/    \"port\": \"$AListdb_port\",/" /var/www/app/initmysql.py
+  # sed -i "5s/.*/    \"database\": \"$AListdb_name\",/" /var/www/app/initmysql.py
+  # sed -i "6s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/initmysql.py
+  # sed -i "7s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/initmysql.py
   
 
   rm -r /etc/nginx/conf.d/ds.conf
@@ -551,6 +551,8 @@ echo 'starting server...'
 cd /var/www/app/AList/
 nohup ./alist server &
 cd $CURRENT_DIR
+pwd
+ls
 python3 initdatabase.py
 python3 init.py -d $DOMAIN
 nohup python3 tb.py &
