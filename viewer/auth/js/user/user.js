@@ -38,6 +38,8 @@ async function loadAdmin(){
     if (user['id'] !== 1){
       window.location.href = serverAddress+'/viewer/';
     }
+  }else{
+    window.location.href = serverAddress+'/viewer/';
   }
 }
 loadAdmin();
