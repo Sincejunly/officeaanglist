@@ -551,11 +551,14 @@ echo 'starting server...'
 cd /var/www/app/AList/
 nohup ./alist server &
 cd $CURRENT_DIR
+echo $CURRENT_DIR
 pwd
 ls
 python3 initdatabase.py
 python3 init.py -d $DOMAIN
+cd /var/www/app/viewer/
 nohup python3 tb.py &
+cd $CURRENT_DIR
 nohup aria2c --conf-path=/var/www/app/aria2/aria2.conf &
 
 echo '............................................................'
