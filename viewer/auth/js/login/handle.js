@@ -53,7 +53,8 @@ const SettingsC = document.querySelector('#SettingsC');
 async function inDocEditor(){
   try {
     placeholder.classList.add('placeholder-fadeIn');
-    await getMyProfile();
+    user = await sendRequest(serverAddress+'/check','GET');
+    await getMyProfile(user);
   } catch (error) {
     console.error(error);
   }

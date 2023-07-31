@@ -14,8 +14,8 @@ async function getUserNames(url,Authorization) {
   }
 }
 
-async function getMyProfile(id) {
-    let username;
+async function getMyProfile(user) {
+    //let username;
     //let id;
     const fileName = await getDomain('fileName');
     const AListPath = await getDomain('AListPath');
@@ -61,8 +61,8 @@ async function getMyProfile(id) {
             }
           },
           "user": {
-            "id": id,
-            "name": username
+            "id": user['id'],
+            "name": user['username']
           }
         },
         "height": "1080px",
