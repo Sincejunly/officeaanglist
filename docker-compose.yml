@@ -25,6 +25,8 @@ services:
       - /volume1/docker/officeaanglist/redis/data:/data
     ports:
       - "6380:6379"
+    networks:
+      - officeaanglist
     logging:
       options:
         max-size: "100m"
@@ -110,3 +112,4 @@ services:
       
 networks:
   officeaanglist:
+    name: officeaanglist
