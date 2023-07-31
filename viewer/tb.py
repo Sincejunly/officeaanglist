@@ -62,11 +62,11 @@ async def setup():
     origin = await readjson(os.path.join(pydith, 'data.json'))
     cache = await aioredis.Redis(
         host=origin['redisHost'],
-        port=origin['redisPort'],
+        port=int(origin['redisPort']),
         password=origin['redisPassword']
     )
     pool = await AsyncMysqlPool.initialize_pool(
-        origin['mysqlHost'], origin['mysqlPort'], origin['mysqlUser'], origin['mysqlPassword'], origin['mysqldataBase'])
+        int(origin['mysqlPort']), origin['mysqlPort'], origin['mysqlUser'], origin['mysqlPassword'], origin['mysqldataBase'])
     
     domains = await pool.getAllrow('x_domain')
 

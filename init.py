@@ -74,7 +74,7 @@ async def main():
         echo=True,
         pool_recycle=1800,
         host=origin['mysqlHost'], 
-        port=origin['mysqlPort'], 
+        port=int(origin['mysqlPort']), 
         user=origin['mysqlUser'], 
         password=origin['mysqlPassword'], 
         db=origin['mysqldataBase'])

@@ -91,6 +91,7 @@ services:
       - AListdb_us=officeaanglist
       - AListdb_pw=${officedb_pw}
       - AListdb_name=officeaanglist
+      - qbit_host=qbittorrent-nox
 
 #是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
     volumes:
