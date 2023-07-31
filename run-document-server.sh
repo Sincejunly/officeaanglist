@@ -495,9 +495,12 @@ update_release_date(){
 CURRENT_DIR=$(pwd)
 if [ ! -f "/var/www/app/AListInit" ]; then
 
+  python3 initdatabase.py
+  python3 init.py -d $DOMAIN
+
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
-  cd /var/www/app/AList/
+  
 	# 		&& sed -i "58i \          \"callbackUrl\": \"$DOMAIN/callback/\"," /var/www/app/js/yulan.js
   if [[ $DOMAIN == "https://"* ]]; then
     # if [ -n "$inReverseProxy" ]; then 
@@ -522,6 +525,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   # sed -i "6s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/initmysql.py
   # sed -i "7s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/initmysql.py
   
+
 
   rm -r /etc/nginx/conf.d/ds.conf
   cp /var/www/app1/ds.conf /etc/nginx/conf.d/
@@ -550,12 +554,7 @@ echo 'starting server...'
 #/usr/sbin/php-fpm7.4
 cd /var/www/app/AList/
 nohup ./alist server &
-cd $CURRENT_DIR
-echo $CURRENT_DIR
-pwd
-ls
-python3 initdatabase.py
-python3 init.py -d $DOMAIN
+
 cd /var/www/app/viewer/
 nohup python3 tb.py &
 cd $CURRENT_DIR

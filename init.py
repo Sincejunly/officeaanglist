@@ -66,7 +66,7 @@ https://github.com/Sincejunly/officeaanglist''')
 
 
 async def main():
-    origin = await readjson(os.path.join(pydith, '/viewer/data.json'))
+    origin = await readjson('./viewer/data.json')
     #print(userData)
     pool = await AsyncMysqlPool.initialize_pool(
         minsize=1,
