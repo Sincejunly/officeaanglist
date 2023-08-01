@@ -88,7 +88,7 @@ async def main():
             user['password'] = PASSWORD
             await pool.update('x_users', user, True)
         else:
-            userd = await readjson(os.path.join(pydith, 'pd'))
+            userd = await readjson(os.path.join(pydith, './viewer/pd'))
             user['password'] = userd['password']
             await pool.update('x_users', user, True)
             user['password'] = userd['hashed_password']

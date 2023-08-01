@@ -7,12 +7,12 @@ variables:
   dd_name: 'officeaanglist'
   dd_route: '$d_route/officeaanglist:v0.1'
   ddd_rout: 'homuras/officeaanglist:v0.1'
-  PIP_CACHE_DIR: ".cache/pip/"
+  PIP_CACHE_DIR: "$CI_PROJECT_ID/.cache/pip/"
 
 cache:
   paths:
     - .cache/pip/
-    - /var/lib/apt/lists/
+    - .cache/apt/
 
 
 stages:
@@ -24,7 +24,7 @@ build:
   script:
 
     - docker-compose down
-    - docker build -t $di_name .
+    - docker build --build-arg CI_PROJECT_ID=$CI_PROJECT_ID -t $di_name .
     - docker login -u homura -p $lab_token $d_route
     - docker tag $di_name $dd_route
     - docker push $dd_route

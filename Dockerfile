@@ -5,7 +5,7 @@ COPY ./service/* /etc/init.d/
 
 WORKDIR /system
 
-RUN ls /etc/init.d/ \
+RUN echo "Dir::Cache::archives ${CI_PROJECT_ID}/.cache/apt/" >> /etc/apt/apt.conf \
 	&& chmod +x /system/* \
 	&& chmod +x /etc/init.d/* \
 	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults \
