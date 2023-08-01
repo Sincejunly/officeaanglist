@@ -64,48 +64,52 @@ https://github.com/Sincejunly/officeaanglist''')
 
 
 async def main():
-    print(init)
-    origin = await readjson(os.path.join(pydith, './viewer/data.json'))
-    #print(userData)
-    pool = await AsyncMysqlPool.initialize_pool(
-        minsize=1,
-        maxsize=2,
-        echo=True,
-        pool_recycle=1800,
-        host=origin['mysqlHost'], 
-        port=int(origin['mysqlPort']), 
-        user=origin['mysqlUser'], 
-        password=origin['mysqlPassword'], 
-        db=origin['mysqlDataBase'])
-    
-
-
-    if users:
-        user = await pool.get_row_by_value('x_users', 'username', 'admin')
-        if init:
+    while True:
+        try:
+            origin = await readjson(os.path.join(pydith, './viewer/data.json'))
+            #print(userData)
+            pool = await AsyncMysqlPool.initialize_pool(
+                minsize=1,
+                maxsize=2,
+                echo=True,
+                pool_recycle=1800,
+                host=origin['mysqlHost'], 
+                port=int(origin['mysqlPort']), 
+                user=origin['mysqlUser'], 
+                password=origin['mysqlPassword'], 
+                db=origin['mysqlDataBase'])
             
-            user['username'] = USERNAME
-            user['password'] = PASSWORD
-            await pool.update('x_users', user, True)
-        else:
-            userd = await readjson(os.path.join(pydith, './viewer/pd'))
-            user['password'] = userd['password']
-            await pool.update('x_users', user, True)
-            user['password'] = userd['hashed_password']
-            user.pop('base_path')
-            await pool.update('x_user', user, True)
 
-        
-    if DOMAIN:
-        await pool.update('x_domain', {'id':1, 'Domain':DOMAIN, 'type': 'believe'}, True)
-        await pool.update(table, userData, True)
-    if TDOMAIN:
-        do = await pool.get_row_by_value('x_domain', 'Domain', DOMAIN)
-        if do != None:
-            do['type'] = 'believe'
-            await pool.update('x_domain', do, True)
-        else:
-            await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
+            
+            if users:
+                user = await pool.get_row_by_value('x_users', 'username', 'admin')
+                if init:
+                    
+                    user['username'] = USERNAME
+                    user['password'] = PASSWORD
+                    await pool.update('x_users', user, True)
+                else:
+                    userd = await readjson(os.path.join(pydith, './viewer/pd'))
+                    user['password'] = userd['password']
+                    await pool.update('x_users', user, True)
+                    user['password'] = userd['hashed_password']
+                    user.pop('base_path')
+                    await pool.update('x_user', user, True)
+
+                
+            if DOMAIN:
+                await pool.update('x_domain', {'id':1, 'Domain':DOMAIN, 'type': 'believe'}, True)
+                await pool.update(table, userData, True)
+            if TDOMAIN:
+                do = await pool.get_row_by_value('x_domain', 'Domain', DOMAIN)
+                if do != None:
+                    do['type'] = 'believe'
+                    await pool.update('x_domain', do, True)
+                else:
+                    await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
+            break
+        except mysql.connector.errors.InterfaceError:
+            pass
    
 
 asyncio.run(main())
