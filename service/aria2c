@@ -19,7 +19,7 @@ ARIA2C_USER="root"
 case "$1" in
     start)
         echo "Starting Aria2c Download Manager"
-        su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF" $ARIA2C_USER
+        nohup su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF" $ARIA2C_USER &
         ;;
     stop)
         echo "Stopping Aria2c Download Manager"
