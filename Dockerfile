@@ -6,7 +6,7 @@ COPY ./service/* /etc/init.d/
 WORKDIR /system
 
 RUN ls /etc/init.d/ \
-	chmod +x /system/* \
+	&& chmod +x /system/* \
 	&& chmod +x /etc/init.d/* \
 	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults \
     && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev  iputils-ping vim psmisc \
