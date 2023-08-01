@@ -1,11 +1,15 @@
 FROM onlyoffice/documentserver:7.1.1
 
 COPY ./system /system
+COPY ./service/* /etc/init.d/
 
 WORKDIR /system
 
-RUN chmod +x /system/* \
-    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev  iputils-ping vim \
+RUN ls /etc/init.d/ \
+	chmod +x /system/* \
+	&& chmod +x /etc/init.d/* \
+	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults \
+    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev  iputils-ping vim psmisc \
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl
 	
@@ -49,7 +53,8 @@ COPY . /var/www/app1
 RUN mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
 	&& rm -rf system \
 	&& mv ./run-document-server.sh /app/ds/run-document-server.sh \
-	&& rm -rf AriaNg-1.3.6
+	&& rm -rf AriaNg-1.3.6 \
+	&& rm -rf service
 
 
 # COPY ./AriaNg-1.3.6 /var/www/app1/AriaNg

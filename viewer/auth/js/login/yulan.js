@@ -1,17 +1,11 @@
-
-async function getUserNames(url,Authorization) {
-  try{
-    const userAgent = navigator.userAgent;
-    const methods = 'GET'; 
-    const headers= {
-      'User-Agent': userAgent,
-      'Authorization': Authorization
-    };
-    const response = await sendRequest(url, "", methods, headers);
-    return response;
-  }catch (error) {
-    console.error('Error:', error);
-  }
+async function generateDocumentKey(url) {
+  const allowedChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._=';
+  const fileName = url.substring(url.lastIndexOf('/') + 1);
+  const timestamp = new Date().toISOString();
+  let key = fileName + timestamp;
+  key = encodeURIComponent(key).substr(0, 20);
+  key = key.split('').filter(char => allowedChars.includes(char)).join('');
+  return key;
 }
 
 async function getMyProfile(user) {
@@ -21,19 +15,14 @@ async function getMyProfile(user) {
     const AListPath = await getDomain('AListPath');
     const fileExtension = fileName.split('.').pop();
     const body = {
-      "AListPath": AListPath + '/' + fileName,
-      "fileName": fileName,
+      "username": user['username'],
+      "AListPath": AListPath,
+      'fileName': fileName,
     }
     //await sendRequest(serverAddress+'/query','POST',{'table':inPut,'Domain':input.value})
-    await sendRequest(serverAddress+'/AListPath',body,'POST');
+    await sendRequest(serverAddress+'/AListPath','POST',body);
+    let url = await getDomain('url');
     try {
-      // const DomainFront = await getDomain('front');
-      // api = DomainFront + '/api/me'
-
-      // const data = await getUserNames(api,Authorization);
-      // username = data.data.username;
-      //id = data.data.id;
-
 
       const initConfig = {
         "document": {
@@ -47,12 +36,12 @@ async function getMyProfile(user) {
           },
           "title": fileName,
           "url": url,
-          "key": generateDocumentKey(url)
+          "key": await generateDocumentKey(url)
         },
         "editorConfig": {
           "lang": "zh-CN",
           "mode": "edit",
-          "callbackUrl": serverAddress+"/save",
+          "callbackUrl": `${await isin(user['permission']) ? serverAddress : ""}/save`,
           "customization": {
             "chat": false,
             "comments": false,
@@ -77,12 +66,3 @@ async function getMyProfile(user) {
     }
 }
 
-function generateDocumentKey(url) {
-    const allowedChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._=';
-    const fileName = url.substring(url.lastIndexOf('/') + 1);
-    const timestamp = new Date().toISOString();
-    let key = fileName + timestamp;
-    key = encodeURIComponent(key).substr(0, 20);
-    key = key.split('').filter(char => allowedChars.includes(char)).join('');
-    return key;
-}

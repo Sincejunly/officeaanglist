@@ -24,7 +24,7 @@
     <div class="lists-container">
       <div class="list" id="list1">
         <div>
-          <button class='add-row' type="button" onclick="addRow('list1','x_domain','believe')">ADD</button>
+          <button class='add-row' type="button" onclick="addRow('list1','x_domain')">ADD</button>
           <label for="x_domain">DOMAIN:</label>
           <input class="input" type="text" id="x_domain" name="x_domain">
           <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">重启容器生效</h5>
@@ -48,7 +48,7 @@
 
       <div class="list" id="list3">
         <form>
-          <button class='add-row' type="button" onclick="addRow('list3','x_user','believe')">Add</button>
+          <button class='add-row' type="button" onclick="addRow('list3','x_user',0)">Add</button>
           <label for="x_user">New Username:</label>
           <input class="input" type="text" id="x_user" name="x_user">
   
@@ -79,5 +79,6 @@
   <script src="./js/login/GetDomain.js" ></script>
   <script src="./js/login/request.js" ></script>
   <script src="./js/user/user.js"></script>
+  <script src="./js/user/count.js"></script>
 </body>
 </html>

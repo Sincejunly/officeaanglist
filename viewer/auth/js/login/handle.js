@@ -50,10 +50,9 @@ const SettingsC = document.querySelector('#SettingsC');
 // });
 
 
-async function inDocEditor(){
+async function inDocEditor(user){
   try {
     placeholder.classList.add('placeholder-fadeIn');
-    user = await sendRequest(serverAddress+'/check','GET');
     await getMyProfile(user);
   } catch (error) {
     console.error(error);
@@ -62,14 +61,14 @@ async function inDocEditor(){
 SettingsC.addEventListener('click', async function() {
   window.location.href = serverAddress+'/user';
 });
-officeC.addEventListener('click', async function() {
+async function viewer(user) {
   isSubmitClicked = true;
   overlay.classList.remove('show-overlay');
   overlay.classList.add('hide-overlay');
   background.classList.add('background-fadeOut');
   manageButton.style.display = 'block';
-  await inDocEditor();
-});
+  await inDocEditor(user);
+}
 // xPath.addEventListener('click', async function() {
 //     isSubmitClicked = true;
 //     overlay.classList.remove('show-overlay');
@@ -88,16 +87,27 @@ document.addEventListener("DOMContentLoaded", async function() {
 async function fetchData() {
     try {
       user = await sendRequest(serverAddress+'/check','GET');
-
+      
       if (!user['empty'] && !('username' in user)) {
         overlay.classList.remove('hide-overlay');
         overlay.classList.add('show-overlay');
         await showLogin();
       }
       else if( 'username' in user){
-        overlay.classList.remove('hide-overlay');
-        overlay.classList.add('show-overlay');
-        await showUser(user);
+        if(user['disabled'] == 0){
+          overlay.classList.remove('hide-overlay');
+          overlay.classList.add('show-overlay');
+          await showLogin();
+          if (await getDomain('fileName')!=''){
+            await viewer(user);
+          }
+        }
+        else{
+          overlay.classList.remove('hide-overlay');
+          overlay.classList.add('show-overlay');
+          await showUser(user);
+        }
+
       }
       else{
         overlay.classList.remove('hide-overlay');
@@ -244,7 +254,6 @@ async function count(event){
     const coomd = `sudo docker exec officeaanglist init.py -u ${username} -p ${has}`;
     Commd.style.display = 'block';
     Commd.textContent = coomd;
-    countBox.style.display = 'block';
   }
   catch (error) {
   }
@@ -269,6 +278,7 @@ async function showForgot(){
   registerC.style.display = 'block';
   loginC.style.display = 'block';
   confirmPasswordInput.style.display = 'none';
+  countBox.style.display = 'block';
 }
 
 async function showUser(user) {
@@ -288,7 +298,7 @@ async function showUser(user) {
     message.style.display = 'none';
     loginC.style.display = 'none';
     AriaNgC.style.display = 'block';
-    officeC.style.display = 'block';
+    //officeC.style.display = 'block';
     loginB.textContent = '登出';
     //await getEventTypes(loginB,true);
     //loginB.addEventListener('click',loginOut);
@@ -301,7 +311,9 @@ async function showUser(user) {
     if (user['id'] == 1){
       SettingsC.style.display = 'block';
     }
-    
+    if (await getDomain('fileName')!=''){
+      await viewer(user);
+    }
 
     //xPath.style.display = 'block';
   } catch (error) {
@@ -331,12 +343,12 @@ async function login(event) {
       const confirmPassword = confirmPasswordInput.value;
       const username = usernameInput.value;
       const captcha = captchaInput.value;
-      var body = {'username':username,'password':password};
+      var body = {'username':username,'password':password,'userAgent':navigator.userAgent};
       if (captcha){
         body['Captcha'] = captcha;
       }
       user = await sendRequest(serverAddress+'/login','POST',body);
-      console.log(user);
+
       if ('Captcha' in user) {
         captchaInput.style.display = 'block';
         captchaImage.style.display = 'block';

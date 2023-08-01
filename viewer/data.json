@@ -1,10 +1,11 @@
 {
-    "mysqlHost":"127.0.0.1",
+    
+    "mysqlHost":"192.168.5.4",
     "mysqlPort":3306,
-    "mysqlPassword":"1234",
+    "mysqlPassword":"159756",
     "mysqlDataBase":"officeaanglist",
     "mysqlUser":"root",
-    "redisHost":"127.0.0.1",
+    "redisHost":"192.168.5.4",
     "redisPort":6379,
-    "redisPassword":"1234"
+    "redisPassword":"159756"
 }

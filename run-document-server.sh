@@ -493,12 +493,14 @@ update_release_date(){
   echo ${RELEASE_DATE} > ${DS_RELEASE_DATE}
 }
 CURRENT_DIR=$(pwd)
+
+
 if [ ! -f "/var/www/app/AListInit" ]; then
 
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
-  
-  
+  service alist start
+  sed -i "11i<script type=\"text/javascript\" src=\"$DOMAIN/web-apps/apps/api/documents/api.js\"></script>" /var/www/app/viewer/auth/index.html
   
 	# 		&& sed -i "58i \          \"callbackUrl\": \"$DOMAIN/callback/\"," /var/www/app/js/yulan.js
   if [[ $DOMAIN == "https://"* ]]; then
@@ -508,6 +510,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
     #     sed -i "s|office.xxx.com|${DOMAIN//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
     #   fi
     # fi
+    rm -r /etc/nginx/conf.d/dsssl.conf
     cp -r /var/www/app1/dsssl.conf /etc/nginx/conf.d/
     sed -i "s|office.xxx.com|${DOMAIN//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
   fi
@@ -528,7 +531,6 @@ if [ ! -f "/var/www/app/AListInit" ]; then
 
   rm -r /etc/nginx/conf.d/ds.conf
   cp /var/www/app1/ds.conf /etc/nginx/conf.d/
-  rm -r /var/www/app/ds.conf
   
   sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
 
@@ -549,18 +551,28 @@ echo '
 '
 echo '............................................................'
 echo 'starting server...'
-qbip=$(ping -c 1 $qbit_host | awk -F'[()]' '/PING/{print $2}')
+
+service cron start
+
+
+ipv4_regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+
+
+if [[ $qbit_host =~ $ipv4_regex ]]; then
+  qbip=$qbit_host
+else
+  qbip=$(ping -c 1 $qbit_host | awk -F'[()]' '/PING/{print $2}')
+fi
+
+
 sed -i "87s/.*/    proxy_pass: http://$qbip:6901;/" /etc/nginx/conf.d/ds.conf
+
 python3 initjson.py
 python3 init.py -d $DOMAIN
+service aria2c start
+service alist restart
+service viewer start
 #/usr/sbin/php-fpm7.4
-cd /var/www/app/AList/
-nohup ./alist server &
-
-cd /var/www/app/viewer/
-nohup python3 tb.py &
-cd $CURRENT_DIR
-nohup aria2c --conf-path=/var/www/app/aria2/aria2.conf &
 
 echo '............................................................'
 # aria2c -v
@@ -695,7 +707,7 @@ if [ ${ONLYOFFICE_DATA_CONTAINER} != "true" ]; then
   
   # start cron to enable log rotating
   update_logrotate_settings
-  service cron start
+  
 fi
 
 # nginx used as a proxy, and as data container status service.

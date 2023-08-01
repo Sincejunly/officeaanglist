@@ -3,6 +3,10 @@
     flex: 1; /* Allow the lists container to take up the remaining space on the right */
     padding: 20px;
     overflow-y: auto;
+    --radii-full: 9999px;
+    --sizes-2: 0.5rem;
+    --colors-success9: #30a46c;
+    --colors-danger9: #e5484d;
   }
 
   /* Limit the size of each list */
@@ -112,6 +116,7 @@
   cursor: pointer;
   width: 40px;
   height: 20px;
+  margin-bottom: 10px;
  } .smallB:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
@@ -150,4 +155,21 @@
   font-size: 16px;
   border-radius: 0;
   width: 150px;
+} 
+.dropPorS {
+    width: var(--sizes-2);
+    height: var(--sizes-2);
+    border-radius: var(--radii-full);
+    background: var(--colors-success9);
+}
+.dropPorD{
+  width: var(--sizes-2);
+  height: var(--sizes-2);
+  border-radius: var(--radii-full);
+  background: var(--colors-danger9);
+}
+.porContainer > div {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 0px; /* Adjust the margin as needed */
 }

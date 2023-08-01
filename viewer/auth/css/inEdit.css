@@ -1,0 +1,24 @@
+.userPorBox {
+    display: flex;
+    align-items: center;
+  }
+
+  .userPorBox label {
+    display: flex;
+    align-items: center;
+    border-radius: 5px; 
+    padding: 5px 10px;
+    margin-right: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-family: 'Helvetica', sans-serif; 
+  }
+
+  .userPorBox input[type="checkbox"] {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    background-color: #888;
+    border: 2px solid #bbb;
+    border-radius: 20px; 
+    cursor: pointer;
+  }

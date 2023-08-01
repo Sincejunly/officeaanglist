@@ -32,7 +32,7 @@ async function toggleList(listId, buttonId) {
   }
 }
 async function loadAdmin(){
-  user = await sendRequest(window.serverAddress+'/check','POST',{});
+  user = await sendRequest(window.serverAddress+'/check','POST');
 
   if ('id' in user){
     if (user['id'] !== 1){
@@ -47,7 +47,7 @@ logOut.addEventListener('click',async function(event){
   await sendRequest(window.serverAddress+'/logout','POST',{});
   window.location.href = serverAddress+'/viewer/';
 });
-async function addRow(listId,inPut,type,database=null,init=false) {
+async function addRow(listId,inPut,type='',database=null,init=false) {
 
   const list = document.getElementById(listId)
   const input = document.getElementById(inPut);
@@ -99,6 +99,7 @@ async function addRow(listId,inPut,type,database=null,init=false) {
       'Domain':input.value,
       'type':type
     }
+
     await sendRequest(window.serverAddress+'/update','POST',{'table':'x_domain','Domain':database})
  
   }else if (database === null && inPut === 'x_user'){
@@ -107,14 +108,20 @@ async function addRow(listId,inPut,type,database=null,init=false) {
       'id':id + 1,
       'username':input.value,
       'password':password,
-      'type':type,
-      'NoCaptcha':true,
+      'role':type,
+      'disabled':0,
+      'permission':8,
+      'otp_secret': '', 
+      'sso_id': '',
+      'NoCaptcha':true
     }
- 
-    database = await sendRequest(window.serverAddress+'/register','POST',database)
-  }
   
+    database = await sendRequest(window.serverAddress+'/register','POST',database)
+    
+  }
+ 
   if (inPut === 'x_domain'){
+ 
     const editButton = `<button class='smallB' data-user-id="${database['id']}" onclick="toggleDetails(this,'Domain')">Edit</button>`;
     const userDetails = `
       <div class="Domain" id="Domain${database['id']}" style="display: none;">
@@ -136,22 +143,61 @@ async function addRow(listId,inPut,type,database=null,init=false) {
       `;
   }else{
 
-    
+    let disabledChecked;
+    let disabledC;
+    let combinations;
+
+    let permissiondChecked;
+
+    let permissiondC;
+
     const deleteButton = `<button class="btn btn-reject" data-user-id="${database['id']}" onclick="Delete(this,'x_user')" >Delete</button>`;
-    const passButton = `<button class="btn btn-approve" data-user-id="${database['id']}" onclick="passUser(this)">Pass</button>`;
+    if(database['id'] === 1 && database['role'] === 2){
+      disabledC = 'dropPorS';
+      permissiondC = 'dropPorS';
+    }else{
+      disabledChecked = database['disabled'] === 0 ? 'checked' : ''
+      disabledC = disabledChecked === '' ? 'dropPorD' : 'dropPorS'
+      if (database['permission'] != 0){
+        combinations = await find_combination(database['permission']) 
+
+        permissiondChecked = combinations.some(combination => combination.includes(8)) ? 'checked' : ''
+    
+        permissiondC = permissiondChecked === '' ? 'dropPorD' : 'dropPorS'
+      }else{
+        permissiondC = 'dropPorD'
+      }
+
+    }
+
+
+    const userPorBox = `
+    <div class="userPorBox">
+        <label for="disabled${database['id']}">
+        启用账号
+        <input type="checkbox" id="disabled${database['id']}" ${disabledChecked}>
+        </label>
+        <label for="editFile${database['id']}">
+        可编辑文件
+        <input type="checkbox" id="editFile${database['id']}" ${permissiondChecked}>
+        </label>
+    </div>`;
 
     newItem.innerHTML = `
-        <div>
+        <div class="user-container">
           <strong>User ID:</strong> <span class="user-id" id='user-${database['id']}'>${database['id']}</span>
           <strong>Username:</strong> <span id='username-${database['id']}'>${database['username']}</span>
           <strong>Password:</strong> <div id="password-${database['id']}" 
           data-username="${database['username']}" 
           onmouseover="showPassword(this)" onmouseout="hidePassword(this)" 
-          style="display: inline-block; vertical-align: middle;">***********</div>
+          style="display: inline-block; vertical-align: middle;">${"*".repeat(database['password'].length)}</div>
         </div>
         <button class="smallB" data-user-id="${database['id']}" onclick="toggleDetails(this,'x_user')">Edit</button>
-        ${database['type'] !== "believe" ? passButton : ''}
-        ${database['id'] !== 1 ? deleteButton : ''}
+        <div class="porContainer">
+          <div class="${disabledC}" id="disabledC${database['id']}"></div>
+          <div class="${permissiondC}" id="permissiondC${database['id']}"></div>
+        </div>
+        ${database['id'] !== 1 && database['username'] !== 'guest' ? deleteButton : ''}
         <div class="user-details" id="x_user${database['id']}" style="display: none;">
             <form>
                 <label for="username${database['id']}">New Username:</label>
@@ -163,8 +209,12 @@ async function addRow(listId,inPut,type,database=null,init=false) {
                 <label for="confirmPassword${database['id']}">Confirm Password:</label>
                 <input class='input' type="password" id="confirmPassword${database['id']}" name="confirmPassword">
 
-                <button class='smallS' type="button" data-user-id="${database['id']}" data-type="${database['type']}" onclick="saveDetails(this,'x_user')">Save</button>
+                ${database['id'] !== 1 ? userPorBox : ''}
+                <button class='smallS' type="button" data-user-id="${database['id']}" data-role="${database['role']}" onclick="saveDetails(this,'x_user')">Save</button>
             </form>
+            <div class="userPer" id="userPer${database['id']}">
+
+            </div>
         </div>
 
     `;
@@ -173,13 +223,13 @@ async function addRow(listId,inPut,type,database=null,init=false) {
   list.appendChild(newItem);
 }
 
-async function passUser(button) {
-  var userId = button.dataset.userId;
-  button.remove(); 
-  await sendRequest(window.serverAddress+'/update','POST',
-  {'table':'x_user','valueName':'type','value':'believe','columnName':'id','columnValue':userId})
+// async function passUser(button) {
+//   var userId = button.dataset.userId;
+//   button.remove(); 
+//   await sendRequest(window.serverAddress+'/update','POST',
+//   {'table':'x_user','valueName':'type','value':'believe','columnName':'id','columnValue':userId})
   
-}
+// }
 
 async function init(){
   data = await sendRequest(window.serverAddress+'/query','POST',{'table':'x_domain'});
@@ -187,17 +237,18 @@ async function init(){
 
   for (let i = 0; i < data.length; i++) {
     if (data[i]['type'] === 'believe'){
-      await addRow('list1','x_domain',data[i]['type'],data[i],true);
+      await addRow('list1','x_domain','',data[i],true);
     }
     else if (data[i]['type'] === 'distrust'){
-      await addRow('list2','x_domaind',data[i]['type'],data[i],true);
+      await addRow('list2','x_domaind','',data[i],true);
     }
   }
 
   data = await sendRequest(window.serverAddress+'/query','POST',{'table':'x_user'});
   delete data.farewell;
+
   for(let i = 0; i < data.length; i++){
-    await addRow('list3','x_user',data[i]['type'],data[i],true);
+    await addRow('list3','x_user','',data[i],true);
   }
 }
 init();
@@ -240,10 +291,11 @@ async function toggleDetails(container,inPut,id = null) {
   }
 }
 
-async function saveDetails(container,inPut,type) {
+async function saveDetails(container,inPut) {
   var userId = container.dataset.userId;
-  var type = container.dataset.type;
+  let database = null;
   if (inPut === 'x_domain'){
+    var type = container.dataset.type;
     var newDomain = document.getElementById("x_domain_input" + userId).value;
     if (!newDomain){
       alert('Domain cannot be empty');
@@ -254,41 +306,99 @@ async function saveDetails(container,inPut,type) {
       alert('Domain already exists');
       return;
     }
-    await sendRequest(window.serverAddress+'/update','POST',{'table':inPut,data:{'id':userId,'Domain':newDomain,'type':type}})
+    await sendRequest(window.serverAddress+'/update','POST',{'table':inPut,'valueName':'id','value':userId,'columnName':'Domain','columnValue':newDomain})
+
     document.getElementById("x_domain" + userId).textContent = newDomain;
     toggleDetails(null,'Domain',userId);
   }else if (inPut === 'x_user'){
-
-    const username = document.getElementById("username" + userId).value;
-    const password = document.getElementById("password" + userId).value;
+    
+    var role = container.dataset.role;
+    let username = document.getElementById("username" + userId).value;
+    let password = document.getElementById("password" + userId).value;
     const confirmPassword = document.getElementById("confirmPassword" + userId).value;
-    if (!username){
-      alert('Username cannot be empty');
-      return;
-    }
-    if (!password){
-      alert('Password cannot be empty');
-      return;
-    }
-    if (password !== confirmPassword){
-      alert('Passwords do not match');
-      return;
-    }
-    database = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut,'username':username})
 
+    database = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut,'username':username})
     if (database !== null){
-      console.log(database['id'] == userId);
+
       if (database['id'] != userId)
       {
         alert('User already exists');
         return;
       }
+      
     }
-    await sendRequest(window.serverAddress+'/register','POST',
-    {'id':userId,'username':username,'password':password,'type':type,'reset':true,'NoCaptcha':true})
-    document.getElementById("password-" + userId).textContent = "*".repeat(password.length);
-    document.getElementById("username-" + userId).textContent = username;
-    document.getElementById("user-" + userId).textContent = userId;
+    else{
+
+      database = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut,'id':userId,'username':username})
+      
+    }
+    const disabled = document.getElementById("disabled" + userId).checked == true ? 0 : 1;
+
+    const combinations = await find_combination(database['permission'])
+
+    const permissionD = database['permission'] !=0 ? combinations.some(combination => combination.includes(8)):false ;
+
+    const editFil = document.getElementById("editFile" + userId).checked
+
+    const permissionC = editFil == permissionD ? 0 : 1;
+    let permissionI;
+    if(permissionC && !permissionD){
+      permissionI = database['permission'] + 8;
+    }
+    else if(permissionC && permissionD){
+      permissionI = database['permission'] - 8;
+    }
+
+    if (password !== confirmPassword){
+      alert('Passwords do not match');
+      return;
+    }
+
+    if (!username){
+      if(database['disabled'] == disabled && !permissionC){
+        alert('Username cannot be empty');
+        return;
+      }
+    }
+    if (!password){
+      if(database['disabled'] == disabled && !permissionC){
+        alert('Password cannot be empty');
+        return;
+      }
+ 
+    }
+
+    // database['id'] = userId;
+    // database['username'] = username;
+    // database['password'] = password;
+    // database['role'] = role;
+    // database['disabled'] = disabled;
+    // database['NoCaptcha'] = true;
+    // database['otp_secret'] = '';
+    // database['sso_id'] = '';
+    // database['reset']='';
+
+    database = {
+      'id':userId,
+      'username':username,
+      'password':password,
+      'role':role,
+      'disabled':disabled,
+      'permission':permissionI,
+      'otp_secret': '', 
+      'sso_id': '',
+      'NoCaptcha':true,
+      'reset':''
+    }
+
+    database = await sendRequest(window.serverAddress+'/register','POST',
+    database)
+
+    document.getElementById("password-" + userId).textContent = "*".repeat(database['password'].length);
+    document.getElementById("username-" + userId).textContent = database['username'];
+    document.getElementById("user-" + userId).textContent = database['id'];
+    document.getElementById("disabledC" + userId).className = disabled == 0 ? 'dropPorS' : 'dropPorD';
+    document.getElementById("permissiondC" + userId).className = permissionI == 0 ? 'dropPorD' : 'dropPorS';
     toggleDetails(null,inPut,userId);
   }
 
@@ -297,7 +407,7 @@ async function saveDetails(container,inPut,type) {
 
 async function showPassword(container) {
   var username = container.dataset.username;
-  console.log(username);
+
   var user = await sendRequest(window.serverAddress+'/query','POST',{'table':'x_user','username':username})
 
   container.textContent = user['password'];
@@ -310,3 +420,4 @@ async function hidePassword(container) {
   var hiddenPassword = "*".repeat(user['password'].length);
   container.textContent = hiddenPassword;
 }
+

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          viewer
+# Required-Start:    $network $remote_fs $syslog
+# Required-Stop:     $network $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Your Viewer Service Description
+# Description:       Start viewer service
+### END INIT INFO
+
+# Change the following line to match your Python3 path
+PYTHON_BIN="/usr/bin/python3"
+TB_USER='root'
+case "$1" in
+    start)
+        echo "Starting Viewer Service"
+        cd /var/www/app/viewer
+        $PYTHON_BIN tb.py &
+        ;;
+    stop)
+        echo "Stopping Viewer Service"
+        killall -q -u $TB_USER python3 tb.py
+        ;;
+    restart)
+        echo "Restarting Viewer Service"
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0

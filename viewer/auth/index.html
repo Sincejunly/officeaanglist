@@ -19,9 +19,12 @@
           <input type="password" id="password-input" name="password" placeholder="请输入密码" style="visibility: visible;"/>
           <input type="password" id="confirm-password-input" name="confirm-password" placeholder="请再次输入密码"/>
           <div id="countBox">
-            <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); display: block;">复制下面内容，在宿主机上执行命令：</a>
+            <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); display: block;">
+              通常，管理员密码与AList同步，<br>
+              如果你忘记了，可以通过计算的方式重置管理员账号与密码，<br>
+              这将同时重置AList与Editer密码</a>
             <code id="Commd">
-                sudo docker exec officeaanglist initmysql.py -u
+                
             </code>
             <!-- <textarea style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); opacity: 0.5; resize: none; display: block; width: 90%;" id="textPassword" rows="1" cols="40"></textarea>   -->
           </div>
@@ -77,6 +80,7 @@
   <script src="./js/login/request.js"></script>
   <script src="./js/login/handle.js"></script>
   <script src="./js/login/yulan.js"></script>
+  <script src="./js/user/count.js"></script>
   <script>
   </script>
 </body>

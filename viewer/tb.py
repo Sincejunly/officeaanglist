@@ -1,8 +1,11 @@
+from codecs import register_error
 import io
 import json
 import os
 import random
 import string
+import aiofiles
+import aiohttp
 import aioredis
 from fastapi import Response
 from quart import Quart, jsonify, redirect, request, send_file, send_from_directory
@@ -13,8 +16,8 @@ from bcrypt import checkpw, gensalt, hashpw
 import tracemalloc
 from quart_session.sessions import SessionInterface
 from captcha.image import ImageCaptcha
-from database_utils import AsyncMysqlPool, readjson, readjson_sync
-
+from database_utils import AsyncMysqlPool, readjson, readjson_sync,writejson
+from urllib import parse
 
 tracemalloc.start()
 pydith = os.path.dirname(os.path.realpath(__file__))
@@ -22,6 +25,12 @@ pydith = os.path.dirname(os.path.realpath(__file__))
 auth_manager = QuartAuth()
 userEditFile = {
 }
+# AListHost = os.environ.get("AListHost")
+# outAList = False
+# if not AListHost:
+#     outAList = True
+#     AListHost = os.environ.get("DOMAIN")+'/AList/api'
+AListHost='https://office.homura.top:82/AList/api'
 CaptchaPrefix = 'officeaanglist:Captcha:'
 def create_app():
     origin = readjson_sync(os.path.join(pydith, 'data.json'))
@@ -70,7 +79,7 @@ async def setup():
     
     domains = await pool.getAllrow('x_domain')
 
-    domains = await getAlltype(domains,'Domain','believe')
+    domains = await getAlltype(domains, 'Domain', 'believe')
 
     app = cors(app, allow_origin=domains)
 
@@ -98,6 +107,8 @@ async def query():
 
         if not user:
             user = await pool.get_row_by_value(userU['table'], arrange, userU[arrange])
+    elif(len(userU) == 3 and 'id' in userU):
+        user = await pool.get_row_by_value(userU['table'], 'id', userU['id'])
     else:
         user = await pool.getAllrow(userU['table'])
     
@@ -107,37 +118,66 @@ async def query():
     
     return jsonify(user)
 
+def create_directory(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        #print(f"目录 {path} 创建成功")
+    else:
+        pass
+        #print(f"目录 {path} 已存在")
+
 @app.route('/AListPath', methods=['GET', 'POST'])
 async def AListPath():
     global userEditFile
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
         return html_message.format(request.remote_addr)    
     userU = await request.get_json()
     if not userU:
-        return jsonify({'Error':"not json"})
-    
-    userEditFile.setdefault(userU['username'],userU['AListPath'])
+        return jsonify({'Error': "not json"})
+    root_folder_path = await pool.get_value_by_value('x_storages', 'mount_path', userU['AListPath'], 'root_folder_path')
+    create_directory(root_folder_path)
+    userEditFile[userU['username']]['File-Path'] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
 
-    return jsonify({'farewell':"ok"})
+    userEditFile[userU['username']]['Content-Length'] = str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
+    userEditFile[userU['username']]['truePath'] = "{}/{}".format(root_folder_path, userU['fileName'])
+
+    return jsonify({'farewell': "ok"})
 
 
 async def download_file(url, path_for_save):
     try:
-        async with request.client.get(url) as response:
-            if response.status == 200:
-                with open(path_for_save, "wb") as file:
-                    while True:
-                        chunk = await response.receive(1024)
-                        if not chunk:
-                            break
-                        file.write(chunk)
-                return True
-            else:
-                return False
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    async with aiofiles.open(path_for_save, "wb",encoding='utf-8') as file:
+                        while True:
+                            chunk = await response.content.read(1024)
+                            if not chunk:
+                                break
+                            await file.write(chunk)
+                    return True
+                else:
+                    return False
     except Exception:
         return False
 
+async def Upload(url,UserAgent,Authorization,localPath, FilePath, password=''):
 
+    upload_header = {
+        'UserAgent': UserAgent,
+        'Authorization': Authorization,
+        'File-Path': FilePath,
+        'Password': password,
+        'Content-Length': str(os.path.getsize(localPath))
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with aiofiles.open(localPath, 'rb',encoding='utf-8') as file:
+                data = await file.read()
+                async with session.put(f'{url}/fs/put', headers=upload_header, data=data) as response:
+                    return await response.json()
+    except Exception as e:
+        return {'code': -1, 'message': str(e)}
     
 @app.route('/save', methods=['GET', 'POST'])
 async def save():
@@ -146,12 +186,20 @@ async def save():
 
     if data.get("status") == 2:
         downloadUri = data.get("url")
-        path_for_save = userEditFile['users']  # 替换为实际保存路径
-        userEditFile.pop('users')
+        path_for_save = userEditFile[data['users'][0]]['truePath']  # 替换为实际保存路径
+        
         if await download_file(downloadUri, path_for_save):
+            #if outAList:
+            print('data:')
+            print(data)
+            print(await Upload(AListHost, userEditFile[data['users'][0]]['userAgent'], 
+            userEditFile[data['users'][0]]['Authorization'], path_for_save, 
+            userEditFile[data['users'][0]]['FilePath']))
+            userEditFile.pop(data['users'][0])
             return jsonify({"error": 0})
         else:
             return "Bad Response", 500
+
     else:
         return "Bad Request", 400
     
@@ -173,9 +221,8 @@ async def delete():
             else:
                 arrange = key
         await pool.delete_row(userU['table'], arrange, userU[arrange])
-        
-
-
+        if userU['table'] == 'x_user':
+            await pool.delete_row('x_users', arrange, userU[arrange])
     return jsonify({'farewell':"ok"})
 
 
@@ -188,15 +235,20 @@ async def update():
     
     if not userU:
         return jsonify({'Error':"not json"})
-    
-    await pool.update_value(userU['table'], userU['valueName'], userU['value'], userU['columnName'], userU['columnValue']) 
+    if 'Domain' in userU or 'user' in userU:
+        table = userU.pop('table',None)
+        user = userU.pop('user') if 'user' in userU else userU.pop('Domain')
+        await pool.update(table, user)
+    else:
+        await pool.update_value(userU['table'], userU['valueName'], userU['value'], userU['columnName'], userU['columnValue']) 
 
     return jsonify({'farewell':"ok"})
 
 @app.route('/check', methods=['GET', 'POST'])
 async def index():
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)    
+        return html_message.format(request.remote_addr)
+    await registerUser()    
     if await current_user.is_authenticated:
         user = await pool.get_row_by_value('x_user','`id`',current_user._auth_id)
         
@@ -205,21 +257,81 @@ async def index():
                 user.pop('password')
         else:
             user = {}
+
         user['empty'] = True
         user['farewell'] = 'ok'
         return jsonify(user)
         #return redirect('/AriaNg')
-    
+    else:
+        user = await pool.get_row_by_value('x_user','username','guest')
+
+        if user['disabled'] == 0:
+            if isinstance(user, dict):
+                if 'password' in user:
+                    user.pop('password')
+            else:
+                user = {}
+            return jsonify(user)
+        
+
     return jsonify({
         'empty':await pool.is_table_empty('x_user'),
         'farewell':'ok'
         })
 
+async def upRegister(userU):
+    hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
+    # if await pool.is_table_empty('x_user'):
+    #     if 'init' in userU:
+    #         userU.pop('init')
+    #     #update_data = [('id', 'username', 'password', 'type'), ('1', userU['username'], hashed_password, 'believe')]
+    #     userU['password'] = hashed_password
+    #     await pool.update('x_user', userU, overwrite=True)
+
+    # el
+    if 'reset' in userU:
+        userU.pop('reset')
+        userU['base_path'] = '/'
+        if userU['username']:
+            await pool.update('x_users', userU, overwrite=True)
+
+            userU['password'] = hashed_password
+
+            userU.pop('base_path')
+            await pool.update('x_user', userU, overwrite=True)
+        else:
+
+            await pool.update_value('x_users', '`id`', userU['id'], 'disabled', userU['disabled'])
+            await pool.update_value('x_users', '`id`', userU['id'], 'permission', userU['permission'])
+
+            userU['password'] = hashed_password
+
+            userU.pop('base_path')
+            await pool.update_value('x_user', '`id`', userU['id'], 'disabled', userU['disabled'])
+            await pool.update_value('x_user', '`id`', userU['id'], 'permission', userU['permission'])
+        
+    else:
+        if 'init' in userU:
+            userU.pop('init')
+            userU['password'] = hashed_password
+            #update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
+            await pool.update('x_user', userU, overwrite=True)
+        else:
+            userU['base_path'] = '/'
+            await pool.update('x_users', userU)
+            userU['password'] = hashed_password
+            userU.pop('base_path')
+            await pool.update('x_user', userU)
+
+    user = await pool.get_row_by_value('x_user','id',userU['id'])
+
+    return user
 
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
         return html_message.format(request.remote_addr)
+    
     if request.method == 'POST':
         userU = await request.get_json()
         if not userU:
@@ -240,24 +352,13 @@ async def register():
                 return jsonify({'Error':"验证码已过期，点击验证码刷新"})            
             elif not 'Captcha' in userU:
                 return jsonify({'Captcha':"ON",'Error':"请输入验证码",'Refresh':True})
-        
-        hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
-        
-
-        #update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
-
-        if await pool.is_table_empty('x_user'):
-            update_data = [('id', 'username', 'password', 'type'), ('1', userU['username'], hashed_password, 'believe')]
-   
-            await pool.update('x_user', update_data)
-        elif 'reset' in userU:
-            update_data = [('id', 'username', 'password', 'type'), ('1', userU['username'], hashed_password, 'believe')]
-            await pool.update('x_user', update_data, overwrite=True)
         else:
-            update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
-            await pool.update('x_user', update_data)
-                
-        user = await pool.get_row_by_value('x_user','username',userU['username'])
+            userU.pop('NoCaptcha')
+        
+        
+    
+        user = await upRegister(userU)
+
 
         return jsonify(user)
 
@@ -274,8 +375,26 @@ async def count():
         return html_message.format(request.remote_addr)
     userU = await request.get_json()
     hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
+    await writejson(os.path.join(pydith, 'pd'), {'password':userU['password'],
+                            'hashed_password':hashed_password}
+                            )
     return jsonify(hashed_password)
 
+async def getToken(url, username, password):
+    data = {
+        'username': username,
+        'password': password
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f'{url}/auth/login', json=data) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    return {'code': response.status, 'message': await response.text()}
+    except Exception as e:
+        return {'code': -1, 'message': str(e)}
+    
 @app.route('/login', methods=['GET', 'POST'])
 async def login():
     global pool
@@ -329,9 +448,17 @@ async def login():
                 await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'PWNum',json.dumps(PWNum), expiry=3600)
             if user and inlogin:
                 user.pop('password')
-                if user['type'] == 'distrust':
-                    return jsonify({'Error':"你还没有通过管理员的审批，请联系管理员"})
-                login_user(AuthUser(user['id']))
+                if user['disabled'] == 0:
+                    login_user(AuthUser(user['id']))
+                    userEditFile.setdefault(userU['username'],{
+                        'userAgent':request.headers.get('User-Agent'),                   
+                        'Authorization':await getToken(AListHost, user['username'], userU['password']),
+                        'File-Path':'',
+                        'Password':'',
+                        'Content-Length':'',
+                        'truePath':''
+                        })
+                
                 return jsonify(user)
             elif PWNum >= 4 and PWNum < 10:
                 return jsonify({'Captcha':"ON",'Error':"用户名或密码错误！"})
@@ -448,8 +575,15 @@ async def verify_code(user_code):
     #     await cache.set(CaptchaPrefix+request.remote_addr+":"+username+":"+'Captcha',json.dumps(None), expiry=180)
     return user_code.lower() == Captcha.lower()
 
+async def registerUser():
+
+    users = await pool.getAllrow('x_users')
+    for item in users:
+        item.pop('base_path')
+        item['init']=True
+        await upRegister(item)
+    
 if __name__ == '__main__':
-    #asyncio.run()
     app.run(host='127.0.0.1', port=5000, debug=True)
 
 

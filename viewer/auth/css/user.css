@@ -3,6 +3,10 @@
     height: 100vh; /* Set the height of html and body to fill the entire viewport */
     margin: 0;
     padding: 0;
+    --sizes-full: 100%;
+    --space-2: 10px;
+    --shadows-md: 0 4px 6px -1px rgb(0 0 0 / 0.09), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --radii-md: 0.375rem;
   }
 
 
@@ -13,4 +17,5 @@
     display: flex;
     height: 100%; 
   }
+
 

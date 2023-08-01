@@ -19,7 +19,9 @@ async function getDomain(range='none'){
   }else if(range == 'fileName'){
     DOMAIN = segments[segments.length - 1];
   }else if(range == 'AListPath'){
-    DOMAIN = '/'+segments.slice(5, segments.length - 1).join('/');
+    DOMAIN = '/'+segments.slice(4, segments.length - 1).join('/');
+  }else if(range == 'url'){
+    DOMAIN = url.replace('/p', '');;
   }
   return DOMAIN;
 }

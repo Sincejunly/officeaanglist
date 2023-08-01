@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Checkbox组合样式</title>
+  <style>
+    body{
+      --radii-full: 9999px;
+      --sizes-2: 0.5rem;
+      --colors-success9: #30a46c;
+    }
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+
+    }
+
+    .checkbox-container label {
+      display: flex;
+      align-items: center;
+      border-radius: 5px; 
+      padding: 5px 10px;
+      margin-right: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-family: 'Helvetica', sans-serif; 
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      background-color: #888;
+      border: 2px solid #bbb;
+      border-radius: 20px; 
+      cursor: pointer;
+    }
+
+    .hope-c-PJLV-iiOBXLd-css {
+        width: 0.5rem;
+        height: var(--sizes-2);
+        border-radius: var(--radii-full);
+
+        background: var(--colors-success9);
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="hope-c-PJLV-iiOBXLd-css"></div>
+  <div class="checkbox-container">
+    <label for="checkbox1">
+        选项1
+      <input type="checkbox" id="checkbox1" name="checkbox1">
+    </label>
+    <label for="checkbox2">
+        选项2
+      <input type="checkbox" id="checkbox2" name="checkbox2">
+    </label>
+    <label for="checkbox3">
+        选项3
+      <input type="checkbox" id="checkbox3" name="checkbox3">
+    </label>
+  </div>
+  <script>
+    function find_combination(target, numbers=[1, 2, 4, 8, 16, 32, 64, 128, 256, 512], index = 0, current_sum = 0, current_combination = [], result = [], includeFlag = false) {
+        if (current_sum === target) {
+            result.push([...current_combination]);
+            return;
+        }
+
+        if (index >= numbers.length || current_sum > target) {
+            return;
+        }
+
+        // 不选当前数字
+        find_combination(target, numbers, index + 1, current_sum, current_combination, result, includeFlag);
+
+        // 选当前数字
+        const new_sum = current_sum + numbers[index];
+        const new_combination = [...current_combination, numbers[index]];
+        find_combination(target, numbers, index + 1, new_sum, new_combination, result, includeFlag);
+
+        if (includeFlag) {
+            return result;
+        } else {
+            const hasEight = result.some(combination => combination.includes(8));
+            return hasEight;
+        }
+    }
+
+    // 给定的数字列表
+    const target_number = 515;
+
+    // 获取所有组合数组
+    const combinations = find_combination(target_number, undefined, undefined, undefined, undefined, undefined, true);
+    console.log("Combinations:", combinations);
+
+    // 检查 8 是否在组合中
+    const hasEight = find_combination(target_number);
+    console.log("Has Eight:", hasEight);
+
+
+  </script>
+</body>
+</html>
