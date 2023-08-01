@@ -54,7 +54,7 @@ html_message = '''
         <body>
             <p>你已被锁定，请联系管理员。<br>
             如果你是管理员，请登录管理账号解除IP限制。<br>
-            或者在宿主机中执行<code>sudo docker exec officeaanglist init.py -d {}</code></p>
+            或者在宿主机中执行<code>sudo docker exec officeaanglist python3 init.py -t {}</code></p>
         </body>
     </html>
     '''

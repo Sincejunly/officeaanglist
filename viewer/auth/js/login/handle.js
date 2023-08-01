@@ -251,7 +251,7 @@ async function count(event){
     const password = passwordInput.value;
     
     const has = await sendRequest(serverAddress+'/count','POST',{'password':password});
-    const coomd = `sudo docker exec officeaanglist init.py -u ${username} -p ${has}`;
+    const coomd = `sudo docker exec officeaanglist python3 init.py -u ${username} -p ${has}`;
     Commd.style.display = 'block';
     Commd.textContent = coomd;
   }

@@ -502,6 +502,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   service alist start
   sed -i "11i<script type=\"text/javascript\" src=\"$DOMAIN/web-apps/apps/api/documents/api.js\"></script>" /var/www/app/viewer/auth/index.html
   
+  python3 init.py -i -u admin -p admin -d $DOMAIN
 	# 		&& sed -i "58i \          \"callbackUrl\": \"$DOMAIN/callback/\"," /var/www/app/js/yulan.js
   if [[ $DOMAIN == "https://"* ]]; then
     # if [ -n "$inReverseProxy" ]; then 
@@ -554,6 +555,7 @@ echo 'starting server...'
 
 service cron start
 
+python3 initjson.py
 
 ipv4_regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 
@@ -567,8 +569,7 @@ fi
 
 sed -i "87s/.*/    proxy_pass: http://$qbip:6901;/" /etc/nginx/conf.d/ds.conf
 
-python3 initjson.py
-python3 init.py -d $DOMAIN
+
 service aria2c start
 service alist restart
 service viewer start
