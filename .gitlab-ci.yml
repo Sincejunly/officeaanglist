@@ -22,7 +22,7 @@ stages:
 build:
   stage: build
   script:
-    #- /bin/sh init.sh
+
     - docker-compose down
     - docker build -t $di_name .
     - docker login -u homura -p $lab_token $d_route
