@@ -102,11 +102,6 @@ async function fetchData() {
             await viewer(user);
           }
         }
-        else{
-          overlay.classList.remove('hide-overlay');
-          overlay.classList.add('show-overlay');
-          await showUser(user);
-        }
 
       }
       else{

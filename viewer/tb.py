@@ -25,12 +25,12 @@ pydith = os.path.dirname(os.path.realpath(__file__))
 auth_manager = QuartAuth()
 userEditFile = {
 }
-# AListHost = os.environ.get("AListHost")
-# outAList = False
-# if not AListHost:
-#     outAList = True
-#     AListHost = os.environ.get("DOMAIN")+'/AList/api'
-AListHost='https://office.homura.top:82/AList/api'
+AListHost = os.environ.get("AListHost")
+outAList = False
+if not AListHost:
+    outAList = True
+    AListHost = os.environ.get("DOMAIN")+'/AList/api'
+
 CaptchaPrefix = 'officeaanglist:Captcha:'
 def create_app():
     origin = readjson_sync(os.path.join(pydith, 'data.json'))
@@ -190,8 +190,7 @@ async def save():
         
         if await download_file(downloadUri, path_for_save):
             #if outAList:
-            print('data:')
-            print(data)
+
             print(await Upload(AListHost, userEditFile[data['users'][0]]['userAgent'], 
             userEditFile[data['users'][0]]['Authorization'], path_for_save, 
             userEditFile[data['users'][0]]['FilePath']))

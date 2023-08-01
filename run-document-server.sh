@@ -499,6 +499,9 @@ if [ ! -f "/var/www/app/AListInit" ]; then
 
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
+
+  python3 initjson.py
+
   service alist start
   sed -i "11i<script type=\"text/javascript\" src=\"$DOMAIN/web-apps/apps/api/documents/api.js\"></script>" /var/www/app/viewer/auth/index.html
   
@@ -535,7 +538,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   
   sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
 
-  sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
+  sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
       sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
       sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
