@@ -134,7 +134,8 @@ async def AListPath():
     userU = await request.get_json()
     if not userU:
         return jsonify({'Error': "not json"})
-    root_folder_path = await pool.get_value_by_value('x_storages', 'mount_path', userU['AListPath'], 'root_folder_path')
+    addition = await pool.get_value_by_value('x_storages', 'mount_path', userU['AListPath'], 'addition')
+    root_folder_path = json.loads(addition)['root_folder_path']
     create_directory(root_folder_path)
     userEditFile[userU['username']]['File-Path'] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
 
@@ -257,7 +258,7 @@ async def index():
         else:
             user = {}
 
-        user['empty'] = True
+        user['empty'] = False
         user['farewell'] = 'ok'
         return jsonify(user)
         #return redirect('/AriaNg')

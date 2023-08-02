@@ -1,3 +1,4 @@
+import json
 import os
 import mysql.connector
 
@@ -32,12 +33,14 @@ if args.password:
     PASSWORD = args.password
 if args.user:
     USERNAME = args.user
+if args.trust:
+    TDOMAIN = args.trust
 
 users = PASSWORD or USERNAME
 
-# if not DOMAIN and not usr:
-#     parser.print_help()
-#     exit(0)
+if not DOMAIN and not users and not TDOMAIN:
+    parser.print_help()
+    exit(0)
 
 if DOMAIN:
     table = 'x_setting_items'
@@ -77,9 +80,8 @@ async def main():
                 user=origin['mysqlUser'], 
                 password=origin['mysqlPassword'], 
                 db=origin['mysqlDataBase'])
-            
-
-            
+        
+           
             if users:
                 user = await pool.get_row_by_value('x_users', 'username', 'admin')
                 if init:
@@ -106,7 +108,7 @@ async def main():
                     await pool.update('x_domain', do, True)
                 else:
                     await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
-                    
+
             break
         except Exception as e:
             await asyncio.sleep(5)

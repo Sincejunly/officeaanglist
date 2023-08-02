@@ -12,6 +12,7 @@ async function getDomain(range='none'){
   if(range == 'none'){
     DOMAIN = segments.slice(0, 3).join('/');
     window.serverAddress = DOMAIN;
+    
   }else if(range == 'front'){
     DOMAIN = segments.slice(0, 4).join('/');
   }else if(range == 'back'){

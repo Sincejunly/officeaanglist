@@ -514,6 +514,10 @@ if [ ! -f "/var/www/app/AListInit" ]; then
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
   rm -r /var/www/app/ds.conf
+  echo '
+'
+  echo "初始化中(Initializing)......................................................................."
+  sleep 60
   
   sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then

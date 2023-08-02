@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 async function fetchData() {
     try {
       user = await sendRequest(serverAddress+'/check','GET');
-      
+
       if (!user['empty'] && !('username' in user)) {
         overlay.classList.remove('hide-overlay');
         overlay.classList.add('show-overlay');
@@ -97,10 +97,14 @@ async function fetchData() {
         if(user['disabled'] == 0){
           overlay.classList.remove('hide-overlay');
           overlay.classList.add('show-overlay');
-          await showLogin();
+
           if (await getDomain('fileName')!=''){
             await viewer(user);
+          }else{
+            await showUser(user);
           }
+        }else{
+          await showLogin();
         }
 
       }

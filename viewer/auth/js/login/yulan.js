@@ -3,10 +3,21 @@ async function generateDocumentKey(url) {
   const fileName = url.substring(url.lastIndexOf('/') + 1);
   const timestamp = new Date().toISOString();
   let key = fileName + timestamp;
-  key = encodeURIComponent(key).substr(0, 20);
-  key = key.split('').filter(char => allowedChars.includes(char)).join('');
-  return key;
+  key = encodeURIComponent(key);
+
+  let sanitizedKey = '';
+  for (let char of key) {
+      if (allowedChars.includes(char)) {
+          sanitizedKey += char;
+          if (sanitizedKey.length === 20) {
+              break;
+          }
+      }
+  }
+
+  return sanitizedKey;
 }
+
 
 async function getMyProfile(user) {
     //let username;
@@ -20,7 +31,11 @@ async function getMyProfile(user) {
       'fileName': fileName,
     }
     //await sendRequest(serverAddress+'/query','POST',{'table':inPut,'Domain':input.value})
-    await sendRequest(serverAddress+'/AListPath','POST',body);
+    const permission = await isin(user['permission']);
+    if(user['id'] == 1 || permission) {
+      await sendRequest(serverAddress+'/AListPath','POST',body);
+    }
+    
     let url = await getDomain('url');
     try {
 
@@ -41,7 +56,7 @@ async function getMyProfile(user) {
         "editorConfig": {
           "lang": "zh-CN",
           "mode": "edit",
-          "callbackUrl": `${await isin(user['permission']) ? serverAddress : ""}/save`,
+          "callbackUrl": `${user['id'] == 1 || permission ? serverAddress : ""}/save`,
           "customization": {
             "chat": false,
             "comments": false,

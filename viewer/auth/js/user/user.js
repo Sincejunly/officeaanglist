@@ -233,7 +233,6 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
 
 async function init(){
   data = await sendRequest(window.serverAddress+'/query','POST',{'table':'x_domain'});
-  delete data.farewell;
 
   for (let i = 0; i < data.length; i++) {
     if (data[i]['type'] === 'believe'){
