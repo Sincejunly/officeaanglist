@@ -1,6 +1,7 @@
 import ipaddress
 import os
 import socket
+from time import sleep
 from database_utils import readjson_sync,writejson_sync
 
 def is_valid_ipv4_address(address):
@@ -28,5 +29,6 @@ while True:
         writejson_sync('./viewer/data.json', data)
         break
     except Exception as e:
+        sleep(5)
         print('initjson: '+str(e))
 

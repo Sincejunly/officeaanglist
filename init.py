@@ -67,7 +67,6 @@ async def main():
     while True:
         try:
             origin = await readjson(os.path.join(pydith, './viewer/data.json'))
-            #print(userData)
             pool = await AsyncMysqlPool.initialize_pool(
                 minsize=1,
                 maxsize=2,
@@ -109,6 +108,7 @@ async def main():
                     await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
             break
         except Exception as e:
+            await asyncio.sleep(5)
             print('init: '+str(e))
 
    
