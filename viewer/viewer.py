@@ -190,11 +190,12 @@ async def save():
         path_for_save = userEditFile[data['users'][0]]['truePath']  # 替换为实际保存路径
         
         if await download_file(downloadUri, path_for_save):
-            #if outAList:
+            if outAList:
 
-            print(await Upload(AListHost, userEditFile[data['users'][0]]['userAgent'], 
-            userEditFile[data['users'][0]]['Authorization'], path_for_save, 
-            userEditFile[data['users'][0]]['FilePath']))
+                await Upload(AListHost, userEditFile[data['users'][0]]['userAgent'], 
+                userEditFile[data['users'][0]]['Authorization'], path_for_save, 
+                userEditFile[data['users'][0]]['FilePath'])
+
             userEditFile.pop(data['users'][0])
             return jsonify({"error": 0})
         else:
