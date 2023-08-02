@@ -109,8 +109,8 @@ async def main():
                     await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
             break
         except Exception as e:
-            print('error':str(e))
-            pass
+            print('init: '+str(e))
+
    
 
 asyncio.run(main())
