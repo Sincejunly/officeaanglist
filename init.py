@@ -108,7 +108,8 @@ async def main():
                 else:
                     await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
             break
-        except mysql.connector.errors.InterfaceError:
+        except Exception as e:
+            print('error':str(e))
             pass
    
 

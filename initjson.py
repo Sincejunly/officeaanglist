@@ -27,5 +27,6 @@ while True:
 
         writejson_sync('./viewer/data.json', data)
         break
-    except:
+    except Exception as e:
+        print('error':str(e))
         pass
