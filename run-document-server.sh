@@ -514,6 +514,17 @@ if [ ! -f "/var/www/app/AListInit" ]; then
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
   rm -r /var/www/app/ds.conf
+  
+  sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
+  if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
+      sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
+      sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
+      sed -i "12s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
+      sed -i "13s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/AList/data/config.json
+      sed -i "14s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
+      sed -i "15s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
+  fi
+
   python3 initjson.py
 
   service alist start
@@ -551,15 +562,7 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   cp /var/www/app1/ds.conf /etc/nginx/conf.d/
   
  
-  sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
-  if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
-      sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
-      sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
-      sed -i "12s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
-      sed -i "13s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/AList/data/config.json
-      sed -i "14s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
-      sed -i "15s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
-  fi
+
 fi
 
 
