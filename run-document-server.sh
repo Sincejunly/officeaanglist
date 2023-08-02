@@ -494,12 +494,26 @@ update_release_date(){
 }
 CURRENT_DIR=$(pwd)
 
-export DOMAIN=$DOMAIN
-if [ ! -f "/var/www/app/AListInit" ]; then
 
+
+function get_ip() {
+  local host=$1
+  local ipv4_regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+
+  if [[ $host =~ $ipv4_regex ]]; then
+    thost=$host
+  else
+    thost=$(ping -c 1 $host | awk -F'[()]' '/PING/{print $2}')
+  fi
+
+  echo $thost
+}
+
+if [ ! -f "/var/www/app/AListInit" ]; then
+  
 	cp -r /var/www/app1/* /var/www/app
   rm -r /var/www/app/dsssl.conf
-
+  rm -r /var/www/app/ds.conf
   python3 initjson.py
 
   service alist start
@@ -536,12 +550,11 @@ if [ ! -f "/var/www/app/AListInit" ]; then
   rm -r /etc/nginx/conf.d/ds.conf
   cp /var/www/app1/ds.conf /etc/nginx/conf.d/
   
-  sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
-
+ 
   sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
       sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
-      sed -i "11s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/AList/data/config.json
+      sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
       sed -i "12s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
       sed -i "13s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/AList/data/config.json
       sed -i "14s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
@@ -560,17 +573,9 @@ service cron start
 
 python3 initjson.py
 
-ipv4_regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 
 
-if [[ $qbit_host =~ $ipv4_regex ]]; then
-  qbip=$qbit_host
-else
-  qbip=$(ping -c 1 $qbit_host | awk -F'[()]' '/PING/{print $2}')
-fi
-
-
-sed -i "87s/.*/    proxy_pass: http://$qbip:6901;/" /etc/nginx/conf.d/ds.conf
+sed -i "87s/.*/    proxy_pass: http://$(get_ip $qbit_host):6901;/" /etc/nginx/conf.d/ds.conf
 
 
 service aria2c start

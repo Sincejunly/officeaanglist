@@ -17,7 +17,7 @@ case "$1" in
     start)
         echo "Starting Viewer Service"
         cd /var/www/app/viewer
-        nohup $PYTHON_BIN tb.py &
+        nohup $PYTHON_BIN viewer.py &
         ;;
     stop)
         echo "Stopping Viewer Service"

@@ -25,14 +25,10 @@ pydith = os.path.dirname(os.path.realpath(__file__))
 auth_manager = QuartAuth()
 userEditFile = {
 }
-AListHost = os.environ.get("AListHost")
-outAList = False
-if not AListHost:
-    outAList = True
-    AListHost = os.environ.get("DOMAIN")+'/AList/api'
 
 CaptchaPrefix = 'officeaanglist:Captcha:'
 def create_app():
+    global AListHost,outAList
     origin = readjson_sync(os.path.join(pydith, 'data.json'))
     app = Quart(__name__, template_folder='auth')
     app.secret_key = "QQ943384135"
@@ -43,6 +39,10 @@ def create_app():
     app.config['SESSION_TYPE'] = 'redis'
     app.config['SESSION_PROTECTION'] = True
     auth_manager.init_app(app)
+    AListHost = origin['AListHost']
+    if AListHost == 'http://127.0.0.1:5244/AList/api':
+        outAList = True
+    
     return app
 app = create_app()
 

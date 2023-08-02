@@ -1,5 +1,5 @@
 {
-    
+    "AListHost":"",
     "mysqlHost":"192.168.5.4",
     "mysqlPort":3306,
     "mysqlPassword":"159756",

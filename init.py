@@ -106,6 +106,7 @@ async def main():
                     await pool.update('x_domain', do, True)
                 else:
                     await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
+                    
             break
         except Exception as e:
             await asyncio.sleep(5)

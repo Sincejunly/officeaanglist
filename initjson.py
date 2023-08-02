@@ -9,7 +9,6 @@ def is_valid_ipv4_address(address):
         ip = ipaddress.IPv4Address(address)
         return True
     except ipaddress.AddressValueError:
-
         return False
 while True:
     try:
@@ -25,7 +24,12 @@ while True:
         data['redisHost'] = REDISHOST if is_valid_ipv4_address(REDISHOST) else socket.gethostbyname(REDISHOST)
         data['redisPort'] = os.environ.get("REDIS_SERVER_PORT")
         data['redisPassword'] = os.environ.get("REDIS_PASSWORD")
-
+        AListHost = os.environ.get("AListHost")
+        if AListHost == None:
+            AListHost = 'http://127.0.0.1:5244/AList/api'
+        elif is_valid_ipv4_address(AListHost):
+            AListHost = 'http://' + AListHost + '/AList/api'
+        data['AListHost'] = AListHost
         writejson_sync('./viewer/data.json', data)
         break
     except Exception as e:
