@@ -21,7 +21,7 @@ case "$1" in
         ;;
     stop)
         echo "Stopping Viewer Service"
-        killall -q -u $TB_USER python3 tb.py
+        killall -q -u $TB_USER python3 viewer.py
         ;;
     restart)
         echo "Restarting Viewer Service"
