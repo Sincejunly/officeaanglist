@@ -494,7 +494,7 @@ update_release_date(){
 }
 CURRENT_DIR=$(pwd)
 
-
+export DOMAIN=$DOMAIN
 if [ ! -f "/var/www/app/AListInit" ]; then
 
 	cp -r /var/www/app1/* /var/www/app
