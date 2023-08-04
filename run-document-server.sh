@@ -523,12 +523,10 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   echo "初始化中(Initializing)......................................................................."
   sleep 130
   
-  python3 initjson.py
-  
   if ! [ -n "$AListHost" ]; then
     service alist start
   fi
-  
+  python3 initjson.py
   sed -i "11i<script type=\"text/javascript\" src=\"$DOMAIN/web-apps/apps/api/documents/api.js\"></script>" /var/www/app/viewer/auth/index.html
   
   python3 init.py -i -u admin -p admin -d $DOMAIN
