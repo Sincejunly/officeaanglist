@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 async function fetchData() {
     try {
       user = await sendRequest(serverAddress+'/check','GET');
-      console.log(user);
+
       if (!user['empty'] && !('username' in user)) {
         overlay.classList.remove('hide-overlay');
         overlay.classList.add('show-overlay');
@@ -121,7 +121,7 @@ async function fetchData() {
         }else{
           await showLogin();
         }
-
+   
       }
       else{
         overlay.classList.remove('hide-overlay');
