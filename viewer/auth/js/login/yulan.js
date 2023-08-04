@@ -1,83 +1,79 @@
 async function generateDocumentKey(url) {
-  const allowedChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._=';
-  const fileName = url.substring(url.lastIndexOf('/') + 1);
-  const timestamp = new Date().toISOString();
-  let key = fileName + timestamp;
-  key = encodeURIComponent(key);
+    const allowedChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+    const fileName = url.substring(url.lastIndexOf('/') + 1);
+    const timestamp = Date.now().toString();
+    const inputString = fileName + '_' + timestamp;
 
-  let sanitizedKey = '';
-  for (let char of key) {
-      if (allowedChars.includes(char)) {
-          sanitizedKey += char;
-          if (sanitizedKey.length === 20) {
-              break;
-          }
-      }
-  }
+    // Generate SHA-256 hash using a built-in browser function
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(inputString));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
 
-  return sanitizedKey;
+    // Convert the hash to a fixed-length alphanumeric string
+    const key = hashHex.split('').filter(char => allowedChars.includes(char)).join('').slice(0, 20);
+
+    return key;
 }
 
 
+
+
 async function getMyProfile(user) {
-    //let username;
-    //let id;
-    const fileName = await getDomain('fileName');
-    const AListPath = await getDomain('AListPath');
-    const fileExtension = fileName.split('.').pop();
-    const body = {
-      "username": user['username'],
-      "AListPath": AListPath,
-      'fileName': fileName,
-    }
-    //await sendRequest(serverAddress+'/query','POST',{'table':inPut,'Domain':input.value})
-    const permission = await isin(user['permission']);
-    if(user['id'] == 1 || permission) {
-      await sendRequest(serverAddress+'/AListPath','POST',body);
-    }
+        const fileName = await getDomain('fileName');
+        const AListPath = await getDomain('AListPath');
+        const fileExtension = fileName.split('.').pop();
+        const body = {
+          "username": user['username'],
+          "AListPath": AListPath,
+          'fileName': fileName,
+        }
+        //await sendRequest(serverAddress+'/query','POST',{'table':inPut,'Domain':input.value})
+        let permission;
+        if(user['id'] != 1)
+        {
+          permission = await isin(user['permission']);
+        }
     
-    let url = await getDomain('url');
-    try {
+        
+      await sendRequest(serverAddress+'/AListPath','POST',body);
 
-      const initConfig = {
-        "document": {
-          "fileType": fileExtension,
-          "permissions": {
-            "edit": true,
-            "comment": true,
-            "download": true,
-            "print": true,
-            "fillForms": true,
-          },
-          "title": fileName,
-          "url": url,
-          "key": await generateDocumentKey(url)
-        },
-        "editorConfig": {
-          "lang": "zh-CN",
-          "mode": "edit",
-          "callbackUrl": `${user['id'] == 1 || permission ? serverAddress : ""}/save`,
-          "customization": {
-            "chat": false,
-            "comments": false,
-            "toolbar": {
-              "hideEditButton": false
-            }
-          },
-          "user": {
-            "id": user['id'],
-            "name": user['username']
-          }
-        },
-        "height": "1080px",
-        "type": "desktop",
-      };
-      //loadClassInFunction(Domain+'/web-apps/apps/api/documents/api.js', 'DocsAPI.DocEditor', DocsAPI => {
-        const docEditor = new DocsAPI.DocEditor("placeholder", initConfig);
-      //});
+        
+      let url = await getDomain('url');
 
-    } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-    }
+
+       const docEditor = new DocsAPI.DocEditor("placeholder", {
+            "document": {
+                "fileType": fileExtension,
+                "permissions": {
+                    "edit": user['id'] == 1 || permission ? true:false,
+                    "comment": true,
+                    "download": true,
+                    "print": true,
+                    "fillForms": true,
+                },
+                "title": fileName,
+                "url": url,
+                "key": await generateDocumentKey(url)
+            },
+            "editorConfig": {
+                "lang": "zh-CN",
+                "mode" : "edit" ,
+                "callbackUrl": serverAddress+'/callback/',
+                "customization": {
+                  "chat": false,
+                  "comments": false,
+                  "toolbar": {
+                    "hideEditButton": false
+                }
+                },
+                "user": {
+                  "id": user['id'],
+                  "name": user['username']
+                },
+            },
+            "height": "1080px",
+            "type": "desktop",
+        }
+        );
 }
 

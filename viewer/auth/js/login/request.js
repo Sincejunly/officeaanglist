@@ -114,7 +114,6 @@ async function sendRequest(url, methods, data = "", headers = {'Content-Type': '
       } else {
         if (needjson) {
           const result = await response.json();
-          delete result.farewell;
           return result;
         }
         return response;

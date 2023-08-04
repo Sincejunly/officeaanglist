@@ -499,15 +499,15 @@ CURRENT_DIR=$(pwd)
 function get_ip() {
   local host=$1
   local ipv4_regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-
   if [[ $host =~ $ipv4_regex ]]; then
     thost=$host
   else
     thost=$(ping -c 1 $host | awk -F'[()]' '/PING/{print $2}')
   fi
-
   echo $thost
 }
+
+
 
 if [ ! -f "/var/www/app/AList/AListInit" ]; then
   
@@ -515,12 +515,14 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   rm -r /var/www/app/dsssl.conf
   rm -r /var/www/app/ds.conf
   touch /var/www/app/AList/AListInit
+
+  sed -i "s/QQ943384135/$aria2Csecret/g" /var/www/app/aria2/aria2.conf
+
   echo '
 '
   echo "初始化中(Initializing)......................................................................."
   sleep 200
   
-  sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
       sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
       sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
@@ -531,8 +533,10 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   fi
 
   python3 initjson.py
-
-  service alist start
+  if ! [ -n "$AListHost" ]; then
+    service alist start
+  fi
+  
   sed -i "11i<script type=\"text/javascript\" src=\"$DOMAIN/web-apps/apps/api/documents/api.js\"></script>" /var/www/app/viewer/auth/index.html
   
   python3 init.py -i -u admin -p admin -d $DOMAIN
@@ -546,7 +550,8 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     # fi
     rm -r /etc/nginx/conf.d/dsssl.conf
     cp -r /var/www/app1/dsssl.conf /etc/nginx/conf.d/
-    sed -i "s|office.xxx.com|${DOMAIN//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
+    host=$(echo "$DOMAIN" | grep -oP '(?<=://)[^:/]+')
+    sed -i "s|office.xxx.com|${host//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
   fi
 
   # sed -i "13s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/backend.py
@@ -578,16 +583,18 @@ echo '............................................................'
 echo 'starting server...'
 
 service cron start
-
+service php-fpm start
 python3 initjson.py
 
 
-
-sed -i "87s/.*/    proxy_pass: http://$(get_ip $qbit_host):6901;/" /etc/nginx/conf.d/ds.conf
+sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
+sed -i "87s#.*#    proxy_pass: http://$(get_ip $qbit_host):6901;#" /etc/nginx/conf.d/ds.conf
 
 
 service aria2c start
-service alist restart
+if ! [ -n "$AListHost" ]; then
+  service alist restart
+fi
 service viewer start
 #/usr/sbin/php-fpm7.4
 

@@ -7,8 +7,8 @@ WORKDIR /system
 
 RUN chmod +x /system/* \
 	&& chmod +x /etc/init.d/* \
-	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults \
-    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev  iputils-ping vim psmisc \
+	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults && update-rc.d php-fpm defaults \
+    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev iputils-ping vim psmisc php7.4-fpm php-curl\
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl
 	
@@ -24,7 +24,8 @@ RUN mkdir -p /var/www/app1 \
 	&& mkdir -p /var/www/app1/AList/data \
 	&& chmod -R g=u /var/www/app1/AList/data \
 	&& chmod -R g=u /var/www/app1  \
-	&& chown -R root:root /var/www/app1 
+	&& chown -R root:root /var/www/app1 \
+	&& mkdir -p /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
 
 
 RUN touch /var/www/app1/aria2/aria2.session \
@@ -50,10 +51,13 @@ RUN touch /var/www/app1/aria2/aria2.session \
 WORKDIR /var/www/app1
 COPY . /var/www/app1
 RUN mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
+	&& copy -r /var/www/app1/Contents.json /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
 	&& rm -rf system \
 	&& mv ./run-document-server.sh /app/ds/run-document-server.sh \
 	&& rm -rf AriaNg-1.3.6 \
-	&& rm -rf service
+	&& rm -rf service \
+	&& rm -rf Contents.json \
+	&& sed -i 's/;extension=curl/extension=curl/' /etc/php/7.4/cli/php.ini
 
 
 # COPY ./AriaNg-1.3.6 /var/www/app1/AriaNg

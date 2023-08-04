@@ -99,10 +99,11 @@ async function fetchData() {
           overlay.classList.add('show-overlay');
 
           if (await getDomain('fileName')!=''){
+
             await viewer(user);
-          }else{
-            await showUser(user);
           }
+          await showUser(user);
+          
         }else{
           await showLogin();
         }
@@ -297,7 +298,7 @@ async function showUser(user) {
     message.style.display = 'none';
     loginC.style.display = 'none';
     AriaNgC.style.display = 'block';
-    //officeC.style.display = 'block';
+    officeC.style.display = 'block';
     loginB.textContent = '登出';
     //await getEventTypes(loginB,true);
     //loginB.addEventListener('click',loginOut);

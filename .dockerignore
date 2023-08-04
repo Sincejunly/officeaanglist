@@ -12,3 +12,4 @@ docker-compose
 Auth
 backend.py
 upfiletests.py
+app.zip

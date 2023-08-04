@@ -61,7 +61,7 @@ services:
       - officeaanglist
 
   onlyoffice:
-    image: $d_route/officeaanglist:v0.1
+    image: officeaanglist
     #build: .
     container_name: ${dd_name}
     restart: always
@@ -86,7 +86,8 @@ services:
       - REDIS_SERVER_HOST=redis
       - REDIS_SERVER_PORT=6379
       - REDIS_PASSWORD=115099
-      - DOMAIN=${office_domain}
+      - DOMAIN=${office_domain} #是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
+      #- AListHost=     使用外部alist
       - AListdb_ty=mysql
       - AListdb_host=db
       - AListdb_port=3306
@@ -94,11 +95,12 @@ services:
       - AListdb_pw=${officedb_pw}
       - AListdb_name=officeaanglist
       - qbit_host=qbittorrent-nox
+      - aria2Csecret=QQ943384135   #aria2c的密钥建议更改！
 
     depends_on:
       - db
       - redis
-#是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
+
     volumes:
       - /volume1/docker/officeaanglist/logs:/var/log/onlyoffice
       - /volume1/docker/officeaanglist/app:/var/www/app:rw
@@ -106,7 +108,7 @@ services:
       - /volume1/docker/officeaanglist/lib:/var/lib/onlyoffice
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
       - /volume1/docker/officeaanglist/conf.d:/etc/nginx/conf.d
-      - /volume1/ssl/homura.top:/ssl
+      #- /volume1/ssl/homura.top:/ssl
     networks:
       - officeaanglist
       

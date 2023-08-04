@@ -81,7 +81,7 @@ async def main():
                 password=origin['mysqlPassword'], 
                 db=origin['mysqlDataBase'])
         
-           
+
             if users:
                 user = await pool.get_row_by_value('x_users', 'username', 'admin')
                 if init:
@@ -114,6 +114,19 @@ async def main():
             await asyncio.sleep(5)
             print('init: '+str(e))
 
-   
+# async def one():
+#     origin = await readjson(os.path.join(pydith, './viewer/data.json'))
+#     pool = await AsyncMysqlPool.initialize_pool(
+#         minsize=1,
+#         maxsize=2,
+#         echo=True,
+#         pool_recycle=1800,
+#         host=origin['mysqlHost'], 
+#         port=int(origin['mysqlPort']), 
+#         user=origin['mysqlUser'], 
+#         password=origin['mysqlPassword'], 
+#         db=origin['mysqlDataBase'])
+#     await pool.update('x_domain', {'`id`':2,'Domain':'https://192.168.5.167', 'type': 'believe'}, True)
 
 asyncio.run(main())
+

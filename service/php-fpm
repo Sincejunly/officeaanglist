@@ -1,0 +1,89 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          php-fpm-custom
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: PHP-FPM custom service
+# Description:       PHP-FPM custom service script
+### END INIT INFO
+
+# Change the following lines to match your application paths and options
+
+# Path to the PHP-FPM binary
+PHP_FPM_BIN="/usr/sbin/php-fpm7.4"
+
+# Path to the PHP-FPM configuration file
+PHP_FPM_CONF="/etc/php/7.4/fpm/php-fpm.conf"
+
+# Path to the PHP-FPM PID file
+PHP_FPM_PID="/run/php/php7.4-fpm.pid"
+
+# Function to start PHP-FPM
+start() {
+
+    echo "Starting PHP-FPM..."
+    $PHP_FPM_BIN
+    echo "PHP-FPM started."
+
+}
+
+# Function to stop PHP-FPM
+stop() {
+    if [ -f "$PHP_FPM_PID" ]; then
+        echo "Stopping PHP-FPM..."
+        kill -SIGINT $(cat "$PHP_FPM_PID")
+        echo "PHP-FPM stopped."
+    else
+        echo "PHP-FPM is not running."
+    fi
+}
+
+# Function to check the status of PHP-FPM
+status() {
+    if [ -f "$PHP_FPM_PID" ]; then
+        echo "PHP-FPM is running (PID: $(cat $PHP_FPM_PID))."
+    else
+        echo "PHP-FPM is not running."
+    fi
+}
+
+# Function to reload PHP-FPM
+reload() {
+    if [ -f "$PHP_FPM_PID" ]; then
+        echo "Reloading PHP-FPM configuration..."
+        kill -USR2 $(cat "$PHP_FPM_PID")
+        echo "PHP-FPM configuration reloaded."
+    else
+        echo "PHP-FPM is not running."
+    fi
+}
+
+# Main script logic based on input parameters
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        sleep 2
+        start
+        ;;
+    status)
+        status
+        ;;
+    reload)
+        reload
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status|reload}"
+        exit 1
+        ;;
+esac
+
+exit 0
