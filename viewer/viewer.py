@@ -155,7 +155,7 @@ async def AListPath():
     root_folder_path = json.loads(RowADD['addition'])['root_folder_path']
     create_directory(root_folder_path)
 
-    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'],True)
     if not fileTask:
         key = await generate_document_key(userU['fileName'])
     else:key = fileTask['key']
@@ -165,26 +165,44 @@ async def AListPath():
     
     truePath = "{}/{}".format(root_folder_path, userU['fileName'])
     if not (user['id'] in userEditFile):
-        alisttoken = await getToken(AListHost, user['username'], user['password'])
+        if outAList:
+            alisttoken = await getToken(AListHost, user['username'], user['password'])
+        else:
+            alisttoken = {'data':{'token':''}}
         userEditFile.setdefault(user['id'],{
             'userAgent':request.headers.get('User-Agent'),                   
             'Authorization':alisttoken['data']['token'],
-            'File-Path':parse.quote("{}/{}".format(userU['AListPath'], userU['fileName'])),
+            'File-Path':{userU['fileName']:parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))},
             'Password':user['password'],
             'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
-            'truePath':truePath,
-            'fileName':userU['fileName']
+            'truePath':{userU['fileName']:truePath}
             })
     else:
-        userEditFile[user['id']]['File-Path'] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
+        userEditFile[user['id']]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
         userEditFile[user['id']]['Password'] = user['password']
         userEditFile[user['id']]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
-        userEditFile[user['id']]['truePath']=truePath
+        userEditFile[user['id']]['truePath'][userU['fileName']]=truePath
 
     if await pool.is_table_empty('x_fileTask'):
-        await pool.update('x_fileTask',{'`id`':1,'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
+        await pool.update(
+        'x_fileTask',{
+            '`id`':1,
+            'fileName': userU['fileName'],
+            '`key`':key,'history':{},
+            'users':[],'actions':[],
+            "lastsave":"", \
+            "notmodified":False,"filetype":"",
+            'truePath':truePath},True,True)
     else:
-        await pool.update('x_fileTask',{'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
+        await pool.update(
+        'x_fileTask',{
+            'fileName': \
+            userU['fileName'],
+            '`key`':key,'history':{},
+            'users':[],'actions':[],
+            "lastsave":"", \
+            "notmodified":False,"filetype":"",
+            'truePath':truePath},True,True)
 
 
     return jsonify(key)
@@ -236,20 +254,38 @@ async def save():
     data = await request.get_json()
     if data.get("status") == 2:
         downloadUri = data.get("url")
-        path_for_save = userEditFile[int(data['users'][0])]['truePath']  # 替换为实际保存路径
+        key = await extract_part_from_url(downloadUri, 4)
+        fileName = key[:key.find('_')]
+        key = await generate_document_key(key.replace('_', ''))
+        path_for_save = userEditFile[int(data['users'][0])]['truePath'][fileName]  # 替换为实际保存路径
 
         if await download_file(downloadUri, path_for_save):
-            #key = await extract_part_from_url(downloadUri,4)
-            key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
+            #key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
+            history = data.get("history") if data.get("history") else {}
+            users = data.get('users') if data.get('users') else []
+            actions = data.get('actions') if data.get('actions') else []
+            lastsave = data.get("lastsave") if data.get("lastsave") else ""
+            notmodified = data.get("notmodified") if data.get("notmodified") else False
+            filetype = data.get("filetype") if data.get("filetype") else ""
 
-            await pool.update('x_fileTask',{'fileName': \
-            userEditFile[int(data['users'][0])]['fileName'],'`key`':key,'truePath':path_for_save},True)
+
+            await pool.update(
+                'x_fileTask',{
+                'fileName': fileName, \
+                '`key`':key,'history':history, \
+                'users':users,'actions':actions,
+                "lastsave":lastsave, \
+                "notmodified":notmodified,"filetype":filetype, \
+                'truePath':path_for_save},True,True)
+            
+            # await pool.update('x_fileTask',{'fileName': \
+            # fileName, '`key`':key,'truePath':path_for_save},True)
 
             if outAList:
 
                 await Upload(AListHost, userEditFile[int(data['users'][0])]['userAgent'], 
                 userEditFile[int(data['users'][0])]['Authorization'], path_for_save, 
-                userEditFile[int(data['users'][0])]['File-Path'])
+                userEditFile[int(data['users'][0])]['File-Path'][fileName])
 
             #userEditFile.pop(data['users'][0])
         else:
@@ -316,7 +352,6 @@ async def index():
         #         'Content-Length':'',
         #         'truePath':''
         #         })
-        
         if isinstance(user, dict):
             if 'password' in user:
                 user.pop('password')
@@ -329,7 +364,7 @@ async def index():
         #return redirect('/AriaNg')
     else:
         user = await pool.get_row_by_value('x_user','username','guest')
-
+        print(user)
         if user['disabled'] == 0:
             if isinstance(user, dict):
                 if 'password' in user:
