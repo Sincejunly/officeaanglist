@@ -91,6 +91,7 @@ async def setup():
 
 
 @app.route('/query', methods=['GET', 'POST'])
+@login_required
 async def query():
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
         return html_message.format(request.remote_addr)    
@@ -139,6 +140,7 @@ async def generate_document_key(file_name):
     return key
 
 @app.route('/AListPath', methods=['GET', 'POST'])
+@login_required
 async def AListPath():
     global userEditFile
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
@@ -249,6 +251,7 @@ async def extract_part_from_url(url, position=0):
     return parts[position]
 
 @app.route('/save', methods=['GET', 'POST'])
+@login_required
 async def save():
     global userEditFile
     data = await request.get_json()
@@ -422,6 +425,7 @@ async def upRegister(userU):
             userU['password'] = hashed_password
             userU.pop('base_path')
             await pool.update('x_user', userU)
+    
 
     user = await pool.get_row_by_value('x_user','id',userU['id'])
 
