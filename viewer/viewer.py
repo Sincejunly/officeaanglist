@@ -210,11 +210,11 @@ async def AListPath():
     return jsonify(key)
 
 
-async def download_file(url, path_for_save):
+async def runCmd(cmd):
     try:
   
-        down = f"wget -O {path_for_save} -q -N '{url}'"
-        proc = await asyncio.create_subprocess_shell(down, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        
+        proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         _, _ = await proc.communicate()  # Wait for the process to complete
 
         return proc.returncode == 0
@@ -262,7 +262,7 @@ async def save():
         key = await generate_document_key(key.replace('_', ''))
         path_for_save = userEditFile[int(data['users'][0])]['truePath'][fileName]  # 替换为实际保存路径
 
-        if await download_file(downloadUri, path_for_save):
+        if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
             #key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
             history = data.get("history") if data.get("history") else {}
             users = data.get('users') if data.get('users') else []
@@ -425,6 +425,7 @@ async def upRegister(userU):
             userU['password'] = hashed_password
             userU.pop('base_path')
             await pool.update('x_user', userU)
+        
     
 
     user = await pool.get_row_by_value('x_user','id',userU['id'])
@@ -462,7 +463,7 @@ async def register():
         
     
         user = await upRegister(userU)
-
+        await runCmd('service alist restart')
 
         return jsonify(user)
 
