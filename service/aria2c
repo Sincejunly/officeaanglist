@@ -23,7 +23,7 @@ case "$1" in
         ;;
     stop)
         echo "Stopping Aria2c Download Manager"
-        pgrep aria2c
+        killall -q /usr/bin/aria2c
         ;;
     restart)
         echo "Restarting Aria2c Download Manager"

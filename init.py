@@ -46,7 +46,7 @@ if DOMAIN:
     table = 'x_setting_items'
     userData =[
         ('`key`', 'value'),
-        ('aria2_secret', 'QQ9433841351'),
+        ('aria2_secret', 'QQ943384135'),
         ('iframe_previews', '''{{
             "doc,docx,xls,xlsx,ppt,pptx": {{
                 "Microsoft":"https://view.officeapps.live.com/op/view.aspx?src=$e_url",
