@@ -13,7 +13,7 @@ cache:
   paths:
     - $CI_PROJECT_ID/.cache/pip/
     - $CI_PROJECT_ID/.cache/apt/
-  key: "$CI_PROJECT_ID"
+  key: $CI_PROJECT_ID
 
 
 stages:
