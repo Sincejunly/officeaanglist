@@ -20,6 +20,7 @@ from database_utils import AsyncMysqlPool, readjson, readjson_sync,writejson
 from urllib import parse
 import asyncio
 import re
+import time
 
 tracemalloc.start()
 pydith = os.path.dirname(os.path.realpath(__file__))
@@ -131,8 +132,9 @@ def create_directory(path):
 
 
 async def generate_document_key(file_name):
-    allowed_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._='
-    key = parse.quote(file_name)[:20]
+    allowed_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    seconds_timestamp = str(time.time())
+    key = parse.quote(file_name + seconds_timestamp)[:20]
     key = ''.join(char for char in key if char in allowed_chars)
     return key
 
@@ -147,15 +149,16 @@ async def AListPath():
     user = await pool.get_row_by_value('x_users','username',userU['username'])
 
   
-
+    
     RowADD = await pool.get_value_by_value('x_storages', 'mount_path', userU['AListPath'], 'addition')
+    
     root_folder_path = json.loads(RowADD['addition'])['root_folder_path']
     create_directory(root_folder_path)
 
-    # fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
-    # if not fileTask:
-    #     key = await generate_document_key(userU['fileName'])
-    # else:key = fileTask['key']
+    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+    if not fileTask:
+        key = await generate_document_key(userU['fileName'])
+    else:key = fileTask['key']
 
     
     
@@ -178,19 +181,13 @@ async def AListPath():
         userEditFile[user['id']]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
         userEditFile[user['id']]['truePath']=truePath
 
-    # if await pool.is_table_empty('x_fileTask'):
-    #     await pool.update('x_fileTask',{'`id`':1,'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
-    # elif fileTask:
-    #     await pool.update('x_fileTask',{'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
-    # else:
-    #     id = await pool.getMaxid('x_fileTask')
-    #     await pool.update('x_fileTask',{'id':id+1,'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
-    # userEditFile[user['id']]['File-Path'] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
+    if await pool.is_table_empty('x_fileTask'):
+        await pool.update('x_fileTask',{'`id`':1,'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
+    else:
+        await pool.update('x_fileTask',{'fileName':userU['fileName'],'`key`':key,'truePath':truePath},True)
 
-    # userEditFile[user['id']]['Content-Length'] = str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
-    # userEditFile[user['id']]['truePath'] = "{}/{}".format(root_folder_path, userU['fileName'])
 
-    return jsonify(True)
+    return jsonify(key)
 
 
 async def download_file(url, path_for_save):
@@ -243,9 +240,10 @@ async def save():
 
         if await download_file(downloadUri, path_for_save):
             #key = await extract_part_from_url(downloadUri,4)
+            key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
 
             await pool.update('x_fileTask',{'fileName': \
-            userEditFile[int(data['users'][0])]['fileName'],'truePath':path_for_save},True)
+            userEditFile[int(data['users'][0])]['fileName'],'`key`':key,'truePath':path_for_save},True)
 
             if outAList:
 

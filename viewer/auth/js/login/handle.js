@@ -69,6 +69,14 @@ async function viewer(user) {
   manageButton.style.display = 'block';
   await inDocEditor(user);
 }
+
+async function hideMode(){
+    isSubmitClicked = true;
+    overlay.classList.remove('show-overlay');
+    overlay.classList.add('hide-overlay');
+    background.classList.add('background-fadeOut');
+}
+officeC.addEventListener('click',hideMode);
 // xPath.addEventListener('click', async function() {
 //     isSubmitClicked = true;
 //     overlay.classList.remove('show-overlay');

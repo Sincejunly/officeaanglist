@@ -13,6 +13,12 @@ def extract_part_from_url(url, position=0):
 # Example URL
 url = "https://office.homura.top:82/cache/files/new.docx3Fsign3Did_7188/output.docx/output.docx?md5=bSncuDb8dptNoXggcJ9ygQ&expires=1691038933&filename=output.docx"
 
-# Extract the desired part at position 1
-desired_part = extract_part_from_url(url, 4)
-print(desired_part)  # Output: new.docx3Fsign3Did_7188
+import time
+from datetime import datetime
+
+# 获取当前时间的秒级时间戳
+seconds_timestamp = int(time.time())
+
+# 将秒级时间戳转换为标准日期时间格式
+date_time_str = datetime.fromtimestamp(seconds_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+print(date_time_str)
