@@ -11,8 +11,8 @@ variables:
 
 cache:
   paths:
-    - .cache/pip/
-    - .cache/apt/
+    - $CI_PROJECT_ID/.cache/pip/
+    - $CI_PROJECT_ID/.cache/apt/
   key: "$CI_PROJECT_ID"
 
 
