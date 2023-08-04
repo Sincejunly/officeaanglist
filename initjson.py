@@ -31,7 +31,7 @@ while True:
             AListHost = 'http://' + AListHost + '/AList/api'
         data['AListHost'] = AListHost
         writejson_sync('./viewer/data.json', data)
-
+        print(data)
         Adata = readjson_sync('./AList/data/config.json')
 
         AListdb_host = os.environ.get("AListdb_host")
@@ -44,7 +44,7 @@ while True:
         Adata['database']['name'] = os.environ.get("AListdb_name")
         Adata['site_url'] = os.environ.get("DOMAIN")
         writejson_sync('./AList/data/config.json', data)
-
+        print(Adata)
 
         break
     except Exception as e:

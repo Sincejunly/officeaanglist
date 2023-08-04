@@ -515,13 +515,13 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   rm -r /var/www/app/dsssl.conf
   rm -r /var/www/app/ds.conf
   touch /var/www/app/AList/AListInit
-  sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
+
   sed -i "s/QQ943384135/$aria2Csecret/g" /var/www/app/aria2/aria2.conf
 
   echo '
 '
   echo "初始化中(Initializing)......................................................................."
-  sleep 200
+  sleep 130
   
   python3 initjson.py
   
