@@ -515,7 +515,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   rm -r /var/www/app/dsssl.conf
   rm -r /var/www/app/ds.conf
   touch /var/www/app/AList/AListInit
-
+  sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
   sed -i "s/QQ943384135/$aria2Csecret/g" /var/www/app/aria2/aria2.conf
 
   echo '
@@ -523,16 +523,8 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   echo "初始化中(Initializing)......................................................................."
   sleep 200
   
-  if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
-      sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
-      sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
-      sed -i "12s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
-      sed -i "13s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/AList/data/config.json
-      sed -i "14s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
-      sed -i "15s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
-  fi
-
   python3 initjson.py
+  
   if ! [ -n "$AListHost" ]; then
     service alist start
   fi
@@ -553,18 +545,6 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     host=$(echo "$DOMAIN" | grep -oP '(?<=://)[^:/]+')
     sed -i "s|office.xxx.com|${host//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
   fi
-
-  # sed -i "13s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/backend.py
-  # sed -i "14s/.*/    \"port\": \"$AListdb_port\",/" /var/www/app/backend.py
-  # sed -i "15s/.*/    \"database\": \"$AListdb_name\",/" /var/www/app/backend.py
-  # sed -i "16s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/backend.py
-  # sed -i "17s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/backend.py
-
-  # sed -i "3s/.*/    \"host\": \"$AListdb_host\",/" /var/www/app/initmysql.py
-  # sed -i "4s/.*/    \"port\": \"$AListdb_port\",/" /var/www/app/initmysql.py
-  # sed -i "5s/.*/    \"database\": \"$AListdb_name\",/" /var/www/app/initmysql.py
-  # sed -i "6s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/initmysql.py
-  # sed -i "7s/.*/    \"password\": \"$AListdb_pw\",/" /var/www/app/initmysql.py
   
 
 
@@ -587,7 +567,6 @@ service php-fpm start
 python3 initjson.py
 
 
-sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
 sed -i "87s#.*#    proxy_pass http://$(get_ip $qbit_host):6901;#" /etc/nginx/conf.d/ds.conf
 
 

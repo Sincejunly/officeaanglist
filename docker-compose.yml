@@ -102,13 +102,15 @@ services:
       - redis
 
     volumes:
-      - /volume1/docker/officeaanglist/logs:/var/log/onlyoffice
+      - /volume1/docker/officeaanglist/logs/onlyoffice:/var/log/onlyoffice
+      - /volume1/docker/officeaanglist/logs/nginx:/var/log/nginx
       - /volume1/docker/officeaanglist/app:/var/www/app:rw
       - /volume1/AList:/AList
       - /volume1/docker/officeaanglist/lib:/var/lib/onlyoffice
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
       - /volume1/docker/officeaanglist/conf.d:/etc/nginx/conf.d
-      #- /volume1/ssl/homura.top:/ssl
+      - /volume1/ssl/homura.top:/ssl
+      
     networks:
       - officeaanglist
       
