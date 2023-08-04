@@ -5,7 +5,7 @@ COPY ./service/* /etc/init.d/
 
 WORKDIR /system
 
-RUN echo 'Dir::Cache::Archives ${CI_PROJECT_ID}/.cache/apt/' > /etc/apt/apt.conf \
+RUN echo 'Dir::Cache::Archives ${CI_PROJECT_ID}/.cache/apt;' > /etc/apt/apt.conf \
 	&& chmod +x /system/* \
 	&& chmod +x /etc/init.d/* \
 	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults && update-rc.d php-fpm defaults \
@@ -26,7 +26,7 @@ RUN mkdir -p /var/www/app1 \
 	&& chmod -R g=u /var/www/app1/AList/data \
 	&& chmod -R g=u /var/www/app1  \
 	&& chown -R root:root /var/www/app1 \
-	&& mkdir -p /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
+	&& mkdir -p /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh 
 
 
 RUN touch /var/www/app1/aria2/aria2.session \
