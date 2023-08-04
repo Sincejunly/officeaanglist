@@ -588,7 +588,7 @@ python3 initjson.py
 
 
 sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
-sed -i "87s#.*#    proxy_pass: http://$(get_ip $qbit_host):6901;#" /etc/nginx/conf.d/ds.conf
+sed -i "87s#.*#    proxy_pass http://$(get_ip $qbit_host):6901;#" /etc/nginx/conf.d/ds.conf
 
 
 service aria2c start
