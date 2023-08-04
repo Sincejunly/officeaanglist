@@ -61,7 +61,7 @@ services:
       - officeaanglist
 
   onlyoffice:
-    image: $d_route/officeaanglist:v0.1
+    image: $d_route/officeaanglist:v0.2
     #build: .
     container_name: ${dd_name}
     restart: always
