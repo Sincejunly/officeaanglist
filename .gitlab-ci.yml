@@ -13,6 +13,7 @@ cache:
   paths:
     - .cache/pip/
     - .cache/apt/
+    key: "$CI_PROJECT_ID"
 
 
 stages:
