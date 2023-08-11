@@ -525,15 +525,15 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   
   python3 initjson.py
   
-  if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
-    sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
-    sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
-    sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
-    sed -i "12s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
-    sed -i "13s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/AList/data/config.json
-    sed -i "14s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
-    sed -i "15s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
-  fi
+  # if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
+  #   sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
+  #   sed -i "10s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
+  #   sed -i "11s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
+  #   sed -i "12s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
+  #   sed -i "13s/.*/    \"user\": \"$AListdb_us\",/" /var/www/app/AList/data/config.json
+  #   sed -i "14s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
+  #   sed -i "15s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
+  # fi
 
   if ! [ -n "$AListHost" ]; then
     service alist start
@@ -578,7 +578,7 @@ service php-fpm start
 python3 initjson.py
 
 
-sed -i "87s#.*#    proxy_pass http://$(get_ip $qbit_host):6901;#" /etc/nginx/conf.d/ds.conf
+#sed -i "87s#.*#    proxy_pass http://$(get_ip $qbit_host):6901;#" /etc/nginx/conf.d/ds.conf
 
 
 service aria2c start
