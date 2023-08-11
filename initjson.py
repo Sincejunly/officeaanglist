@@ -44,7 +44,7 @@ while True:
         Adata['database']['name'] = os.environ.get("AListdb_name")
         Adata['site_url'] = os.environ.get("DOMAIN")
         writejson_sync('./AList/data/config.json', data)
-     
+        print(Adata)
 
         break
     except Exception as e:
