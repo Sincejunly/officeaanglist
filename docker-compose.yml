@@ -74,8 +74,8 @@ services:
       - "83:443"
     environment:
       - JWT_ENABLEN=false
-      - PUID=1000
-      - PGID=1000
+      # - PUID=1000
+      # - PGID=1000
       - TZ=Asia/Shanghai
       - DB_TYPE=mariadb
       - DB_HOST=db
