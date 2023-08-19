@@ -3,12 +3,6 @@ FROM onlyoffice/documentserver:7.1.1
 COPY ./system /system
 COPY ./service/* /etc/init.d/
 
-COPY ./mc /system/minio-py
-
-WORKDIR /system/minio-py
-
-RUN python3 setup.py install
-
 WORKDIR /system
 #echo 'Dir::Cache::Archives /.cache/apt;' > /etc/apt/apt.conf
 RUN chmod +x /system/* \
