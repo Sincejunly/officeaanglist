@@ -1,3 +1,0 @@
-[submodule "minio-py"]
-	path = minio-py
-	url = https://github.com/minio/minio-py.git

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./css/login.css">
+    <link rel="stylesheet" href="./css/lists-comtainer.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <title>homuraOffice editor</title>
 </head>
@@ -31,27 +32,50 @@
           </div>
 
           <div style="display: flex; align-items: center;">
-            <input type="text" id="captchaInput" placeholder="请输入验证码" style="display: none;">
+            <input class="captcha-input" type="text" id="captchaInput" placeholder="请输入验证码" style="display: none;">
             <img id="captchaImage" src="" alt="Captcha" style="display: none;">
           </div>
           <a id="message"></a>
-          <div style="display: flex; justify-content: center; align-items: center;">
-            <button id="loginB">验证</button>
-            <button id="registerB" >注册</button>
-            <button id="countB">计算</button>
-            <button id="logOutB">登出</button>
+          <div style="display: flex; justify-content: center; align-items: center; padding: 5px 0;">
+            <button class="MButton" id="loginB">验证</button>
+            <button class="MButton" id="registerB" >注册</button>
+            <button class="MButton" id="countB">计算</button>
+            <button class="MButton" id="logOutB">登出</button>
           </div>
-          <div style="display: flex; align-items: center; justify-content: center;">
+          <div style="display: flex; align-items: center; justify-content: center; padding: 10px 0;">
             <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8);" href="javascript:void(0)" id="registerC" onclick="showRegister()">注册</a>
-            <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); display: none;" href="/AriaNg/" id="AriaNgC">AriaNg</a>
-            <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); display: none;" id="OfficeC">Office</a>
-            <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); display: none;" id="SettingsC">Settings</a>
+            <a class="MButtonS" href="/AriaNg/" id="AriaNgC" target="_blank">AriaNg</a>
+
+            <a class="MButtonS" id="PDFC">PDF</a>
+
+            
+
+            <a class="MButtonS" id="OfficeC">Office</a>
+            <a class="MButtonS" id="SettingsC">Settings</a>
             
             <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); display: none;" href="javascript:void(0)" id="loginC" onclick="showLogin()" style="display: none;">登录</a>
             <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8); float: right;" href="javascript:void(0)" id="forgotC" onclick="showForgot()">忘记密码？</a>
             <!-- <button id="AriaNg">AriaNg</button> -->
           </div>
-                              
+
+          <div class="menu" id="pdfSetting">
+            <label for="rotate">
+              修复旋转错误
+              <input type="checkbox" id="rotate" >
+            </label>
+
+            <label for="distort">
+              消除扭曲
+              <input type="checkbox" id="distort" >
+            </label>
+            <input type="text" id="PDFmetadata"  placeholder="自定义输出元数据(例：My PDF)">
+      
+            <input type="text" id="PDFCPU"  placeholder="使用CPU核心数">
+
+            <input type="text" id="pdfType" placeholder="输出的文件类型(pdf/pdfa)">
+            <!-- <button type="submit" class="MButtonS" id="PDFDO">PDFDO</button> -->
+          </div>
+
         </div>
         <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">
           当前版本：<br>

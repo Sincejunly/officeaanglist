@@ -102,9 +102,9 @@
     margin-bottom: 5px;
  }
  .smallB{
-  display: inline-flex; /* 将按钮容器设置为 Flexbox 布局 */
-  justify-content: center; /* 水平居中对齐 */
-  align-items: center; /* 垂直居中对齐 */
+  display: inline-flex; 
+  justify-content: center; 
+  align-items: center; 
   margin: 0 10px;
   /* margin-top: 10px; */
   padding: 10px 20px;
@@ -117,6 +117,9 @@
   width: 40px;
   height: 20px;
   margin-bottom: 10px;
+  position: relative; /* 添加这一行 */
+  overflow: hidden; /* 添加这一行 */
+
  } .smallB:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }

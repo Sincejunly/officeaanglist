@@ -136,9 +136,8 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
     newItem.innerHTML = `
       <div>
           <strong>DOMAIN:</strong> <span class="Domain" id="x_domain${database['id']}">${database['Domain']}</span>
-          ${editButton}
+          ${editButton}${database['id'] !== 1 ? deleteButton : ''}
           ${userDetails}
-          ${database['id'] !== 1 ? deleteButton : ''}
       </div>
       `;
   }else{

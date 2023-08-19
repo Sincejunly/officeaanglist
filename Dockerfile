@@ -3,13 +3,21 @@ FROM onlyoffice/documentserver:7.1.1
 COPY ./system /system
 COPY ./service/* /etc/init.d/
 
-WORKDIR /system
+COPY ./mc /system/minio-py
 
-RUN echo 'Dir::Cache::Archives ${CI_PROJECT_ID}/.cache/apt;' > /etc/apt/apt.conf \
-	&& chmod +x /system/* \
+WORKDIR /system/minio-py
+
+RUN python3 setup.py install
+
+WORKDIR /system
+#echo 'Dir::Cache::Archives /.cache/apt;' > /etc/apt/apt.conf
+RUN chmod +x /system/* \
 	&& chmod +x /etc/init.d/* \
-	&& update-rc.d alist defaults && update-rc.d aria2c defaults && update-rc.d viewer defaults && update-rc.d php-fpm defaults \
-    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev iputils-ping vim psmisc php7.4-fpm php-curl\
+	&& update-rc.d alist defaults && update-rc.d aria2c defaults \
+	&& update-rc.d viewer defaults && update-rc.d php-fpm defaults \
+    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev \
+	iputils-ping vim psmisc php7.4-fpm php-curl libtesseract-dev tesseract-ocr \
+	tesseract-ocr-chi-sim tesseract-ocr-chi-tra \
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl
 	

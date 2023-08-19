@@ -15,16 +15,24 @@
 APP_DIR="/var/www/app/AList"
 APP_EXEC="/var/www/app/AList/alist"
 APP_OPTIONS="server"
+LOG_FILE="/var/log/alist.log"
+PID_FILE="/var/run/alist.pid"
 
 case "$1" in
     start)
         echo "Starting alist"
-        cd $APP_DIR
-        nohup $APP_EXEC $APP_OPTIONS &
+        cd "$APP_DIR"
+        nohup "$APP_EXEC" "$APP_OPTIONS" >> "$LOG_FILE" 2>&1 &
+        echo $! > "$PID_FILE"  # Save the process ID to the PID file
         ;;
     stop)
         echo "Stopping alist"
-        killall -q $APP_EXEC
+        if [ -f "$PID_FILE" ]; then
+            kill $(cat "$PID_FILE")  # Kill the process using the PID from the PID file
+            rm "$PID_FILE"
+        else
+            echo "PID file not found. The process might not be running."
+        fi
         ;;
     restart)
         echo "Restarting alist"
@@ -32,8 +40,20 @@ case "$1" in
         sleep 1
         $0 start
         ;;
+    status)
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE")
+            if ps -p $pid > /dev/null; then
+                echo "AList is running with PID $pid."
+            else
+                echo "AList is not running, but PID file exists."
+            fi
+        else
+            echo "AList is not running."
+        fi
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 1
         ;;
 esac

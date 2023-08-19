@@ -153,9 +153,14 @@ async def AListPath():
   
     
     RowADD = await pool.get_value_by_value('x_storages', 'mount_path', userU['AListPath'], 'addition')
-    
-    root_folder_path = json.loads(RowADD['addition'])['root_folder_path']
-    create_directory(root_folder_path)
+
+    if RowADD['driver'] == 'local':
+        root_folder_path = json.loads(RowADD['addition'])['root_folder_path'] + '/'
+        create_directory(root_folder_path)
+    else:
+        outAList = True
+        create_directory('fileCahe/')
+        root_folder_path = 'fileCahe/'
 
     fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'],True)
     if not fileTask:
@@ -165,7 +170,7 @@ async def AListPath():
     
     
     
-    truePath = "{}/{}".format(root_folder_path, userU['fileName'])
+    #truePath = "{}/{}".format(root_folder_path, userU['fileName']) if root_folder_path else ''
     if not (user['id'] in userEditFile):
         if outAList:
             alisttoken = await getToken(AListHost, user['username'], user['password'])
@@ -177,13 +182,13 @@ async def AListPath():
             'File-Path':{userU['fileName']:parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))},
             'Password':user['password'],
             'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
-            'truePath':{userU['fileName']:truePath}
+            'truePath':{userU['fileName']:root_folder_path}
             })
     else:
         userEditFile[user['id']]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
         userEditFile[user['id']]['Password'] = user['password']
         userEditFile[user['id']]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
-        userEditFile[user['id']]['truePath'][userU['fileName']]=truePath
+        userEditFile[user['id']]['truePath'][userU['fileName']]=root_folder_path
 
     if await pool.is_table_empty('x_fileTask'):
         await pool.update(
@@ -194,7 +199,7 @@ async def AListPath():
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":"",
-            'truePath':truePath},True,True)
+            'truePath':root_folder_path},True)
     else:
         await pool.update(
         'x_fileTask',{
@@ -204,7 +209,7 @@ async def AListPath():
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":"",
-            'truePath':truePath},True,True)
+            'truePath':root_folder_path},True)
 
 
     return jsonify(key)
@@ -213,15 +218,14 @@ async def AListPath():
 async def runCmd(cmd):
     try:
   
-        
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        _, _ = await proc.communicate()  # Wait for the process to complete
+        _, _ = await proc.communicate()  
 
         return proc.returncode == 0
     except Exception:
         return False
 
-async def Upload(url,UserAgent,Authorization,localPath, FilePath, password=''):
+async def Upload(url, UserAgent, Authorization, localPath, FilePath, password=''):
 
     upload_header = {
         'UserAgent': UserAgent,
@@ -251,7 +255,6 @@ async def extract_part_from_url(url, position=0):
     return parts[position]
 
 @app.route('/save', methods=['GET', 'POST'])
-@login_required
 async def save():
     global userEditFile
     data = await request.get_json()
@@ -260,7 +263,8 @@ async def save():
         key = await extract_part_from_url(downloadUri, 4)
         fileName = key[:key.find('_')]
         key = await generate_document_key(key.replace('_', ''))
-        path_for_save = userEditFile[int(data['users'][0])]['truePath'][fileName]  # 替换为实际保存路径
+        truePath = userEditFile[int(data['users'][0])]['truePath'][fileName]
+        path_for_save = truePath + fileName  # 替换为实际保存路径
 
         if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
             #key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
@@ -279,7 +283,7 @@ async def save():
                 'users':users,'actions':actions,
                 "lastsave":lastsave, \
                 "notmodified":notmodified,"filetype":filetype, \
-                'truePath':path_for_save},True,True)
+                'truePath':truePath},True)
             
             # await pool.update('x_fileTask',{'fileName': \
             # fileName, '`key`':key,'truePath':path_for_save},True)
@@ -296,11 +300,37 @@ async def save():
 
     return jsonify("{\"error\":0}")
 
+@app.route('/orc', methods=['GET', 'POST'])
+@login_required
+async def delete():
+    # if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+    #     return html_message.format(request.remote_addr)    
+    userU = await request.get_json()
     
+    if not userU:
+        return jsonify({'Error':"not json"})
+    
+    truPath = userEditFile[userU['id']]['truePath'][userU['fileName']]
+
+    filePath = truPath + userU['fileName'] 
+    orcFilePath = truPath + userU['fileName']+'_orc'+userU['fileType']
+
+    if await runCmd(f"ocrmypdf {userU['cmd']} {filePath}  '{orcFilePath}' "):
+        if outAList:
+            await Upload(AListHost, userEditFile[userU['id']]['userAgent'], 
+            userEditFile[userU['id']]['Authorization'], 
+            orcFilePath, 
+            parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']+'_orc'+userU['fileType']))
+            )
+
+        return jsonify({'message': "ok"})
+
+    else:
+        return jsonify({'Error': "失败"})
 
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required
-async def delete():
+async def deletet():
     # if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
     #     return html_message.format(request.remote_addr)    
     userU = await request.get_json()
@@ -367,7 +397,7 @@ async def index():
         #return redirect('/AriaNg')
     else:
         user = await pool.get_row_by_value('x_user','username','guest')
-        print(user)
+   
         if user['disabled'] == 0:
             if isinstance(user, dict):
                 if 'password' in user:

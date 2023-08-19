@@ -15,15 +15,23 @@
 ARIA2C_BIN="/usr/bin/aria2c"
 ARIA2C_CONF="/var/www/app/aria2/aria2.conf"
 ARIA2C_USER="root"
+LOG_FILE="/var/log/aria2c.log"
+PID_FILE="/var/run/aria2c.pid"
 
 case "$1" in
     start)
         echo "Starting Aria2c Download Manager"
-        nohup su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF" $ARIA2C_USER &
+        nohup su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF >> $LOG_FILE 2>&1 & echo \$!" $ARIA2C_USER > "$PID_FILE"
         ;;
     stop)
         echo "Stopping Aria2c Download Manager"
-        killall -q /usr/bin/aria2c
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE")
+            kill $pid
+            rm "$PID_FILE"
+        else
+            echo "PID file not found. The process might not be running."
+        fi
         ;;
     restart)
         echo "Restarting Aria2c Download Manager"
@@ -31,8 +39,20 @@ case "$1" in
         sleep 1
         $0 start
         ;;
+    status)
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE")
+            if ps -p $pid > /dev/null; then
+                echo "Aria2c Download Manager is running with PID $pid."
+            else
+                echo "Aria2c Download Manager is not running, but PID file exists."
+            fi
+        else
+            echo "Aria2c Download Manager is not running."
+        fi
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 1
         ;;
 esac

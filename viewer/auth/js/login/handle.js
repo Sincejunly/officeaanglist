@@ -34,6 +34,18 @@ const countBox = document.querySelector('#countBox');
 const Commd = document.querySelector('#Commd');
 const id = document.querySelector('#id');
 const SettingsC = document.querySelector('#SettingsC');
+const PDFC = document.querySelector('#PDFC');
+const pdfSetting = document.querySelector('#pdfSetting');
+//const PDFDO = document.querySelector('#PDFDO');
+
+const rotate = document.querySelector('#rotate');
+const distort = document.querySelector('#distort');
+const PDFmetadata = document.querySelector('#PDFmetadata');
+const PDFCPU = document.querySelector('#PDFCPU');
+const pdfType = document.querySelector('#pdfType');
+let user;
+const fileName = await getDomain('fileName');
+const AListPath = await getDomain('AListPath');
 //var closebButton = document.querySelector('.close-button');
 
 // var xPath = document.getElementById('x');
@@ -50,7 +62,7 @@ const SettingsC = document.querySelector('#SettingsC');
 // });
 
 
-async function inDocEditor(user){
+async function inDocEditor(){
   try {
     placeholder.classList.add('placeholder-fadeIn');
     await getMyProfile(user);
@@ -61,13 +73,12 @@ async function inDocEditor(user){
 SettingsC.addEventListener('click', async function() {
   window.location.href = serverAddress+'/user';
 });
-async function viewer(user) {
+async function viewer() {
   isSubmitClicked = true;
   overlay.classList.remove('show-overlay');
   overlay.classList.add('hide-overlay');
   background.classList.add('background-fadeOut');
-  manageButton.style.display = 'block';
-  await inDocEditor(user);
+  await inDocEditor();
 }
 
 async function hideMode(){
@@ -75,6 +86,7 @@ async function hideMode(){
     overlay.classList.remove('show-overlay');
     overlay.classList.add('hide-overlay');
     background.classList.add('background-fadeOut');
+    manageButton.style.display = 'block';
 }
 officeC.addEventListener('click',hideMode);
 // xPath.addEventListener('click', async function() {
@@ -106,12 +118,12 @@ async function fetchData() {
           overlay.classList.remove('hide-overlay');
           overlay.classList.add('show-overlay');
 
-          if (await getDomain('fileName')!=''){
-            await viewer(user);
-          }
+          // if (fileName!=''){
+          //   await viewer();
+          // }
           if (user['username']!='guest')
           {
-            await showUser(user);
+            await showUser();
           }
           else{
             await showLogin();
@@ -213,6 +225,7 @@ async function showRegister(){
     loginC.style.display = 'block';
     captchaInput.style.display = 'block';
     captchaImage.style.display = 'block';
+    message.style.display = 'none';
     //textPassword.style.display = 'none';
     captchaImage.src = serverAddress+'/generate_code?' + "&timestamp=" + new Date().getTime();
   } catch (error) {
@@ -246,10 +259,12 @@ async function showLogin(){
     registerC.style.display = 'block';
     passwordInput.style.display = 'block';
     usernameInput.style.display = 'block';
+    message.style.display = 'none';
 
     loginC.style.display = 'none';
     captchaInput.style.display = 'none';
     captchaImage.style.display = 'none';
+
   }
   catch (error) {
     console.error('Error:', error);
@@ -283,6 +298,7 @@ async function showForgot(){
   countB.style.display = 'block';
   registerB.style.display = 'none';
   countBox.style.display = 'none';
+  message.style.display = 'none';
 
   usernameInput.style.display = 'block';
   passwordInput.style.display = 'block';
@@ -295,7 +311,7 @@ async function showForgot(){
   countBox.style.display = 'block';
 }
 
-async function showUser(user) {
+async function showUser() {
   try {
     passwordInput.style.display = 'none';
     confirmPasswordInput.style.display = 'none';
@@ -314,6 +330,8 @@ async function showUser(user) {
     AriaNgC.style.display = 'block';
     officeC.style.display = 'block';
     loginB.textContent = '登出';
+
+    PDFC.style.display = 'block';
     //await getEventTypes(loginB,true);
     //loginB.addEventListener('click',loginOut);
     loginB.style.display = 'none';
@@ -322,12 +340,14 @@ async function showUser(user) {
     countB.style.display = 'none';
     registerB.style.display = 'none';
     countBox.style.display = 'none';
+
+    
     if (user['id'] == 1){
       SettingsC.style.display = 'block';
     }
-    if (await getDomain('fileName')!=''){
-      await viewer(user);
-    }
+    // if (await getDomain('fileName')!=''){
+    //   await viewer();
+    // }
 
     //xPath.style.display = 'block';
   } catch (error) {
@@ -348,6 +368,50 @@ async function showUser(user) {
 captchaImage.addEventListener('click',async () => {
   captchaImage.src = serverAddress+'/generate_code?' + "&timestamp=" + new Date().getTime();
 });
+
+async function isArabicNumber(value) {
+
+  var regex = /^[0-9]+$/;
+  
+  return regex.test(value);
+}
+
+async function upPDF(event) {
+  event.preventDefault();
+
+  if(pdfSetting.style.display == 'none' || pdfSetting.style.display == ''){
+    pdfSetting.style.display = 'inline-block';
+    PDFC.textContent = 'UP';
+  }
+  else{
+    pdfSetting.style.display = 'none';
+    PDFC.textContent = 'PDF';
+
+    const rotatec = rotate.checked ? ' --rotate-pages ': '';
+    const distortc = distort.checked ? ' --deskew ': '';
+    const PDFmetadatac = PDFmetadata.value ? ` --title ${PDFmetadata.value}`: '';
+    const PDFCPUc = isArabicNumber(PDFCPU.value) ? ` --jobs ${PDFCPU.value}`: '';
+    const pdfTypec = pdfType.value ? ` --output-type ${pdfType.value}`: '';
+    const fileType = pdfTypec ? '.pdfa' : '.pdf';
+    const cmd = rotatec + distortc + PDFmetadatac + PDFCPUc + pdfTypec;
+
+
+
+    const ret = await sendRequest(serverAddress+'/orc','POST',{'id':user['id'],'fileName':fileName,
+    'AListPath':AListPath,'fileType':fileType,'cmd':cmd});
+      if ('Error' in ret){
+        message.style.display = 'block';
+        message.textContent = ret['Error'];
+      }
+      else{
+        message.style.display = 'block';
+        message.textContent = '转换成功';
+      }
+  }
+}
+
+PDFC.addEventListener('click',upPDF);
+//PDFDO.addEventListener('click',upPDF);
 
 async function login(event) {
     try {
@@ -374,7 +438,7 @@ async function login(event) {
         message.textContent = user['Error'];
       }
       else{
-        await showUser(user);
+        await showUser();
       }
   } catch (error) {
       console.error('Error:', error);

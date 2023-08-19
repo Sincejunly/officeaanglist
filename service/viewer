@@ -13,15 +13,24 @@
 # Change the following line to match your Python3 path
 PYTHON_BIN="/usr/bin/python3"
 TB_USER='root'
+LOG_FILE="/var/log/viewer.log"
+PID_FILE="/var/run/viewer.pid"
+
 case "$1" in
     start)
         echo "Starting Viewer Service"
         cd /var/www/app/viewer
-        nohup $PYTHON_BIN viewer.py &
+        nohup $PYTHON_BIN viewer.py >> $LOG_FILE 2>&1 & echo $! > "$PID_FILE"
         ;;
     stop)
         echo "Stopping Viewer Service"
-        killall -q -u $TB_USER python3 viewer.py
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE")
+            kill $pid
+            rm "$PID_FILE"
+        else
+            echo "PID file not found. The process might not be running."
+        fi
         ;;
     restart)
         echo "Restarting Viewer Service"
@@ -29,8 +38,20 @@ case "$1" in
         sleep 1
         $0 start
         ;;
+    status)
+        if [ -f "$PID_FILE" ]; then
+            pid=$(cat "$PID_FILE")
+            if ps -p $pid > /dev/null; then
+                echo "Viewer Service is running with PID $pid."
+            else
+                echo "Viewer Service is not running, but PID file exists."
+            fi
+        else
+            echo "Viewer Service is not running."
+        fi
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 1
         ;;
 esac

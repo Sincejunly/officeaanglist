@@ -5,14 +5,14 @@ services:
 variables:
   di_name: 'officeaanglist'
   dd_name: 'officeaanglist'
-  dd_route: '$d_route/officeaanglist:v0.2'
-  ddd_rout: 'homuras/officeaanglist:v0.2'
-  PIP_CACHE_DIR: $CI_PROJECT_ID/.cache/pip
+  dd_route: '$d_route/officeaanglist:v0.3'
+  ddd_rout: 'homuras/officeaanglist:v0.3'
+  PIP_CACHE_DIR: .cache/pip
 
 cache:
   paths:
     - .cache/pip/
-    - .cache/apt/
+    #- .cache/apt/
   key: $CI_PROJECT_ID
 
 
@@ -31,6 +31,6 @@ build:
     - docker push $dd_route
     - docker-compose up -d
  
-    - docker login -u homuras -p $docker_token
-    - docker tag $di_name $ddd_rout
-    - docker push $ddd_rout
+    # - docker login -u homuras -p $docker_token
+    # - docker tag $di_name $ddd_rout
+    # - docker push $ddd_rout

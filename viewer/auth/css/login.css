@@ -106,6 +106,7 @@
     }
     
     .input-group input {
+      position: relative;
       margin-top: 5px;
       padding: 5px;
       border: none;
@@ -119,17 +120,44 @@
     
     .input-group input::placeholder {
       color: rgba(255, 255, 255, 0.6);
+    } 
+    .menu {
+      display: none;
+      align-items: center;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 5px;
+      width: 50%;
+    }  
+    .menu label {
+      align-items: center;
+      border-radius: 5px; 
+      padding: 5px 10px;
+      margin-right: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-family: 'Helvetica', sans-serif; 
+      width: 38%;
     }
+  
+    .menu input[type="checkbox"] {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      background-color: #888;
+      border: 2px solid #bbb;
+      border-radius: 20px; 
+      cursor: pointer;
+    }
+    
     #message{
       color: red;
       font-size: 12px;
       display: none;
     }
     
-    #loginB {
+    .MButton{
       margin: 0 10px;
-      /* margin-top: 10px; */
-
+  
       padding: 10px 20px;
       border: 1px solid white;
       border-radius: 5px;
@@ -137,66 +165,35 @@
       color: white;
       font-size: 16px;
       cursor: pointer;
+      display: none;
+  
     }
-    
-    #loginB:hover {
+    .MButton:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
-    #registerB {
-      margin: 0 10px;
-      /* //margin-top: 10px; */
-
-      padding: 10px 20px;
-      border: 1px solid white;
-      border-radius: 5px;
-      background-color: transparent;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      display:none;
-    }
-    #registerB:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    #countB{
-      margin: 0 10px;
-      /* margin-top: 10px; */
-      padding: 10px 20px;
-      border: 1px solid white;
-      border-radius: 5px;
-      background-color: transparent;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      display:none;
-    }
-    #countB:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    #logOutB{
-      margin: 0 10px;
-      /* margin-top: 10px; */
-      padding: 10px 20px;
-      border: 1px solid white;
-      border-radius: 5px;
-      background-color: transparent;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      display:none;
-    }
-    #logOutB:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    #Commd {
-      max-width: 80%;
-      margin: 0 auto; /* 这将使元素在父容器中水平居中 */
-      margin: 0 10px; 
-      color: rgba(255, 255, 255, 0.8); 
-      font-family: inherit; 
-      display: block;
+    .MButton:active {
+      background-color: rgba(0, 0, 0, 0.3);
     }
 
+    .MButtonS{
+      margin: 0 5px;
+  
+      padding: 5px 10px;
+      border: 1px solid white;
+      border-radius: 5px;
+      background-color: transparent;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+  
+    }
+    .MButtonS:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .MButtonS:active {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
     #manage-button {
       position: fixed;
       bottom: 20px;
@@ -227,7 +224,8 @@
       opacity: 1;
       display: none;
       z-index: 9999;
-    }.placeholder-fadein {
+    }
+    .placeholder-fadein {
       opacity: 1;
       animation: placeholder-fadeIn 5s forwards;
     }
