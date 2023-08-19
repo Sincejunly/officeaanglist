@@ -61,7 +61,7 @@ services:
       - officeaanglist
 
   onlyoffice:
-    image: $d_route/officeaanglist:v0.2
+    image: $dd_route
     #build: .
     container_name: ${dd_name}
     restart: always
@@ -74,8 +74,8 @@ services:
       - "83:443"
     environment:
       - JWT_ENABLEN=false
-      - PUID=1026
-      - PGID=100
+      - PUID=1000
+      - PGID=1000
       - TZ=Asia/Shanghai
       - DB_TYPE=mariadb
       - DB_HOST=db
