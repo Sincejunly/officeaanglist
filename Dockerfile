@@ -5,8 +5,8 @@ COPY ./service/* /etc/init.d/
 
 WORKDIR /system
 #
-RUN export PIP_CACHE_DIR='.cache/pip' \
-	&& echo 'Dir::Cache::Archives /.cache/apt;' > /etc/apt/apt.conf \
+RUN export PIP_CACHE_DIR='/system/.cache/pip' \
+	&& echo 'Dir::Cache::Archives /system/.cache/apt;' > /etc/apt/apt.conf \
     && chmod +x /system/* \
 	&& mv mc /usr/local/bin/ \
 	&& ./minio_upload_download.sh -d .cache.tar.gz \
