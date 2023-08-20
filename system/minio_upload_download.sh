@@ -45,7 +45,6 @@ if [ "$OPERATION" == "-d" ]; then
     FILE_NAME=$(basename "$input_path")
     if ! mc ls "$BUCKET_NAME/$FILE_NAME" &>/dev/null; then
         echo "File $FILE_NAME not found on MinIO. Exiting."
-        exit 1
     fi
 
     # Download the compressed file from MinIO
