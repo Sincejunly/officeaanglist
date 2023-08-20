@@ -13,7 +13,7 @@ RUN export PIP_CACHE_DIR='.cache/pip' \
 	&& chmod +x /etc/init.d/* \
 	&& update-rc.d alist defaults && update-rc.d aria2c defaults \
 	&& update-rc.d viewer defaults && update-rc.d php-fpm defaults \
-    && ./update-mirror.sh --apt aria2 python3-pip pkg-config libmariadb-dev \
+    && ./update-mirror.sh --apt git aria2 python3-pip pkg-config libmariadb-dev \
 	iputils-ping vim psmisc php7.4-fpm php-curl libtesseract-dev tesseract-ocr \
 	tesseract-ocr-chi-sim tesseract-ocr-chi-tra \
 	&& pip3 install -r requirements.txt \
