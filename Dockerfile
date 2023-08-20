@@ -61,8 +61,7 @@ RUN touch /var/www/app1/aria2/aria2.session \
 	
 WORKDIR /var/www/app1
 COPY . /var/www/app1
-RUN chmod +rwx /var/www/app1/* \
-	&& mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
+RUN mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
 	&& cp -r /var/www/app1/Contents.json /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
 	&& rm -rf system \
 	&& mv ./run-document-server.sh /app/ds/run-document-server.sh \
