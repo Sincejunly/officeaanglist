@@ -7,6 +7,8 @@ WORKDIR /system
 #
 RUN export PIP_CACHE_DIR='/system/.cache/pip' \
 	&& echo 'Dir::Cache::Archives /system/.cache/apt;' > /etc/apt/apt.conf \
+	&& mkdir -p /system/.cache/apt \
+	&& mkdir -p /system/.cache/pip \
     && chmod +x /system/* \
 	&& mv mc /usr/local/bin/ \
 	&& ./minio_upload_download.sh -d .cache.tar.gz \
