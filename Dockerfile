@@ -18,7 +18,7 @@ RUN export PIP_CACHE_DIR='/system/.cache/pip' \
 	&& update-rc.d viewer defaults && update-rc.d php-fpm defaults \
     && ./update-mirror.sh --apt git aria2 python3-pip pkg-config libmariadb-dev \
 	iputils-ping vim psmisc php7.4-fpm php-curl libtesseract-dev tesseract-ocr \
-	tesseract-ocr-chi-sim tesseract-ocr-chi-tra \
+	tesseract-ocr-chi-sim tesseract-ocr-chi-tra lsof\
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl \
 	&& ./minio_upload_download.sh -up .cache
