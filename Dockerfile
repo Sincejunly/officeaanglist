@@ -4,8 +4,12 @@ COPY ./system /system
 COPY ./service/* /etc/init.d/
 
 WORKDIR /system
-#echo 'Dir::Cache::Archives /.cache/apt;' > /etc/apt/apt.conf
-RUN chmod +x /system/* \
+#
+RUN export PIP_CACHE_DIR='.cache/pip' \
+	&& echo 'Dir::Cache::Archives /.cache/apt;' > /etc/apt/apt.conf \
+    && chmod +x /system/* \
+	&& mv mc /usr/local/bin/ \
+	&& ./minio_upload_download.sh -d .cache.tar.gz \
 	&& chmod +x /etc/init.d/* \
 	&& update-rc.d alist defaults && update-rc.d aria2c defaults \
 	&& update-rc.d viewer defaults && update-rc.d php-fpm defaults \
@@ -13,7 +17,8 @@ RUN chmod +x /system/* \
 	iputils-ping vim psmisc php7.4-fpm php-curl libtesseract-dev tesseract-ocr \
 	tesseract-ocr-chi-sim tesseract-ocr-chi-tra \
 	&& pip3 install -r requirements.txt \
-	&& pip3 install database_utils-0.1-py3-none-any.whl
+	&& pip3 install database_utils-0.1-py3-none-any.whl \
+	&& ./minio_upload_download.sh -up .cache
 	
 #&& chown -R www-data:root /var/www/aria2 \
 
@@ -53,7 +58,8 @@ RUN touch /var/www/app1/aria2/aria2.session \
 	
 WORKDIR /var/www/app1
 COPY . /var/www/app1
-RUN mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
+RUN chmod +x /var/www/app1/* \
+	mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
 	&& cp -r /var/www/app1/Contents.json /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
 	&& rm -rf system \
 	&& mv ./run-document-server.sh /app/ds/run-document-server.sh \
