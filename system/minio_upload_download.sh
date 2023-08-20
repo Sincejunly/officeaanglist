@@ -25,7 +25,7 @@ if [ "$OPERATION" == "-up" ]; then
     COMPRESSED_FILE="$DIRECTORY_NAME.tar.gz"
 
     # Compress the directory
-    #tar -czvf "$COMPRESSED_FILE" "$input_path"
+    tar -czvf "$COMPRESSED_FILE" "$input_path"
 
     # Upload the compressed file to MinIO
     mc alias set myminio "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
