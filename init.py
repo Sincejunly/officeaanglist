@@ -114,31 +114,28 @@ async def main():
             await asyncio.sleep(5)
             print('init: '+str(e))
 
-# async def one():
-#     origin = await readjson(os.path.join(pydith, './viewer/data.json'))
-#     pool = await AsyncMysqlPool.initialize_pool(
-#         minsize=1,
-#         maxsize=2,
-#         echo=True,
-#         pool_recycle=1800,
-#         host=origin['mysqlHost'], 
-#         port=int(origin['mysqlPort']), 
-#         user=origin['mysqlUser'], 
-#         password=origin['mysqlPassword'], 
-#         db=origin['mysqlDataBase'])
-#     #await pool.update('x_domain', {'`id`':2,'Domain':'https://192.168.5.167', 'type': 'believe'}, True)
-#     await pool.update(
-#         'x_fileTask',{
-#         '`id`':1,
-#         'fileName':'fff.docx',
-#         '`key`':'fff.docx',
-#         'history':{},
-#         'users':[],
-#         'actions':[],
-#         "lastsave":"", 
-#         "notmodified":False,
-#         "filetype":"",
-#         'truePath':'/AList/'},True)
+async def one():
+    origin = await readjson(os.path.join(pydith, './viewer/data.json'))
+    pool = await AsyncMysqlPool.initialize_pool(
+        minsize=1,
+        maxsize=2,
+        echo=True,
+        pool_recycle=1800,
+        host=origin['mysqlHost'], 
+        port=int(origin['mysqlPort']), 
+        user=origin['mysqlUser'], 
+        password=origin['mysqlPassword'], 
+        db=origin['mysqlDataBase'])
+    #await pool.update('x_domain', {'`id`':2,'Domain':'https://192.168.5.167', 'type': 'believe'}, True)
+    await pool.update(
+        'x_fileTask',{
+            '`id`':1,
+            'fileName':'ff.dox',
+            '`key`':'ff.dox','history':{},
+            'users':[],'actions':[],
+            "lastsave":"", \
+            "notmodified":False,"filetype":'.dox',
+            'truePath':'/AList/'},True)
 
 asyncio.run(main())
 

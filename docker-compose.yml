@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: mariadb
+    image: mariadb/server:10.3
     restart: always
     container_name: ${dd_name}-db
     environment:
@@ -32,15 +32,15 @@ services:
         max-size: "100m"
         max-file: "2"
 
-  # phpmyadmin:
-  #   image: phpmyadmin
-  #   restart: always
-  #   container_name: phpmyadminOffic
-  #   ports:
-  #     - "8051:80"
-  #   environment:
-  #     PMA_HOST: db
-  #     MYSQL_ROOT_PASSWORD: $db_r
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    container_name: phpmyadminOffic
+    ports:
+      - "8051:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: $db_r
 
   qbittorrent-nox:
     image: qbittorrentofficial/qbittorrent-nox:latest
