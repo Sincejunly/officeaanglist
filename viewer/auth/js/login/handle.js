@@ -44,8 +44,8 @@ const PDFmetadata = document.querySelector('#PDFmetadata');
 const PDFCPU = document.querySelector('#PDFCPU');
 const pdfType = document.querySelector('#pdfType');
 let user;
-const fileName = await getDomain('fileName');
-const AListPath = await getDomain('AListPath');
+
+
 //var closebButton = document.querySelector('.close-button');
 
 // var xPath = document.getElementById('x');
@@ -118,9 +118,7 @@ async function fetchData() {
           overlay.classList.remove('hide-overlay');
           overlay.classList.add('show-overlay');
 
-          // if (fileName!=''){
-          //   await viewer();
-          // }
+  
           if (user['username']!='guest')
           {
             await showUser();
@@ -345,9 +343,7 @@ async function showUser() {
     if (user['id'] == 1){
       SettingsC.style.display = 'block';
     }
-    // if (await getDomain('fileName')!=''){
-    //   await viewer();
-    // }
+
 
     //xPath.style.display = 'block';
   } catch (error) {
@@ -378,7 +374,8 @@ async function isArabicNumber(value) {
 
 async function upPDF(event) {
   event.preventDefault();
-
+  const fileName = await getDomain('fileName');
+  const AListPath = await getDomain('AListPath');
   if(pdfSetting.style.display == 'none' || pdfSetting.style.display == ''){
     pdfSetting.style.display = 'inline-block';
     PDFC.textContent = 'UP';

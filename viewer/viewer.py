@@ -142,7 +142,7 @@ async def generate_document_key(file_name):
 @app.route('/AListPath', methods=['GET', 'POST'])
 @login_required
 async def AListPath():
-    global userEditFile
+    global userEditFile,outAList
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
         return html_message.format(request.remote_addr)    
     userU = await request.get_json()
@@ -152,21 +152,22 @@ async def AListPath():
 
   
     
-    RowADD = await pool.get_value_by_value('x_storages', 'mount_path', userU['AListPath'], 'addition')
+    RowADD = await pool.get_row_by_value('x_storages', 'mount_path', userU['AListPath'])
 
-    if RowADD['driver'] == 'local':
+    if RowADD['driver'] == 'Local':
         root_folder_path = json.loads(RowADD['addition'])['root_folder_path'] + '/'
         create_directory(root_folder_path)
     else:
         outAList = True
-        create_directory('fileCahe/')
+        create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
 
     fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'],True)
     if not fileTask:
         key = await generate_document_key(userU['fileName'])
     else:key = fileTask['key']
-
+    
+    fileType = userU['fileName'][userU['fileName'].rfind('.'):]
     
     
     
@@ -194,21 +195,20 @@ async def AListPath():
         await pool.update(
         'x_fileTask',{
             '`id`':1,
-            'fileName': userU['fileName'],
+            'fileName':userU['fileName'],
             '`key`':key,'history':{},
             'users':[],'actions':[],
             "lastsave":"", \
-            "notmodified":False,"filetype":"",
+            "notmodified":False,"filetype":fileType,
             'truePath':root_folder_path},True)
     else:
         await pool.update(
         'x_fileTask',{
-            'fileName': \
-            userU['fileName'],
+            'fileName':userU['fileName'],
             '`key`':key,'history':{},
             'users':[],'actions':[],
             "lastsave":"", \
-            "notmodified":False,"filetype":"",
+            "notmodified":False,"filetype":fileType,
             'truePath':root_folder_path},True)
 
 
@@ -256,7 +256,7 @@ async def extract_part_from_url(url, position=0):
 
 @app.route('/save', methods=['GET', 'POST'])
 async def save():
-    global userEditFile
+    global userEditFile,outAList
     data = await request.get_json()
     if data.get("status") == 2:
         downloadUri = data.get("url")
@@ -311,16 +311,17 @@ async def delete():
         return jsonify({'Error':"not json"})
     
     truPath = userEditFile[userU['id']]['truePath'][userU['fileName']]
+    fileNameP = userU['fileName'][:userU['fileName'].rfind('.')]
 
     filePath = truPath + userU['fileName'] 
-    orcFilePath = truPath + userU['fileName']+'_orc'+userU['fileType']
+    orcFilePath = truPath + fileNameP+'_orc'+userU['fileType']
 
     if await runCmd(f"ocrmypdf {userU['cmd']} {filePath}  '{orcFilePath}' "):
         if outAList:
             await Upload(AListHost, userEditFile[userU['id']]['userAgent'], 
             userEditFile[userU['id']]['Authorization'], 
             orcFilePath, 
-            parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']+'_orc'+userU['fileType']))
+            parse.quote("{}/{}".format(userU['AListPath'], fileNameP+'_orc'+userU['fileType']))
             )
 
         return jsonify({'message': "ok"})
