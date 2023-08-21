@@ -31,7 +31,8 @@ if [ "$OPERATION" == "-up" ]; then
     mc alias set myminio "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
     mc mb "myminio/$BUCKET_NAME"
     mc cp "$COMPRESSED_FILE" "myminio/$BUCKET_NAME/$COMPRESSED_FILE"
-    #mc ls "$BUCKET_NAME"
+
+    #mc ls "myminio/$BUCKET_NAME"
     #mc rb "myminio/cache" --force
 
     echo "Upload completed."
@@ -43,17 +44,16 @@ if [ "$OPERATION" == "-d" ]; then
 
     # Check if the compressed file exists
     FILE_NAME=$(basename "$input_path")
-    if ! mc ls "$BUCKET_NAME/$FILE_NAME" &>/dev/null; then
-        echo "File $FILE_NAME not found on MinIO. Exiting."
-    fi
+    #if ! mc ls "$BUCKET_NAME/$FILE_NAME" &>/dev/null; then
+    #    echo "File $FILE_NAME not found on MinIO. Exiting."
+    #fi
 
     # Download the compressed file from MinIO
     mc alias set myminio "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
-    mc cp "$BUCKET_NAME/$FILE_NAME" "$FILE_NAME"
+    mc cp "myminio/$BUCKET_NAME/$FILE_NAME" "$FILE_NAME"
 
     # Extract the compressed file
     tar -xzvf "$FILE_NAME"
 
     echo "Download and extraction completed."
 fi
-
