@@ -78,17 +78,12 @@ async function viewer() {
   overlay.classList.remove('show-overlay');
   overlay.classList.add('hide-overlay');
   background.classList.add('background-fadeOut');
+  manageButton.style.display = 'block';
   await inDocEditor();
 }
 
-async function hideMode(){
-    isSubmitClicked = true;
-    overlay.classList.remove('show-overlay');
-    overlay.classList.add('hide-overlay');
-    background.classList.add('background-fadeOut');
-    manageButton.style.display = 'block';
-}
-officeC.addEventListener('click',hideMode);
+
+officeC.addEventListener('click',viewer);
 // xPath.addEventListener('click', async function() {
 //     isSubmitClicked = true;
 //     overlay.classList.remove('show-overlay');
