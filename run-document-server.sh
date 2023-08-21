@@ -513,6 +513,11 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   
 	cp -r /var/www/app1/* /var/www/app
   chmod 777 /var/www/app/*
+  chmod +x /var/www/app/AList/alist
+  chmod +x /var/www/app/aria2/*
+  chmod +x /var/www/app/viewer/*
+  chmod +x /var/www/app/viewer/auth/*
+
   rm -r /var/www/app/dsssl.conf
   rm -r /var/www/app/ds.conf
   touch /var/www/app/AList/AListInit
