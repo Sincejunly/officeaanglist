@@ -1,6 +1,7 @@
 #!/bin/bash
 has_sudo=$(command -v sudo)
 source_params='qinghua'
+export DEBIAN_FRONTEND=noninteractive
 # 遍历所有参数
 while [ $# -gt 0 ]; do
   case "$1" in
