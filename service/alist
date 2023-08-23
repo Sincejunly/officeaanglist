@@ -16,11 +16,12 @@ APP_DIR=/var/www/app/AList
 APP_EXEC=/var/www/app/AList/alist
 APP_OPTIONS=server
 LOG_FILE=/var/log/onlyoffice/app/alist.log
-PID_FILE=/var/run/alist.pid
-
+PID_FILE=/var/run/alist.pidls
 case "$1" in
     start)
         echo "Starting alist"
+        mkdir -p /var/log/onlyoffice/app 
+        chmod -R g=u /var/log/onlyoffice/app 
         cd $APP_DIR
         nohup $APP_EXEC $APP_OPTIONS >> $LOG_FILE 2>&1 &
         echo $! > $PID_FILE  # Save the process ID to the PID file

@@ -27,9 +27,6 @@ RUN export PIP_CACHE_DIR='/system/.cache/pip' \
 
 RUN mkdir -p /var/www/app1 \
 	&& mkdir -p /var/log/onlyoffice/ \
-	&& chmod -R g=u /var/log/onlyoffice \
-	&& mkdir -p /var/log/onlyoffice/app \
-	&& chmod -R g=u /var/log/onlyoffice/app \
 	&& mkdir -p /var/www/app1/aria2 \
 	&& chmod -R g=u /var/www/app1/aria2  \
 	&& mkdir -p /var/www/app1/aria2/Download \
