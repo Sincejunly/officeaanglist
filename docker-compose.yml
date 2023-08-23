@@ -104,7 +104,7 @@ services:
       - redis
 
     volumes:
-      #- /home/homura/officeaanglist/logs/:/var/log/
+      - /home/homura/officeaanglist/logs/:/var/log/onlyoffice
       - /home/homura/officeaanglist/app:/var/www/app:rw
       - /home/homura/AList:/AList
       - /home/homura/officeaanglist/lib:/var/lib/onlyoffice
