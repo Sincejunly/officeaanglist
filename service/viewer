@@ -13,24 +13,39 @@
 # Change the following line to match your Python3 path
 PYTHON_BIN="/usr/bin/python3"
 TB_USER='root'
-LOG_FILE="/var/log/viewer.log"
-PID_FILE="/var/run/viewer.pid"
+LOG_FILE="/var/log/onlyoffice/app/viewer.log"
+APP_DIR='/var/www/app/viewer'
+
+PORTS_TO_KILL=(5000 5001)
+check_port() {
+    port=$1
+    result=$(lsof -i :$port)
+    if [ -n "$result" ]; then
+     
+        echo "$result"
+        return 0  
+    else
+       
+        return 1  
+    fi
+}
 
 case "$1" in
     start)
         echo "Starting Viewer Service"
-        cd /var/www/app/viewer
-        nohup $PYTHON_BIN viewer.py >> $LOG_FILE 2>&1 & echo $! > "$PID_FILE"
+        cd $APP_DIR
+        nohup $PYTHON_BIN viewer.py >> $LOG_FILE 2>&1 &
         ;;
     stop)
         echo "Stopping Viewer Service"
-        if [ -f "$PID_FILE" ]; then
-            pid=$(cat "$PID_FILE")
-            kill $pid
-            rm "$PID_FILE"
-        else
-            echo "PID file not found. The process might not be running."
-        fi
+
+        for port in "${PORTS_TO_KILL[@]}"; do
+            if check_port $port; then
+                lsof -t -i :$port | xargs -r kill
+            fi
+        done
+
+        echo "Stopd Viewer Service"
         ;;
     restart)
         echo "Restarting Viewer Service"
@@ -39,16 +54,12 @@ case "$1" in
         $0 start
         ;;
     status)
-        if [ -f "$PID_FILE" ]; then
-            pid=$(cat "$PID_FILE")
-            if ps -p $pid > /dev/null; then
-                echo "Viewer Service is running with PID $pid."
-            else
-                echo "Viewer Service is not running, but PID file exists."
+        for port in "${PORTS_TO_KILL[@]}"; do
+            if check_port $port; then
+                echo "Viewer Service is running on port $port"
+                exit 0
             fi
-        else
-            echo "Viewer Service is not running."
-        fi
+        done
         ;;
     *)
         echo "Usage: $0 {start|stop|restart|status}"

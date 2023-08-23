@@ -6,8 +6,10 @@
     <link rel="stylesheet" href="./css/lists-comtainer.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
     <title>homuraOffice editor</title>
+
 </head>
 <body>
+<script type="text/javascript" src="https://office.homura.top:82/web-apps/apps/api/documents/api.js"></script>
   <div id="placeholder"></div>
 <script type="text/javascript" src="https://office.homura.top:82/web-apps/apps/api/documents/api.js"></script>
   <img class="background-image" src="./images/mm.jpg" alt="Background Image">
@@ -42,13 +44,19 @@
             <button class="MButton" id="countB">计算</button>
             <button class="MButton" id="logOutB">登出</button>
           </div>
+
+          <div class="longCheckbox" id="showViewerBox">
+              <label  for="showViewerCB">
+                <input type="checkbox" id="showViewerCB">
+                直接进入预览
+              </label>
+          </div>
+
           <div style="display: flex; align-items: center; justify-content: center; padding: 10px 0;">
             <a style="margin: 0 10px; color: rgba(255, 255, 255, 0.8);" href="javascript:void(0)" id="registerC" onclick="showRegister()">注册</a>
             <a class="MButtonS" href="/AriaNg/" id="AriaNgC" target="_blank">AriaNg</a>
 
             <a class="MButtonS" id="PDFC">PDF</a>
-
-            
 
             <a class="MButtonS" id="OfficeC">Office</a>
             <a class="MButtonS" id="SettingsC">Settings</a>
@@ -68,20 +76,23 @@
               消除扭曲
               <input type="checkbox" id="distort" >
             </label>
+            <label id="upPDFC">开始转换捏</label>
             <input type="text" id="PDFmetadata"  placeholder="自定义输出元数据(例：My PDF)">
       
             <input type="text" id="PDFCPU"  placeholder="使用CPU核心数">
 
             <input type="text" id="pdfType" placeholder="输出的文件类型(pdf/pdfa)">
-            <!-- <button type="submit" class="MButtonS" id="PDFDO">PDFDO</button> -->
+            
+            <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">不想填可以不填</h5>
           </div>
 
         </div>
+
         <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">
           当前版本：<br>
           officeaanglist:v0.2&nbsp;&nbsp;&nbsp;documentserver:7.1.1<br>
           aria2:1.35.0&nbsp;&nbsp;&nbsp;ariaNg:1.3.6<br>
-          AList-v3.18.0
+          AList-v3.26.0
         </h5>
         <h5 style="margin: 0; color: rgba(255, 255, 255, 0.8);">QQ943384135</h5>
       </form>

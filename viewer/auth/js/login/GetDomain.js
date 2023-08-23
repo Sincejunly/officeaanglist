@@ -12,7 +12,7 @@ async function getDomain(range='none'){
   if(range == 'none'){
     DOMAIN = segments.slice(0, 3).join('/');
     window.serverAddress = DOMAIN;
-    
+    window.webSocketAddress = DOMAIN.replace('https', 'wss');
   }else if(range == 'front'){
     DOMAIN = segments.slice(0, 4).join('/');
   }else if(range == 'back'){

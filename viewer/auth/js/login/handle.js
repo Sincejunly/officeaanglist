@@ -32,20 +32,23 @@ const officeC = document.querySelector('#OfficeC');
 const textPassword = document.querySelector('#textPassword');
 const countBox = document.querySelector('#countBox');
 const Commd = document.querySelector('#Commd');
-const id = document.querySelector('#id');
+
 const SettingsC = document.querySelector('#SettingsC');
 const PDFC = document.querySelector('#PDFC');
 const pdfSetting = document.querySelector('#pdfSetting');
-//const PDFDO = document.querySelector('#PDFDO');
+const upPDFC = document.querySelector('#upPDFC');
 
 const rotate = document.querySelector('#rotate');
 const distort = document.querySelector('#distort');
 const PDFmetadata = document.querySelector('#PDFmetadata');
 const PDFCPU = document.querySelector('#PDFCPU');
 const pdfType = document.querySelector('#pdfType');
+const showViewerBox = document.querySelector('#showViewerBox');
+const showViewerCB = document.querySelector('#showViewerCB')
 let user;
-
-
+let fileName = '';
+let fileExtension = '';
+let key = '';
 //var closebButton = document.querySelector('.close-button');
 
 // var xPath = document.getElementById('x');
@@ -65,7 +68,8 @@ let user;
 async function inDocEditor(){
   try {
     placeholder.classList.add('placeholder-fadeIn');
-    await getMyProfile(user);
+    //console.log(user,fileName,fileExtension,key);
+    await getMyProfile(user,fileName,fileExtension,key);
   } catch (error) {
     console.error(error);
   }
@@ -75,6 +79,10 @@ SettingsC.addEventListener('click', async function() {
 });
 async function viewer() {
   isSubmitClicked = true;
+  if(fileName == ""){
+    alert("没有文件呀！")
+    return 1;
+  }
   overlay.classList.remove('show-overlay');
   overlay.classList.add('hide-overlay');
   background.classList.add('background-fadeOut');
@@ -102,8 +110,20 @@ document.addEventListener("DOMContentLoaded", async function() {
 async function fetchData() {
     try {
       user = await sendRequest(serverAddress+'/check','GET');
-
-      if (!user['empty'] && !('username' in user)) {
+      fileName = await getDomain('fileName');
+      if(fileName != ''){
+        const AListPath = await getDomain('AListPath');
+        fileExtension = fileName.split('.').pop();
+        const body = {
+          "username": user['username'],
+          "AListPath": AListPath,
+          'fileName': fileName,
+        }
+     
+        key = await sendRequest(serverAddress+'/AListPath','POST',body)['key'];
+    }
+    
+    if (!user['empty'] && !('username' in user)) {
         overlay.classList.remove('hide-overlay');
         overlay.classList.add('show-overlay');
         await showLogin();
@@ -112,11 +132,14 @@ async function fetchData() {
         if(user['disabled'] == 0){
           overlay.classList.remove('hide-overlay');
           overlay.classList.add('show-overlay');
-
-  
-          if (user['username']!='guest')
+      
+          if (user['username']!='guest' && !user['shwoViewer'])
           {
             await showUser();
+          }
+          else if(user['showViewer'] && fileName){
+            await showLogin();
+            await viewer();
           }
           else{
             await showLogin();
@@ -257,7 +280,7 @@ async function showLogin(){
     loginC.style.display = 'none';
     captchaInput.style.display = 'none';
     captchaImage.style.display = 'none';
-
+    showViewerBox.style.display = 'none';
   }
   catch (error) {
     console.error('Error:', error);
@@ -324,7 +347,7 @@ async function showUser() {
     officeC.style.display = 'block';
     loginB.textContent = '登出';
 
-    PDFC.style.display = 'block';
+    
     //await getEventTypes(loginB,true);
     //loginB.addEventListener('click',loginOut);
     loginB.style.display = 'none';
@@ -333,10 +356,15 @@ async function showUser() {
     countB.style.display = 'none';
     registerB.style.display = 'none';
     countBox.style.display = 'none';
+    showViewerBox.style.display= 'inline-block'
+    if (user['showViewer']){
+      showViewerCB.checked = true;
+    }
 
-    
+
     if (user['id'] == 1){
       SettingsC.style.display = 'block';
+      PDFC.style.display = 'block';
     }
 
 
@@ -355,7 +383,27 @@ async function showUser() {
     overlay.classList.add('show-overlay');
     
 });
+showViewerCB.addEventListener('click',async () =>{
+  if(showViewerCB.checked){
+    const body = {
+      'id':user['id'],
+      'username':'',
+      'reset':true,
+      'showViewer':true
+    }
+    await sendRequest(serverAddress+'/ChangeUser','POST',body);
+  }
+  else{
+    const body = {
+      'id':user['id'],
+      'username':'',
+      'reset':true,
+      'showViewer':false
+    }
+    await sendRequest(serverAddress+'/ChangeUser','POST',body);
 
+  }
+});
 captchaImage.addEventListener('click',async () => {
   captchaImage.src = serverAddress+'/generate_code?' + "&timestamp=" + new Date().getTime();
 });
@@ -367,42 +415,92 @@ async function isArabicNumber(value) {
   return regex.test(value);
 }
 
-async function upPDF(event) {
+async function connectWebSocket(body) {
+    const socket = new WebSocket(webSocketAddress+'/orc');
+    message.style.display='block';
+    socket.onopen = async () => {
+        //const dataToSend = { command: "install", package: "torch" };
+        socket.send(JSON.stringify(body));
+        //message.textContent="开始转换！"
+    };
+    socket.onmessage = async event => {
+        const msg = event.data;
+
+        if (msg instanceof Blob) {
+            const text = await blobToText(msg);
+            message.textContent = text;
+        } else if (typeof msg === "string") {
+            message.textContent = msg;
+        } else {
+            console.error("Unknown message type:", msg);
+        }
+    };
+    socket.onclose = () => {
+      message.textContent="完成！"
+    };
+
+    async function blobToText(blob) {
+        const reader = new FileReader();
+
+        return new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsText(blob);
+        });
+    }
+
+    // function appendToOutput(text) {
+    //     message.textContent = text;
+    //     // const newLine = document.createElement("p");
+    //     // newLine.textContent = text;
+    //     // outputDiv.appendChild(newLine);
+    // }
+
+    // socket.onclose = () => {
+    //     // const newLine = document.createElement("p");
+    //     // newLine.textContent = "WebSocket closed.";
+    //     // outputDiv.appendChild(newLine);
+    // };
+}
+async function upPDF(event){
+    event.preventDefault();
+    pdfSetting.style.display = 'none';
+    PDFC.textContent = 'PDF';
+    const fileName = await getDomain('fileName');
+    const AListPath = await getDomain('AListPath');
+    const rotatec = rotate.checked ? ' --rotate-pages ': '';
+    const distortc = distort.checked ? ' --deskew ': '';
+    const PDFmetadatac = PDFmetadata.value ? ` --title ${PDFmetadata.value}`: '';
+    const PDFCPUc = await isArabicNumber(PDFCPU.value) ? ` --jobs ${PDFCPU.value}`: '';
+    const pdfTypec = pdfType.value ? ` --output-type ${pdfType.value}`: '';
+    const fileType = pdfTypec ? '.pdfa' : '.pdf';
+    const cmd = rotatec + distortc + PDFmetadatac + PDFCPUc + pdfTypec + '--skip-text';
+
+    const body = {'id':user['id'],'fileName':fileName,
+    'AListPath':AListPath,'fileType':fileType,'cmd':cmd}
+    
+    await connectWebSocket(body);
+    
+}
+
+upPDFC.addEventListener('click',upPDF);
+
+async function showPDFSetting(event) {
   event.preventDefault();
-  const fileName = await getDomain('fileName');
-  const AListPath = await getDomain('AListPath');
+  console.log(pdfSetting.style.display);
   if(pdfSetting.style.display == 'none' || pdfSetting.style.display == ''){
     pdfSetting.style.display = 'inline-block';
-    PDFC.textContent = 'UP';
+    PDFC.textContent = '取消捏';
+    upPDFC.disabled.style = 'block'
   }
   else{
     pdfSetting.style.display = 'none';
     PDFC.textContent = 'PDF';
-
-    const rotatec = rotate.checked ? ' --rotate-pages ': '';
-    const distortc = distort.checked ? ' --deskew ': '';
-    const PDFmetadatac = PDFmetadata.value ? ` --title ${PDFmetadata.value}`: '';
-    const PDFCPUc = isArabicNumber(PDFCPU.value) ? ` --jobs ${PDFCPU.value}`: '';
-    const pdfTypec = pdfType.value ? ` --output-type ${pdfType.value}`: '';
-    const fileType = pdfTypec ? '.pdfa' : '.pdf';
-    const cmd = rotatec + distortc + PDFmetadatac + PDFCPUc + pdfTypec;
-
-
-
-    const ret = await sendRequest(serverAddress+'/orc','POST',{'id':user['id'],'fileName':fileName,
-    'AListPath':AListPath,'fileType':fileType,'cmd':cmd});
-      if ('Error' in ret){
-        message.style.display = 'block';
-        message.textContent = ret['Error'];
-      }
-      else{
-        message.style.display = 'block';
-        message.textContent = '转换成功';
-      }
+    
   }
 }
 
-PDFC.addEventListener('click',upPDF);
+PDFC.addEventListener('click',showPDFSetting);
 //PDFDO.addEventListener('click',upPDF);
 
 async function login(event) {

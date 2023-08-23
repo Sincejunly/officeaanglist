@@ -41,6 +41,8 @@ services:
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: $db_r
+    networks:
+      - officeaanglist
 
   qbittorrent-nox:
     image: qbittorrentofficial/qbittorrent-nox:latest

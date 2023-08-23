@@ -44,16 +44,32 @@ users = PASSWORD or USERNAME
 
 if DOMAIN:
     table = 'x_setting_items'
+#     userData =[
+#         ('`key`', 'value'),
+#         ('aria2_secret', 'QQ943384135'),
+#         ('iframe_previews', '''{{
+#             "doc,docx,xls,xlsx,ppt,pptx": {{
+#                 "Microsoft":"https://view.officeapps.live.com/op/view.aspx?src=$e_url",
+#                 "office":"{}/viewer?src=$e_url"
+#             }},
+#             "pdf": {{
+#                 "PDF.js":"https://alist-org.github.io/pdf.js/web/viewer.html?file=$e_url"
+#             }},
+#             "epub": {{
+#                 "EPUB.js":"https://alist-org.github.io/static/epub.js/viewer.html?url=$e_url"
+#             }}
+#     }}'''.format(DOMAIN)),
+#         ('aria2_uri','{}/aria2/jsonrpc'.format(DOMAIN)),
+#         ("announcement",'''### repo
+# https://github.com/alist-org/alist     
+# https://github.com/Sincejunly/officeaanglist''')
+#     ]
     userData =[
         ('`key`', 'value'),
         ('aria2_secret', 'QQ943384135'),
         ('iframe_previews', '''{{
-            "doc,docx,xls,xlsx,ppt,pptx": {{
-                "Microsoft":"https://view.officeapps.live.com/op/view.aspx?src=$e_url",
+            "doc,docx,xls,xlsx,ppt,pptx,pdf,pdfa": {{
                 "office":"{}/viewer?src=$e_url"
-            }},
-            "pdf": {{
-                "PDF.js":"https://alist-org.github.io/pdf.js/web/viewer.html?file=$e_url"
             }},
             "epub": {{
                 "EPUB.js":"https://alist-org.github.io/static/epub.js/viewer.html?url=$e_url"
@@ -64,7 +80,6 @@ if DOMAIN:
 https://github.com/alist-org/alist     
 https://github.com/Sincejunly/officeaanglist''')
     ]
-
 
 async def main():
     while True:

@@ -103,6 +103,34 @@
       padding: 20px;
       border-radius: 5px;
       text-align: center;
+    }    
+    .longCheckbox {
+      display: none;
+      align-items: center;
+      padding: 10px;
+      margin: 5px;
+      width: 50%;
+    }
+
+    .longCheckbox label {
+      align-items: center;
+      border-radius: 5px; 
+      padding: 5px 10px;
+      margin-right: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-family: 'Helvetica', sans-serif; 
+      width: 38%;
+      white-space: nowrap;
+    }
+
+    .longCheckbox input[type="checkbox"] {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      background-color: #888;
+      border: 2px solid #bbb;
+      border-radius: 20px; 
+      cursor: pointer;
     }
     
     .input-group input {

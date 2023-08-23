@@ -15,13 +15,14 @@
 ARIA2C_BIN="/usr/bin/aria2c"
 ARIA2C_CONF="/var/www/app/aria2/aria2.conf"
 ARIA2C_USER="root"
-LOG_FILE="/var/log/aria2c.log"
+LOG_FILE="/var/log/onlyoffice/app/aria2c.log"
 PID_FILE="/var/run/aria2c.pid"
 
 case "$1" in
     start)
         echo "Starting Aria2c Download Manager"
         nohup su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF >> $LOG_FILE 2>&1 & echo \$!" $ARIA2C_USER > "$PID_FILE"
+        echo "Aria2c Download Manager started"
         ;;
     stop)
         echo "Stopping Aria2c Download Manager"
@@ -29,6 +30,7 @@ case "$1" in
             pid=$(cat "$PID_FILE")
             kill $pid
             rm "$PID_FILE"
+            echo "Aria2c Download Manager stopped"
         else
             echo "PID file not found. The process might not be running."
         fi

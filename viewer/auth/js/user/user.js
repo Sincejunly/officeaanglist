@@ -87,15 +87,15 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
 
   }
   
-  var id = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut, 'id':1})
-  if (id === null){
-    id = 1;
-  }
+  // var id = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut, 'id':1})
+  // if (id === null){
+  //   id = 1;
+  // }
 
   if (database === null && inPut === 'x_domain'){
     
     database = {
-      'id':id + 1,
+      //'id':id + 1,
       'Domain':input.value,
       'type':type
     }
@@ -105,7 +105,7 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
   }else if (database === null && inPut === 'x_user'){
 
     database = {
-      'id':id + 1,
+      //'id':id + 1,
       'username':input.value,
       'password':password,
       'role':type,
@@ -113,10 +113,10 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
       'permission':8,
       'otp_secret': '', 
       'sso_id': '',
-      'NoCaptcha':true
+      'showViewer':false
     }
   
-    database = await sendRequest(window.serverAddress+'/register','POST',database)
+    database = await sendRequest(window.serverAddress+'/ChangeUser','POST',database)
     
   }
  
@@ -330,21 +330,29 @@ async function saveDetails(container,inPut) {
       database = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut,'id':userId,'username':username})
       
     }
+
     const disabled = document.getElementById("disabled" + userId).checked == true ? 0 : 1;
 
     const combinations = await find_combination(database['permission'])
 
-    const permissionD = database['permission'] !=0 ? combinations.some(combination => combination.includes(8)):false ;
-
+    const permissionDA = database['permission'] == 0 ? false:combinations.some(combination => combination.includes(8));
+    
     const editFil = document.getElementById("editFile" + userId).checked
+    
+    const permissiond = editFil == permissionDA ? false: true;
 
-    const permissionC = editFil == permissionD ? 0 : 1;
+    const disabledd = database['disabled'] == disabled ? false:true
+
+    
     let permissionI;
-    if(permissionC && !permissionD){
+    if(permissiond && permissionDA){
+      permissionI = database['permission'] - 8;
+    }
+    else if (permissiond && !permissionDA){
       permissionI = database['permission'] + 8;
     }
-    else if(permissionC && permissionD){
-      permissionI = database['permission'] - 8;
+    else{
+      permissionI = database['permission'];
     }
 
     if (password !== confirmPassword){
@@ -352,17 +360,17 @@ async function saveDetails(container,inPut) {
       return;
     }
 
-    if (!username){
-      if(database['disabled'] == disabled && !permissionC){
+    if (!username && !permissiond && !disabledd){
+     
         alert('Username cannot be empty');
         return;
-      }
+      
     }
-    if (!password){
-      if(database['disabled'] == disabled && !permissionC){
+    if (!password && !permissiond && !disabledd){
+     
         alert('Password cannot be empty');
         return;
-      }
+    
  
     }
 
@@ -385,11 +393,10 @@ async function saveDetails(container,inPut) {
       'permission':permissionI,
       'otp_secret': '', 
       'sso_id': '',
-      'NoCaptcha':true,
       'reset':''
     }
 
-    database = await sendRequest(window.serverAddress+'/register','POST',
+    database = await sendRequest(window.serverAddress+'/ChangeUser','POST',
     database)
 
     document.getElementById("password-" + userId).textContent = "*".repeat(database['password'].length);

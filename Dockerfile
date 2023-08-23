@@ -18,7 +18,7 @@ RUN export PIP_CACHE_DIR='/system/.cache/pip' \
 	&& update-rc.d viewer defaults && update-rc.d php-fpm defaults \
     && ./update-mirror.sh --apt git aria2 python3-pip pkg-config libmariadb-dev \
 	iputils-ping vim psmisc php7.4-fpm php-curl libtesseract-dev tesseract-ocr \
-	tesseract-ocr-chi-sim tesseract-ocr-chi-tra lsof nano\
+	tesseract-ocr-chi-sim tesseract-ocr-chi-tra lsof ghostscript \
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl \
 	&& ./minio_upload_download.sh -up .cache
@@ -63,6 +63,7 @@ WORKDIR /var/www/app1
 COPY . /var/www/app1
 RUN chmod +rwx /var/www/app1/* \
 	&& mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
+	&& mv /var/www/app1/AList-3.26.0 /var/www/app1/AList \
 	&& cp -r /var/www/app1/Contents.json /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
 	&& rm -rf system \
 	&& mv ./run-document-server.sh /app/ds/run-document-server.sh \

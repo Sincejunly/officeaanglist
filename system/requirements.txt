@@ -97,3 +97,4 @@ Werkzeug==2.3.6
 wsproto==1.2.0
 yarl==1.9.2
 zipp==3.16.0
+ocrmypdf==14.4.0

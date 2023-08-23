@@ -18,15 +18,8 @@ async function generateDocumentKey(url) {
 
 
 
-async function getMyProfile(user) {
-      const fileName = await getDomain('fileName');
-      const AListPath = await getDomain('AListPath');
-      const fileExtension = fileName.split('.').pop();
-      const body = {
-        "username": user['username'],
-        "AListPath": AListPath,
-        'fileName': fileName,
-      }
+async function getMyProfile(user,fileName,fileExtension,key) {
+
       //await sendRequest(serverAddress+'/query','POST',{'table':inPut,'Domain':input.value})
       let permission;
       if(user['id'] != 1)
@@ -40,8 +33,6 @@ async function getMyProfile(user) {
         
       }
   
-      
-    await sendRequest(serverAddress+'/AListPath','POST',body);
 
       
     let url = await getDomain('url');
@@ -59,7 +50,7 @@ async function getMyProfile(user) {
               },
               "title": fileName,
               "url": url,
-              "key": await generateDocumentKey(url)
+              "key": key
           },
           "editorConfig": {
               "lang": "zh-CN",
@@ -73,7 +64,7 @@ async function getMyProfile(user) {
               }
               },
               "user": {
-                "id": user['id'],
+                "id": String(user['id']),
                 "name": user['username']
               },
           },

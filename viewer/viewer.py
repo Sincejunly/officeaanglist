@@ -21,7 +21,9 @@ from urllib import parse
 import asyncio
 import re
 import time
-
+import threading
+import websockets
+import sys
 tracemalloc.start()
 pydith = os.path.dirname(os.path.realpath(__file__))
 
@@ -66,7 +68,12 @@ html_message = '''
 async def getAlltype(domains,key,types):
     domains = [d[key] for d in domains if d['type'] == types]
     return domains
-
+@app.after_request
+async def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')  # 允许所有域访问，也可以指定特定域
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    return response
 # 配置Redis连接
 @app.before_serving
 async def setup():
@@ -140,7 +147,7 @@ async def generate_document_key(file_name):
     return key
 
 @app.route('/AListPath', methods=['GET', 'POST'])
-@login_required
+#@login_required
 async def AListPath():
     global userEditFile,outAList
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
@@ -149,7 +156,7 @@ async def AListPath():
     if not userU:
         return jsonify({'Error': "not json"})
     user = await pool.get_row_by_value('x_users','username',userU['username'])
-
+    
   
     
     RowADD = await pool.get_row_by_value('x_storages', 'mount_path', userU['AListPath'])
@@ -162,10 +169,12 @@ async def AListPath():
         create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
 
-    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'],True)
+    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+    
     if not fileTask:
         key = await generate_document_key(userU['fileName'])
     else:key = fileTask['key']
+    
     
     fileType = userU['fileName'][userU['fileName'].rfind('.'):]
     
@@ -183,13 +192,15 @@ async def AListPath():
             'File-Path':{userU['fileName']:parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))},
             'Password':user['password'],
             'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
-            'truePath':{userU['fileName']:root_folder_path}
+            'truePath':{userU['fileName']:root_folder_path},
+            'fileName':userU['fileName']
             })
     else:
         userEditFile[user['id']]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
         userEditFile[user['id']]['Password'] = user['password']
         userEditFile[user['id']]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
         userEditFile[user['id']]['truePath'][userU['fileName']]=root_folder_path
+        userEditFile[user['id']]['fileName'] = userU['fileName']
 
     if await pool.is_table_empty('x_fileTask'):
         await pool.update(
@@ -212,7 +223,7 @@ async def AListPath():
             'truePath':root_folder_path},True)
 
 
-    return jsonify(key)
+    return jsonify({'key':key,'farewell':"ok"})
 
 
 async def runCmd(cmd):
@@ -220,9 +231,10 @@ async def runCmd(cmd):
   
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         _, _ = await proc.communicate()  
-
+        print(cmd)
         return proc.returncode == 0
-    except Exception:
+    except Exception as e:
+        print(e)
         return False
 
 async def Upload(url, UserAgent, Authorization, localPath, FilePath, password=''):
@@ -261,8 +273,10 @@ async def save():
     if data.get("status") == 2:
         downloadUri = data.get("url")
         key = await extract_part_from_url(downloadUri, 4)
-        fileName = key[:key.find('_')]
+        
+        fileName = userEditFile[int(data['users'][0])]['fileName']
         key = await generate_document_key(key.replace('_', ''))
+        
         truePath = userEditFile[int(data['users'][0])]['truePath'][fileName]
         path_for_save = truePath + fileName  # 替换为实际保存路径
 
@@ -298,36 +312,79 @@ async def save():
         else:
             print("Failed to download the file.")
 
-    return jsonify("{\"error\":0}")
+    return jsonify({'farewell':"ok"})
 
-@app.route('/orc', methods=['GET', 'POST'])
-@login_required
-async def delete():
+async def read_stream_and_display(stream, display,websocket):
+    """Read from stream line by line until EOF, display, and capture the lines."""
+    output = []
+    while True:
+        line = await stream.readline()
+        #line = await stream.read(1)
+        if not line:
+            break
+        output.append(line)
+        display(line)
+        try:
+            await websocket.send(line)
+        except:pass
+    return b''.join(output)
+
+async def run_command_as_string(command,websocket):
+    process = await asyncio.create_subprocess_shell(
+        command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+
+    try:
+        stdout, stderr = await asyncio.gather(
+            read_stream_and_display(process.stdout, sys.stdout.buffer.write,websocket),
+            read_stream_and_display(process.stderr, sys.stderr.buffer.write,websocket),
+        )
+    except Exception:
+        process.kill()
+        raise
+    finally:
+        rc = await process.wait()
+
+    return rc, stdout, stderr
+
+# async def echo(websocket, path):
+#     async for message in websocket:
+#         print(f"收到消息: {message}")
+#         await websocket.send(f"服务器回复: {message}")
+
+#@app.websocket('/orc')
+#@login_required
+async def orc(websocket, path):
     # if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
     #     return html_message.format(request.remote_addr)    
-    userU = await request.get_json()
+    #userU = await websocket.receive_json()
+    await websocket.send('转换中！')
     
-    if not userU:
-        return jsonify({'Error':"not json"})
-    
-    truPath = userEditFile[userU['id']]['truePath'][userU['fileName']]
-    fileNameP = userU['fileName'][:userU['fileName'].rfind('.')]
+    async for userU in websocket:
+        if not userU:
+            return jsonify({'Error':"not json"})
+        
+        userU = json.loads(userU)
+        truPath = userEditFile[userU['id']]['truePath'][userU['fileName']]
+      
+        fileNameP = userU['fileName'][:userU['fileName'].rfind('.')]
 
-    filePath = truPath + userU['fileName'] 
-    orcFilePath = truPath + fileNameP+'_orc'+userU['fileType']
+        filePath = truPath + userU['fileName'] 
+        orcFilePath = truPath + fileNameP+'_orc'+userU['fileType']
 
-    if await runCmd(f"ocrmypdf {userU['cmd']} {filePath}  '{orcFilePath}' "):
+        await run_command_as_string(f"ocrmypdf {userU['cmd']} {filePath}  {orcFilePath} ",websocket)
         if outAList:
             await Upload(AListHost, userEditFile[userU['id']]['userAgent'], 
             userEditFile[userU['id']]['Authorization'], 
             orcFilePath, 
             parse.quote("{}/{}".format(userU['AListPath'], fileNameP+'_orc'+userU['fileType']))
             )
+        await websocket.close()
 
-        return jsonify({'message': "ok"})
+    #     return jsonify({'message': "ok"})
 
-    else:
-        return jsonify({'Error': "失败"})
+    # else:
+    #     return jsonify({'Error': "失败"})
 
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required
@@ -398,11 +455,13 @@ async def index():
         #return redirect('/AriaNg')
     else:
         user = await pool.get_row_by_value('x_user','username','guest')
-   
+        
         if user['disabled'] == 0:
             if isinstance(user, dict):
                 if 'password' in user:
                     user.pop('password')
+                user['empty'] = False
+                user['farewell'] = 'ok'
             else:
                 user = {}
             return jsonify(user)
@@ -423,9 +482,37 @@ async def upRegister(userU):
     #     await pool.update('x_user', userU, overwrite=True)
 
     # el
+
+    if 'init' in userU:
+        userU.pop('init')
+        userU['password'] = hashed_password
+        #update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
+        await pool.update('x_user', userU)
+    else:
+        userU['base_path'] = '/'
+        await pool.update('x_users', userU)
+        userU['password'] = hashed_password
+        userU.pop('base_path')
+        await pool.update('x_user', userU)
+        
+    
+
+    user = await pool.get_row_by_value('x_user','id',userU['id'])
+
+    return user
+
+@app.route('/ChangeUser', methods=['GET', 'POST'])
+@login_required
+async def ChangeUser():
+    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.remote_addr)
+    userU = await request.get_json()
+    hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
     if 'reset' in userU:
         userU.pop('reset')
-        userU['base_path'] = '/'
+        
+        userU['base_path'] = (await pool.get_row_by_value('x_users','`id`',userU['id']))['base_path']
+
         if userU['username']:
             await pool.update('x_users', userU, overwrite=True)
 
@@ -433,8 +520,9 @@ async def upRegister(userU):
 
             userU.pop('base_path')
             await pool.update('x_user', userU, overwrite=True)
-        else:
-
+        elif 'showViewer' in userU:
+            await pool.update_value('x_user','`id`',userU['id'],'showViewer',userU['showViewer'])
+        elif 'permission' in userU:
             await pool.update_value('x_users', '`id`', userU['id'], 'disabled', userU['disabled'])
             await pool.update_value('x_users', '`id`', userU['id'], 'permission', userU['permission'])
 
@@ -443,25 +531,12 @@ async def upRegister(userU):
             userU.pop('base_path')
             await pool.update_value('x_user', '`id`', userU['id'], 'disabled', userU['disabled'])
             await pool.update_value('x_user', '`id`', userU['id'], 'permission', userU['permission'])
-        
+        user = await pool.get_row_by_value('x_user','id',userU['id'])
     else:
-        if 'init' in userU:
-            userU.pop('init')
-            userU['password'] = hashed_password
-            #update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
-            await pool.update('x_user', userU, overwrite=True)
-        else:
-            userU['base_path'] = '/'
-            await pool.update('x_users', userU)
-            userU['password'] = hashed_password
-            userU.pop('base_path')
-            await pool.update('x_user', userU)
-        
-    
-
-    user = await pool.get_row_by_value('x_user','id',userU['id'])
-
-    return user
+        user = await upRegister(userU)
+    user['farewell'] = 'ok'
+    return jsonify(user)
+   
 
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
@@ -480,16 +555,15 @@ async def register():
 
         # if IPLock:
         #     return jsonify({'Error':"你尝试的次数过多，IP已锁定,一小时后解锁"})
-        if not('NoCaptcha' in userU):
-            if 'Captcha' in userU and Captcha:
-                if Captcha.lower() != userU['Captcha'].lower():
-                    return jsonify({'Error':"验证码错误，你可以点击验证码刷新，也可以不刷新"})
-            elif not Captcha and 'Captcha' in userU:
-                return jsonify({'Error':"验证码已过期，点击验证码刷新"})            
-            elif not 'Captcha' in userU:
-                return jsonify({'Captcha':"ON",'Error':"请输入验证码",'Refresh':True})
-        else:
-            userU.pop('NoCaptcha')
+        
+        if 'Captcha' in userU and Captcha:
+            if Captcha.lower() != userU['Captcha'].lower():
+                return jsonify({'Error':"验证码错误，你可以点击验证码刷新，也可以不刷新"})
+        elif not Captcha and 'Captcha' in userU:
+            return jsonify({'Error':"验证码已过期，点击验证码刷新"})            
+        elif not 'Captcha' in userU:
+            return jsonify({'Captcha':"ON",'Error':"请输入验证码",'Refresh':True})
+
         
         
     
@@ -711,9 +785,29 @@ async def registerUser():
     for item in users:
         item.pop('base_path')
         item['init']=True
+        if item['username'] == 'guest':
+            item['showViewer']=True
+        else:
+            item['showViewer']=False
         await upRegister(item)
+
+# async def echo(websocket, path):
+#     async for message in websocket:
+#         print(f"收到消息: {message}")
+#         await websocket.send(f"服务器回复: {message}")
+
+def websocket_server():
+    loop = asyncio.new_event_loop()  
+    asyncio.set_event_loop(loop)  
+
+    start_server = websockets.serve(orc, "0.0.0.0", 5001)
+    loop.run_until_complete(start_server)
+    loop.run_forever()
+
     
 if __name__ == '__main__':
+    websocket_thread = threading.Thread(target=websocket_server)
+    websocket_thread.start()
     app.run(host='127.0.0.1', port=5000, debug=True)
 
 

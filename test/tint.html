@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Command Progress</title>
+</head>
+<body>
+    <h1>Command Progress</h1>
+    <div id="output"></div>
+
+    <script>
+        const outputDiv = document.getElementById("output");
+        
+        async function connectWebSocket() {
+            const socket = new WebSocket("wss://office.homura.top:82/orc");
+
+            socket.onopen = async () => {
+                const dataToSend = { command: "install", package: "torch" };
+                socket.send(JSON.stringify(dataToSend));
+            };
+            socket.onmessage = async event => {
+                const message = event.data;
+
+                if (message instanceof Blob) {
+                    const text = await blobToText(message);
+                    appendToOutput(text);
+                } else if (typeof message === "string") {
+                    appendToOutput(message);
+                } else {
+                    console.error("Unknown message type:", message);
+                }
+            };
+
+            async function blobToText(blob) {
+                const reader = new FileReader();
+
+                return new Promise((resolve, reject) => {
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsText(blob);
+                });
+            }
+
+            function appendToOutput(text) {
+                const newLine = document.createElement("p");
+                newLine.textContent = text;
+                outputDiv.appendChild(newLine);
+            }
+
+            socket.onclose = () => {
+                const newLine = document.createElement("p");
+                newLine.textContent = "WebSocket closed.";
+                outputDiv.appendChild(newLine);
+            };
+        }
+
+        // Call the async function to establish the WebSocket connection
+        // Only after defining the function as an async context
+        (async () => {
+            await connectWebSocket();
+        })();
+    </script>
+</body>
+</html>
