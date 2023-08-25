@@ -34,18 +34,18 @@ while True:
         data['AListHost'] = AListHost
         writejson_sync('./viewer/data.json', data)
      
-        #Adata = readjson_sync('./AList/data/config.json')
+        Adata = readjson_sync('./AList/data/config.json')
 
-        #AListdb_host = os.environ.get("AListdb_host")
+        AListdb_host = os.environ.get("AListdb_host")
 
-        # Adata['database']['type'] = 'mysql'
-        # Adata['database']['host'] = AListdb_host if is_valid_ipv4_address(AListdb_host) else socket.gethostbyname(AListdb_host)
-        # Adata['database']['port'] = os.environ.get("AListdb_port")
-        # Adata['database']['user'] = os.environ.get("AListdb_us")
-        # Adata['database']['password'] = os.environ.get("AListdb_pw")
-        # Adata['database']['name'] = os.environ.get("AListdb_name")
-        # Adata['site_url'] = os.environ.get("DOMAIN")
-        # writejson_sync('./AList/data/config.json', Adata)
+        Adata['database']['type'] = 'mysql'
+        Adata['database']['host'] = AListdb_host if is_valid_ipv4_address(AListdb_host) else socket.gethostbyname(AListdb_host)
+        Adata['database']['port'] = os.environ.get("AListdb_port")
+        Adata['database']['user'] = os.environ.get("AListdb_us")
+        Adata['database']['password'] = os.environ.get("AListdb_pw")
+        Adata['database']['name'] = os.environ.get("AListdb_name")
+        Adata['site_url'] = os.environ.get("DOMAIN")
+        writejson_sync('./AList/data/config.json', Adata)
 
         break
     except Exception as e:
