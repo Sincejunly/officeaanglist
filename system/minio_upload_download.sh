@@ -3,7 +3,7 @@
 # MinIO Server configuration
 
 MINIO_ENDPOINT="http://192.168.5.4:9000"
-MINIO_ACCESS_KEY="homuras"
+MINIO_ACCESS_KEY="homura"
 MINIO_SECRET_KEY="aa159756"
 BUCKET_NAME="gitlab-cache"
 
