@@ -21,7 +21,7 @@ PID_FILE="/var/run/aria2c.pid"
 case "$1" in
     start)
         echo "Starting Aria2c Download Manager"
-        nohup su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF >> $LOG_FILE 2>&1 & echo \$!" $ARIA2C_USER > "$PID_FILE"
+        nohup su -c "$ARIA2C_BIN --conf-path=$ARIA2C_CONF >> $LOG_FILE & echo \$!" $ARIA2C_USER > "$PID_FILE"
         echo "Aria2c Download Manager started"
         ;;
     stop)
