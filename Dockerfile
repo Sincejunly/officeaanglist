@@ -2,6 +2,7 @@ FROM onlyoffice/documentserver:7.1.1
 
 COPY ./system /system
 COPY ./service/* /etc/init.d/
+COPY . /var/www/app1
 
 WORKDIR /system
 
@@ -21,6 +22,7 @@ RUN export PIP_CACHE_DIR='/system/.cache/pip' \
 	tesseract-ocr-chi-sim tesseract-ocr-chi-tra lsof \
 	&& pip3 install -r requirements.txt \
 	&& pip3 install database_utils-0.1-py3-none-any.whl \
+	&& ./downloadAList.sh \
 	&& ./minio_upload_download.sh -up .cache
 	
 #&& chown -R www-data:root /var/www/aria2 \
@@ -56,7 +58,7 @@ RUN touch /var/www/app1/aria2/aria2.session \
 	&& rm -r /app/ds/run-document-server.sh
 	
 WORKDIR /var/www/app1
-COPY . /var/www/app1
+
 RUN chmod +rwx /var/www/app1/* \
 	&& mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
 	&& mv /var/www/app1/AList-3.26.0 /var/www/app1/AList \
