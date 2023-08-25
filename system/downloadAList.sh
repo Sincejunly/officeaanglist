@@ -4,6 +4,7 @@ alist=".cache/alist-linux-amd64.tar.gz"
 
 if [ -e "$file_path" ]; then
     echo "File exists at $file_path."
+    mkdir /var/www/app1/AList
     tar -xvf .cache/alist-linux-amd64.tar.gz -C /var/www/app1/AList
 else
     mkdir /var/www/app1/AList

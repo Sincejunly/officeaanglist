@@ -33,7 +33,7 @@ while True:
             AListHost = AListHost + '/AList/api'
         data['AListHost'] = AListHost
         writejson_sync('./viewer/data.json', data)
-     
+        sleep(5)
         Adata = readjson_sync('./AList/data/config.json')
 
         AListdb_host = os.environ.get("AListdb_host")
@@ -49,6 +49,6 @@ while True:
 
         break
     except Exception as e:
-        sleep(5)
+        sleep(2)
         print('initjson: '+str(e))
 
