@@ -30,10 +30,6 @@ RUN mkdir -p /var/www/app1 \
 	&& chmod -R g=u /var/www/app1/aria2  \
 	&& mkdir -p /var/www/app1/aria2/Download \
 	&& chmod -R g=u /var/www/app1/aria2/Download \
-	&& mkdir -p /var/www/app1/AList \
-	&& chmod -R g=u /var/www/app1/AList \
-	&& mkdir -p /var/www/app1/AList/data \
-	&& chmod -R g=u /var/www/app1/AList/data \
 	&& chmod -R g=u /var/www/app1  \
 	&& chown -R root:root /var/www/app1 \
 	&& mkdir -p /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh 
