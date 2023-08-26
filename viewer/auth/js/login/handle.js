@@ -44,7 +44,7 @@ const PDFmetadata = document.querySelector('#PDFmetadata');
 const PDFCPU = document.querySelector('#PDFCPU');
 const pdfType = document.querySelector('#pdfType');
 const showViewerBox = document.querySelector('#showViewerBox');
-const showViewerCB = document.querySelector('#showViewerCB')
+const showViewerCB = document.querySelector('#showViewerCB');
 let user;
 let fileName = '';
 let fileExtension = '';
@@ -181,16 +181,43 @@ async function register(event) {
       message.textContent = '两次密码不一致';
       return;
     }
-    var body = {'username':username,'password':password,'type':'distrust'};
+    const msg = await sendRequest(serverAddress+'/checkUser','POST',{'username':username});
+    if(msg['whether'] == true){
+      alert('用户已存在！');
+      return;
+    }
+    var id = await sendRequest(window.serverAddress+'/checkUser','POST',{'id':1})
+    if (id === null){
+      id = 1;
+    }
+    else{
+      id = id['id']
+    }
+
+    var body = {
+    'id':id+1,
+    'username':username,
+    'password':password,
+    'role':0,
+    'disabled':1,
+    'permission':0,
+    'otp_secret':'',
+    'sso_id':'',
+    'showViewer':File
+    };
+ 
     if (captcha){
       body['Captcha'] = captcha;
     }
     else{
+ 
       message.style.display = 'block';
       message.textContent = '请输入验证码';
       return;
     }
+  
     user = await sendRequest(serverAddress+'/register','POST',body);
+    
     if('id' in user)
     {
       alert('注册成功');

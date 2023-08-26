@@ -33,7 +33,7 @@ userEditFile = {
 outAList = True
 CaptchaPrefix = 'officeaanglist:Captcha:'
 def create_app():
-    global AListHost,outAList
+    global AListHost,outAList,origin
     origin = readjson_sync(os.path.join(pydith, 'data.json'))
     app = Quart(__name__, template_folder='auth')
     app.secret_key = "QQ943384135"
@@ -92,10 +92,25 @@ async def setup():
     #domains = await getAlltype(domains, 'Domain', 'believe')
 
     app = cors(app, allow_origin='0.0.0.0')
-
+    await registerUser()
     app.config['SESSION_REDIS'] = cache
     Session(app)
 
+@app.route('/checkUser',methods=['GET', 'POST'])
+async def checkUser():
+    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.remote_addr)
+    await block()
+    userU = await request.get_json()
+    if 'username' in userU:
+        user = await pool.get_row_by_value('x_user', 'username', userU['username'])
+        if user:
+            return jsonify({'whether':True})
+        else:
+            return jsonify({'whether':False})
+    elif 'id' in userU:
+        id = await pool.getMaxid('x_user')
+        return jsonify({'id':id})
 
 @app.route('/query', methods=['GET', 'POST'])
 @login_required
@@ -111,8 +126,6 @@ async def query():
         for key, value in userU.items():
             if key == 'table':
                 continue
-            elif key == 'id':
-                user = await pool.getMaxid(userU['table'])
             else:
                 arrange = key
 
@@ -430,7 +443,7 @@ async def update():
 async def index():
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
         return html_message.format(request.remote_addr)
-    await registerUser()    
+
     if await current_user.is_authenticated:
         
         user = await pool.get_row_by_value('x_users','`id`',current_user._auth_id)
@@ -484,16 +497,20 @@ async def upRegister(userU):
     #     await pool.update('x_user', userU, overwrite=True)
 
     # el
-
+    showViewer=False
+    if 'showViewer' in userU:
+        showViewer = userU.pop('showViewer')
     if 'init' in userU:
         userU.pop('init')
         userU['password'] = hashed_password
+        userU['showViewer'] = showViewer
         #update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
         await pool.update('x_user', userU)
     else:
         userU['base_path'] = '/'
-        await pool.update('x_users', userU)
+        await pool.update('x_users', userU,True)
         userU['password'] = hashed_password
+        userU['showViewer'] = showViewer
         userU.pop('base_path')
         await pool.update('x_user', userU)
         
@@ -510,6 +527,7 @@ async def ChangeUser():
         return html_message.format(request.remote_addr)
     userU = await request.get_json()
     hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
+    print(userU)
     if 'reset' in userU:
         userU.pop('reset')
         
@@ -536,6 +554,7 @@ async def ChangeUser():
         user = await pool.get_row_by_value('x_user','id',userU['id'])
     else:
         user = await upRegister(userU)
+
     user['farewell'] = 'ok'
     return jsonify(user)
    
@@ -550,9 +569,12 @@ async def register():
         if not userU:
             return jsonify({'Error':"Invalid username or password."})
 
+        await block()
+
         cache: SessionInterface = app.session_interface
 
         Captcha = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'Captcha')
+        
         #IPLock = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'Lock')
 
         # if IPLock:
@@ -561,6 +583,7 @@ async def register():
         if 'Captcha' in userU and Captcha:
             if Captcha.lower() != userU['Captcha'].lower():
                 return jsonify({'Error':"验证码错误，你可以点击验证码刷新，也可以不刷新"})
+            userU.pop('Captcha')
         elif not Captcha and 'Captcha' in userU:
             return jsonify({'Error':"验证码已过期，点击验证码刷新"})            
         elif not 'Captcha' in userU:
@@ -570,7 +593,8 @@ async def register():
         
     
         user = await upRegister(userU)
-        await runCmd('service alist restart')
+        
+        #await runCmd('service alist restart')
 
         return jsonify(user)
 
@@ -658,24 +682,19 @@ async def login():
             if not inlogin:
                 PWNum = PWNum + 1
                 await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'PWNum',json.dumps(PWNum), expiry=3600)
-            if user and inlogin:
-                user.pop('password')
-                if user['disabled'] == 0:
-                    login_user(AuthUser(user['id']))
- 
-
-                
-                return jsonify(user)
-            elif PWNum >= 4 and PWNum < 10:
+            if PWNum >= 4 and PWNum < 10:
                 return jsonify({'Captcha':"ON",'Error':"用户名或密码错误！"})
             elif PWNum == 10:
                 await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'Lock',json.dumps("True"), expiry=3600)
                 return jsonify({'Error':"你尝试的次数过多，账户已被锁定,一小时后解锁"})
-            elif PWNum > 20:
-                if request.remote_addr != '127.0.0.1':
-                    await pool.update('x_domain',{'domain':request.remote_addr, 'type':'distrust'})
-                    return jsonify({'Error':'你的IP已被锁定'})
-
+            elif user and inlogin:
+                user.pop('password')
+                if user['disabled'] == 0:
+                    login_user(AuthUser(user['id']))
+                else:
+                    return jsonify({'Error':"你的账户还未激活！"})
+                return jsonify(user)
+ 
             # elif PWNum > 20:
             #     await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'Lock',json.dumps("True"), expiry=3600)
             #     return jsonify({'Error':"你尝试的次数过多，IP已锁定,一小时后解锁"})
@@ -703,6 +722,21 @@ async def generate_verification_code(length=4):
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for _ in range(length))
 
+async def block():
+    cache: SessionInterface = app.session_interface
+    CaptchaNum = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'CaptchaNum')
+    if CaptchaNum is not None:
+        CaptchaNum = CaptchaNum + 1
+    else:
+        CaptchaNum = 0
+    await cache.set(CaptchaPrefix+request.remote_addr+":"+'CaptchaNum', json.dumps(CaptchaNum), expiry=3600)
+    if CaptchaNum >= 20:
+        if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','believe'):
+            await cache.set(CaptchaPrefix+request.remote_addr+":"+'CaptchaNum', json.dumps(0), expiry=3600)
+            return
+        if request.remote_addr != '127.0.0.1' :
+            await pool.update('x_domain',{'domain':request.remote_addr,'type':'distrust'})
+
 @app.route('/generate_code')
 async def generate_code():
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
@@ -712,18 +746,11 @@ async def generate_code():
     # # 验证用户名或其他必要的验证步骤
     # if not username:
     #     return jsonify({'error': "Invalid username."})
-    cache: SessionInterface = app.session_interface
-    CaptchaNum = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'CaptchaNum')
-    if CaptchaNum is not None:
-        CaptchaNum = CaptchaNum + 1
-    else:
-        CaptchaNum = 0
-    if CaptchaNum >= 20:
-        if request.remote_addr != '127.0.0.1':
-            await pool.update('x_domain',{'domain':request.remote_addr,'type':'distrust'})
+    await block()
         # await cache.set(CaptchaPrefix+request.remote_addr+":"+'Lock', json.dumps(True), expiry=3600)
         # return jsonify({'Error':"你尝试的次数过多，IP已锁定，一小时后解锁"})
-
+    cache: SessionInterface = app.session_interface
+    CaptchaNum = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'CaptchaNum')
     code = await generate_verification_code()
     image_captcha = ImageCaptcha(fonts=[os.path.join(pydith, 'MiSans-Light.ttf')], width=150, height=50)
     image = image_captcha.generate_image(str(code))
@@ -733,7 +760,7 @@ async def generate_code():
     img_io.seek(0)
 
     await cache.set(CaptchaPrefix+request.remote_addr+":"+'Captcha', json.dumps(code), expiry=180)
-    await cache.set(CaptchaPrefix+request.remote_addr+":"+'CaptchaNum', json.dumps(CaptchaNum), expiry=3600)
+    
 
     return await send_file(img_io, mimetype='image/png')
 
@@ -782,16 +809,28 @@ async def verify_code(user_code):
     return user_code.lower() == Captcha.lower()
 
 async def registerUser():
-
+    
+    origin = await readjson(os.path.join(pydith, 'data.json'))
+    pool = await AsyncMysqlPool.initialize_pool(
+        origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
+    
     users = await pool.getAllrow('x_users')
-    for item in users:
-        item.pop('base_path')
-        item['init']=True
-        if item['username'] == 'guest':
-            item['showViewer']=True
-        else:
-            item['showViewer']=False
-        await upRegister(item)
+    user = await pool.getAllrow('x_user')
+   
+    keys1 = set(users[0].keys())
+    keys2 = set(user[0].keys())
+    
+    if keys1!=keys2:
+        for item in users:
+            item.pop('base_path')
+            item['init']=True
+            if item['username'] == 'guest':
+                item['showViewer']=True
+            else:
+                item['showViewer']=False
+        
+            await upRegister(item)
+
 
 # async def echo(websocket, path):
 #     async for message in websocket:
@@ -808,6 +847,7 @@ def websocket_server():
 
     
 if __name__ == '__main__':
+  
     websocket_thread = threading.Thread(target=websocket_server)
     websocket_thread.start()
     app.run(host='127.0.0.1', port=5000, debug=True)

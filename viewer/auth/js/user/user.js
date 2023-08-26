@@ -5,6 +5,7 @@ button1.classList.toggle('active');
 const logOut = document.getElementById('logOut');
 activeButton = button1;
 
+
 async function toggleList(listId, buttonId) {
   const button = document.getElementById(buttonId);
   
@@ -47,7 +48,7 @@ logOut.addEventListener('click',async function(event){
   await sendRequest(window.serverAddress+'/logout','POST',{});
   window.location.href = serverAddress+'/viewer/';
 });
-async function addRow(listId,inPut,type='',database=null,init=false) {
+async function addRow(listId,inPut,type=0,database=null,init=false) {
 
   const list = document.getElementById(listId)
   const input = document.getElementById(inPut);
@@ -87,28 +88,28 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
 
   }
   
-  // var id = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut, 'id':1})
-  // if (id === null){
-  //   id = 1;
-  // }
+  var id = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut, 'id':1})
+  if (id === null){
+    id = 1;
+  }
 
   if (database === null && inPut === 'x_domain'){
     
     database = {
-      //'id':id + 1,
+      'id':id + 1,
       'Domain':input.value,
       'type':type
     }
 
     await sendRequest(window.serverAddress+'/update','POST',{'table':'x_domain','Domain':database})
- 
+
   }else if (database === null && inPut === 'x_user'){
 
     database = {
-      //'id':id + 1,
+      'id':id + 1,
       'username':input.value,
       'password':password,
-      'role':type,
+      'role':parseInt(type),
       'disabled':0,
       'permission':8,
       'otp_secret': '', 
@@ -142,14 +143,14 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
       `;
   }else{
 
-    let disabledChecked;
-    let disabledC;
-    let combinations;
+    let disabledChecked='';
+    let disabledC='';
+    let combinations='';
 
-    let permissiondChecked;
+    let permissiondChecked='';
 
-    let permissiondC;
-
+    let permissiondC='';
+    let showViewerChecked='';
     const deleteButton = `<button class="btn btn-reject" data-user-id="${database['id']}" onclick="Delete(this,'x_user')" >Delete</button>`;
     if(database['id'] === 1 && database['role'] === 2){
       disabledC = 'dropPorS';
@@ -165,6 +166,7 @@ async function addRow(listId,inPut,type='',database=null,init=false) {
         permissiondC = permissiondChecked === '' ? 'dropPorD' : 'dropPorS'
       }else{
         permissiondC = 'dropPorD'
+
       }
 
     }
@@ -330,18 +332,31 @@ async function saveDetails(container,inPut) {
       database = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut,'id':userId,'username':username})
       
     }
+ 
+    let permissionDA;
+    let permissiond;
+    let disabled;
 
-    const disabled = document.getElementById("disabled" + userId).checked == true ? 0 : 1;
+    if(userId ==1){
+      disabledd = false;
+      permissiond = false;
+      permissionDA = false;
+      
+    }
+    else{
+      disabled = document.getElementById("disabled" + userId).checked == true ? 0 : 1;
 
-    const combinations = await find_combination(database['permission'])
+      const combinations = await find_combination(database['permission'])
 
-    const permissionDA = database['permission'] == 0 ? false:combinations.some(combination => combination.includes(8));
-    
-    const editFil = document.getElementById("editFile" + userId).checked
-    
-    const permissiond = editFil == permissionDA ? false: true;
+      permissionDA = database['permission'] == 0 ? false:combinations.some(combination => combination.includes(8));
+      
+      const editFil = document.getElementById("editFile" + userId).checked
+      
+      permissiond = editFil == permissionDA ? false: true;
 
-    const disabledd = database['disabled'] == disabled ? false:true
+      disabledd = database['disabled'] == disabled ? false:true
+    }
+
 
     
     let permissionI;
@@ -371,7 +386,6 @@ async function saveDetails(container,inPut) {
         alert('Password cannot be empty');
         return;
     
- 
     }
 
     // database['id'] = userId;
@@ -388,22 +402,26 @@ async function saveDetails(container,inPut) {
       'id':userId,
       'username':username,
       'password':password,
-      'role':role,
+      'role':parseInt(role),
       'disabled':disabled,
       'permission':permissionI,
       'otp_secret': '', 
       'sso_id': '',
       'reset':''
     }
-
+    console.log(database);
     database = await sendRequest(window.serverAddress+'/ChangeUser','POST',
     database)
-
+    
     document.getElementById("password-" + userId).textContent = "*".repeat(database['password'].length);
     document.getElementById("username-" + userId).textContent = database['username'];
     document.getElementById("user-" + userId).textContent = database['id'];
-    document.getElementById("disabledC" + userId).className = disabled == 0 ? 'dropPorS' : 'dropPorD';
-    document.getElementById("permissiondC" + userId).className = permissionI == 0 ? 'dropPorD' : 'dropPorS';
+    if (database['id'] != 1)
+    {
+      document.getElementById("disabledC" + userId).className = disabled == 0 ? 'dropPorS' : 'dropPorD';
+      document.getElementById("permissiondC" + userId).className = permissionI == 0 ? 'dropPorD' : 'dropPorS';
+    }
+
     toggleDetails(null,inPut,userId);
   }
 
