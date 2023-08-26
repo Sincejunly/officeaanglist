@@ -171,10 +171,7 @@ async def AListPath():
 
     fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
     
-    if not fileTask:
-        key = await generate_document_key(userU['fileName'])
-    else:key = fileTask['key']
-    
+    key = await generate_document_key(userU['fileName'])
     
     fileType = userU['fileName'][userU['fileName'].rfind('.'):]
     
@@ -193,15 +190,15 @@ async def AListPath():
             'Password':user['password'],
             'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
             'truePath':{userU['fileName']:root_folder_path},
-            'fileName':userU['fileName']
+            #'fileName':{userU['fileName']:}
             })
     else:
         userEditFile[user['id']]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
         userEditFile[user['id']]['Password'] = user['password']
         userEditFile[user['id']]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
         userEditFile[user['id']]['truePath'][userU['fileName']]=root_folder_path
-        userEditFile[user['id']]['fileName'] = userU['fileName']
-
+        #userEditFile[user['id']]['fileName'] = userU['fileName']
+    
     if await pool.is_table_empty('x_fileTask'):
         await pool.update(
         'x_fileTask',{
@@ -274,10 +271,11 @@ async def save():
         downloadUri = data.get("url")
         key = await extract_part_from_url(downloadUri, 4)
         
-        fileName = userEditFile[int(data['users'][0])]['fileName']
-        key = await generate_document_key(key.replace('_', ''))
-        
-        truePath = userEditFile[int(data['users'][0])]['truePath'][fileName]
+        fileTask = await pool.get_row_by_value('x_fileTask','`key`',key[:key.rfind('_')])
+        fileName = fileTask['fileName']
+        truePath = fileTask['truePath']
+        key = await generate_document_key(fileName)
+
         path_for_save = truePath + fileName  # 替换为实际保存路径
 
         if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
@@ -379,7 +377,9 @@ async def orc(websocket, path):
             orcFilePath, 
             parse.quote("{}/{}".format(userU['AListPath'], fileNameP+'_orc'+userU['fileType']))
             )
-        await websocket.close()
+        try:
+            await websocket.close()
+        except:pass
 
     #     return jsonify({'message': "ok"})
 
@@ -443,6 +443,7 @@ async def index():
         #         'Content-Length':'',
         #         'truePath':''
         #         })
+     
         if isinstance(user, dict):
             if 'password' in user:
                 user.pop('password')
@@ -455,16 +456,17 @@ async def index():
         #return redirect('/AriaNg')
     else:
         user = await pool.get_row_by_value('x_user','username','guest')
-        
-        if user['disabled'] == 0:
-            if isinstance(user, dict):
-                if 'password' in user:
-                    user.pop('password')
-                user['empty'] = False
-                user['farewell'] = 'ok'
-            else:
-                user = {}
-            return jsonify(user)
+      
+   
+        if isinstance(user, dict):
+            if 'password' in user:
+                user.pop('password')
+            user['empty'] = False
+            user['farewell'] = 'ok'
+        else:
+            user = {}
+        return jsonify(user)
+
         
 
     return jsonify({

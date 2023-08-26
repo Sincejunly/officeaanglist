@@ -1,11 +1,11 @@
 {
-    "AListHost": "http://127.0.0.1:5244/AList/api",
-    "mysqlHost": "127.0.0.1",
-    "mysqlPort": "3306",
-    "mysqlPassword": "123456",
-    "mysqlDataBase": "officeaanglist",
-    "mysqlUser": "officeaanglist",
-    "redisHost": "127.0.0.1",
-    "redisPort": "6379",
-    "redisPassword": "115099"
+  "AListHost": "http://127.0.0.1:5244/AList/api",
+  "mysqlHost": "127.0.0.1",
+  "mysqlPort": "3306",
+  "mysqlPassword": "123456",
+  "mysqlDataBase": "officeaanglist",
+  "mysqlUser": "officeaanglist",
+  "redisHost": "127.0.0.1",
+  "redisPort": "6379",
+  "redisPassword": "115099"
 }

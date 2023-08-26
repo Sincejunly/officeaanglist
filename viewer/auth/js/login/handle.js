@@ -119,8 +119,10 @@ async function fetchData() {
           "AListPath": AListPath,
           'fileName': fileName,
         }
-     
-        key = await sendRequest(serverAddress+'/AListPath','POST',body)['key'];
+        
+        key = await sendRequest(serverAddress+'/AListPath','POST',body);
+        key = key['key'];
+        
     }
     
     if (!user['empty'] && !('username' in user)) {
@@ -142,11 +144,15 @@ async function fetchData() {
             await viewer();
           }
           else{
+            overlay.classList.remove('hide-overlay');
+            overlay.classList.add('show-overlay');
             await showLogin();
           }
           
           
         }else{
+          overlay.classList.remove('hide-overlay');
+          overlay.classList.add('show-overlay');
           await showLogin();
         }
    
@@ -491,7 +497,6 @@ async function showPDFSetting(event) {
   if(pdfSetting.style.display == 'none' || pdfSetting.style.display == ''){
     pdfSetting.style.display = 'inline-block';
     PDFC.textContent = '取消捏';
-    upPDFC.disabled.style = 'block'
   }
   else{
     pdfSetting.style.display = 'none';

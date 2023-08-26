@@ -32,7 +32,6 @@ async function getMyProfile(user,fileName,fileExtension,key) {
         }
         
       }
-  
 
       
     let url = await getDomain('url');
