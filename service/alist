@@ -16,24 +16,32 @@ APP_DIR=/var/www/app/AList
 APP_EXEC=/var/www/app/AList/alist
 APP_OPTIONS=server
 LOG_FILE=/var/log/onlyoffice/app/alist.log
-PID_FILE=/var/run/alist.pid
+port=5244
+check_port() {
+    port=$1
+    result=$(lsof -i :$port)
+    if [ -n "$result" ]; then
 
+        echo "$result"
+        return 0  
+    else
+       
+        return 1  
+    fi
+}
 case "$1" in
     start)
         echo "Starting alist"
         cd $APP_DIR
         nohup $APP_EXEC $APP_OPTIONS 2>&1 | tee -a $LOG_FILE &
-        echo $! > $PID_FILE  # Save the process ID to the PID file
         echo "alist started"
         ;;
     stop)
         echo "Stopping alist"
-        if [ -f $PID_FILE ]; then
-            kill $(cat $PID_FILE)  # Kill the process using the PID from the PID file
-            rm $PID_FILE
-            echo "alist stopped"
+        if check_port $port; then
+            lsof -t -i :$port | xargs -r kill
         else
-            echo "PID file not found. The process might not be running."
+            echo "The process might not be running."
         fi
         ;;
     restart)
@@ -43,13 +51,8 @@ case "$1" in
         $0 start
         ;;
     status)
-        if [ -f $PID_FILE ]; then
-            pid=$(cat $PID_FILE)
-            if ps -p $pid > /dev/null; then
-                echo "AList is running with PID $pid."
-            else
-                echo "AList is not running, but PID file exists."
-            fi
+        if check_port $port; then
+            echo "AList is running with PID $pid."
         else
             echo "AList is not running."
         fi
