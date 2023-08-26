@@ -533,7 +533,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     service alist start
   fi
   python3 initjson.py
-
+  sleep 5
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
     sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
     sed -i "8s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
@@ -543,7 +543,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     sed -i "12s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
     sed -i "13s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
   fi
-  sleep 5
+  
   if ! [ -n "$AListHost" ]; then
     service alist restart
   fi
