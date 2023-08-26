@@ -34,7 +34,7 @@ case "$1" in
     start)
         echo "Starting Viewer Service"
         cd $APP_DIR
-        nohup $PYTHON_BIN viewer.py >> $LOG_FILE 2>&1 &
+        nohup $PYTHON_BIN viewer.py 2>&1 | tee -a $LOG_FILE &
         ;;
     stop)
         echo "Stopping Viewer Service"
@@ -57,9 +57,9 @@ case "$1" in
         for port in "${PORTS_TO_KILL[@]}"; do
             if check_port $port; then
                 echo "Viewer Service is running on port $port"
-                exit 0
             fi
         done
+        exit 0
         ;;
     *)
         echo "Usage: $0 {start|stop|restart|status}"

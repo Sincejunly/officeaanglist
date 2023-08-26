@@ -22,7 +22,7 @@ case "$1" in
     start)
         echo "Starting alist"
         cd $APP_DIR
-        nohup $APP_EXEC $APP_OPTIONS >> $LOG_FILE 2>&1 &
+        nohup $APP_EXEC $APP_OPTIONS 2>&1 | tee -a $LOG_FILE &
         echo $! > $PID_FILE  # Save the process ID to the PID file
         echo "alist started"
         ;;

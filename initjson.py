@@ -36,19 +36,19 @@ async def main():
                 AListHost = AListHost + '/AList/api'
             data['AListHost'] = AListHost
             await writejson('./viewer/data.json', data)
-            await asyncio.sleep(5)
+            # await asyncio.sleep(5)
             
-            Adata = await readjson('./AList/data/config.json')
+            # Adata = await readjson('./AList/data/config.json')
 
-            AListdb_host = os.environ.get("AListdb_host")
-            Adata['database']['type'] = 'mysql'
-            Adata['database']['host'] = AListdb_host if is_valid_ipv4_address(AListdb_host) else socket.gethostbyname(AListdb_host)
-            Adata['database']['port'] = os.environ.get("AListdb_port")
-            Adata['database']['user'] = os.environ.get("AListdb_us")
-            Adata['database']['password'] = os.environ.get("AListdb_pw")
-            Adata['database']['name'] = os.environ.get("AListdb_name")
-            Adata['site_url'] = os.environ.get("DOMAIN")
-            await writejson('./AList/data/config.json', Adata)
+            # AListdb_host = os.environ.get("AListdb_host")
+            # Adata['database']['type'] = 'mysql'
+            # Adata['database']['host'] = AListdb_host if is_valid_ipv4_address(AListdb_host) else socket.gethostbyname(AListdb_host)
+            # Adata['database']['port'] = os.environ.get("AListdb_port")
+            # Adata['database']['user'] = os.environ.get("AListdb_us")
+            # Adata['database']['password'] = os.environ.get("AListdb_pw")
+            # Adata['database']['name'] = os.environ.get("AListdb_name")
+            # Adata['site_url'] = os.environ.get("DOMAIN")
+            # await writejson('./AList/data/config.json', Adata)
 
             break
         except Exception as e:
