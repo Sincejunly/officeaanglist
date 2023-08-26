@@ -543,6 +543,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     sed -i "12s|.*|    \"password\": \"$AListdb_pw\",|" /var/www/app/AList/data/config.json
     sed -i "13s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
   fi
+  sleep 5
   if ! [ -n "$AListHost" ]; then
     service alist restart
   fi
