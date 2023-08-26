@@ -87,14 +87,15 @@ async def setup():
     pool = await AsyncMysqlPool.initialize_pool(
         origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
     
-    #domains = await pool.getAllrow('x_domain')
+    domains = await pool.getAllrow('x_domain')
 
-    #domains = await getAlltype(domains, 'Domain', 'believe')
+    domains = await getAlltype(domains, 'Domain', 'believe')
 
-    app = cors(app, allow_origin='0.0.0.0')
-    await registerUser()
+    app = cors(app, allow_origin=domains)
     app.config['SESSION_REDIS'] = cache
     Session(app)
+
+    await registerUser()
 
 @app.route('/checkUser',methods=['GET', 'POST'])
 async def checkUser():
@@ -809,18 +810,14 @@ async def verify_code(user_code):
     return user_code.lower() == Captcha.lower()
 
 async def registerUser():
-    try:
-        origin = await readjson(os.path.join(pydith, 'data.json'))
-        pool = await AsyncMysqlPool.initialize_pool(
-            origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
-        
-        users = await pool.getAllrow('x_users')
-        user = await pool.getAllrow('x_user')
-    
-        keys1 = set(users[0].keys())
-        keys2 = set(user[0].keys())
-        
-        if keys1!=keys2:
+    while True:
+        try:
+            # origin = await readjson(os.path.join(pydith, 'data.json'))
+            # pool = await AsyncMysqlPool.initialize_pool(
+            #     origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
+            
+            users = await pool.getAllrow('x_users')
+
             for item in users:
                 item.pop('base_path')
                 item['init']=True
@@ -830,9 +827,11 @@ async def registerUser():
                     item['showViewer']=False
             
                 await upRegister(item)
-    except Exception as e:
-        print(e)
-        return False
+            break
+        except Exception as e:
+            await asyncio.sleep(5)
+            print(e)
+            return False
 
 
 # async def echo(websocket, path):
