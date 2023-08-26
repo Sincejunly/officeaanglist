@@ -809,27 +809,30 @@ async def verify_code(user_code):
     return user_code.lower() == Captcha.lower()
 
 async def registerUser():
-    
-    origin = await readjson(os.path.join(pydith, 'data.json'))
-    pool = await AsyncMysqlPool.initialize_pool(
-        origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
-    
-    users = await pool.getAllrow('x_users')
-    user = await pool.getAllrow('x_user')
-   
-    keys1 = set(users[0].keys())
-    keys2 = set(user[0].keys())
-    
-    if keys1!=keys2:
-        for item in users:
-            item.pop('base_path')
-            item['init']=True
-            if item['username'] == 'guest':
-                item['showViewer']=True
-            else:
-                item['showViewer']=False
+    try:
+        origin = await readjson(os.path.join(pydith, 'data.json'))
+        pool = await AsyncMysqlPool.initialize_pool(
+            origin['mysqlHost'], int(origin['mysqlPort']), origin['mysqlUser'], origin['mysqlPassword'], origin['mysqlDataBase'])
         
-            await upRegister(item)
+        users = await pool.getAllrow('x_users')
+        user = await pool.getAllrow('x_user')
+    
+        keys1 = set(users[0].keys())
+        keys2 = set(user[0].keys())
+        
+        if keys1!=keys2:
+            for item in users:
+                item.pop('base_path')
+                item['init']=True
+                if item['username'] == 'guest':
+                    item['showViewer']=True
+                else:
+                    item['showViewer']=False
+            
+                await upRegister(item)
+    except Exception as e:
+        print(e)
+        return False
 
 
 # async def echo(websocket, path):
