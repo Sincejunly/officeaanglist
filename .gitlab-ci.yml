@@ -7,6 +7,7 @@ variables:
   dd_name: 'officeaanglist'
   dd_route: '$d_route/officeaanglist:v0.3'
   ddd_rout: 'homuras/officeaanglist:v0.3'
+  od_rout: "$d_route/office:7.1.1"
   #PIP_CACHE_DIR: .cache/pip
 
 # cache:
@@ -25,7 +26,7 @@ build:
   script:
 
     - docker-compose down
-    - docker build --build-arg CI_PROJECT_ID=$CI_PROJECT_ID -t $di_name .
+    - docker build --build-arg od_rout=$od_rout -t $di_name .
     - docker login -u homura -p $lab_token $d_route
     - docker tag $di_name $dd_route
     - docker push $dd_route

@@ -529,7 +529,9 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
 '
   echo "初始化中(Initializing)......................................................................."
   sleep 130
-
+  if ! [ -n "$AListHost" ]; then
+    service alist start
+  fi
   python3 initjson.py
 
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
@@ -542,7 +544,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     sed -i "13s/.*/    \"name\": \"$AListdb_name\",/" /var/www/app/AList/data/config.json
   fi
   if ! [ -n "$AListHost" ]; then
-    service alist start
+    service alist restart
   fi
 
   
