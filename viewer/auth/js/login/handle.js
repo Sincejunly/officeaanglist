@@ -83,6 +83,7 @@ async function viewer() {
     alert("没有文件呀！")
     return 1;
   }
+
   overlay.classList.remove('show-overlay');
   overlay.classList.add('hide-overlay');
   background.classList.add('background-fadeOut');
@@ -134,12 +135,14 @@ async function fetchData() {
         if(user['disabled'] == 0){
           overlay.classList.remove('hide-overlay');
           overlay.classList.add('show-overlay');
-      
-          if (user['username']!='guest' && !user['shwoViewer'])
+          
+          if (user['username']!='guest' && !user['showViewer'])
           {
+       
             await showUser();
           }
           else if(user['showViewer'] && fileName){
+            
             await showLogin();
             await viewer();
           }
@@ -390,6 +393,7 @@ async function showUser() {
     registerB.style.display = 'none';
     countBox.style.display = 'none';
     showViewerBox.style.display= 'inline-block'
+    console.log(user);
     if (user['showViewer']){
       showViewerCB.checked = true;
     }

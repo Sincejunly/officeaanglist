@@ -409,7 +409,7 @@ async function saveDetails(container,inPut) {
       'sso_id': '',
       'reset':''
     }
-    console.log(database);
+  
     database = await sendRequest(window.serverAddress+'/ChangeUser','POST',
     database)
     

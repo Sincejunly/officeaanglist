@@ -447,7 +447,7 @@ async def index():
 
     if await current_user.is_authenticated:
         
-        user = await pool.get_row_by_value('x_users','`id`',current_user._auth_id)
+        user = await pool.get_row_by_value('x_user','`id`',current_user._auth_id)
         # alisttoken = await getToken(AListHost, user['username'], user['password'])
         # userEditFile.setdefault(user['id'],{
         #         'userAgent':request.headers.get('User-Agent'),                   
@@ -527,8 +527,9 @@ async def ChangeUser():
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
         return html_message.format(request.remote_addr)
     userU = await request.get_json()
-    hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
-    print(userU)
+    if 'password' in userU:
+        hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
+    
     if 'reset' in userU:
         userU.pop('reset')
         
