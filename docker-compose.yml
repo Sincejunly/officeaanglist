@@ -11,7 +11,7 @@ services:
       MYSQL_USER: officeaanglist
       MYSQL_PASSWORD: ${officedb_pw}
     volumes:
-      - /home/homura/officeaanglist/db:/var/lib/mysql
+      - /home/homura/docker/officeaanglist/db:/var/lib/mysql
     networks:
       - officeaanglist
 
@@ -21,8 +21,8 @@ services:
     restart: always
     command: redis-server /etc/redis/redis.conf --appendonly yes --requirepass 115099
     volumes:
-      - /home/homura/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
-      - /home/homura/officeaanglist/redis/data:/data
+      - /home/homura/docker/officeaanglist/redis/redis.conf:/etc/redis/redis.conf
+      - /home/homura/docker/officeaanglist/redis/data:/data
     ports:
       - "6380:6379"
     networks:
@@ -57,8 +57,8 @@ services:
       - "6881:6881/tcp"
       - "6881:6881/udp"
     volumes:
-      - "/home/homura/qbittorrent/config:/config"
-      - "/home/homura/Download/qbittorrent:/downloads"
+      - "/home/homura/docker/qbittorrent/config:/config"
+      - "/mnt/4T/Download/qbittorrent:/downloads"
     networks:
       - officeaanglist
 
@@ -104,12 +104,16 @@ services:
       - redis
 
     volumes:
-      - /home/homura/officeaanglist/logs:/var/log/onlyoffice
-      - /home/homura/officeaanglist/app:/var/www/app:rw
+      - /home/homura/docker/officeaanglist/logs:/var/log/onlyoffice
+      - /home/homura/docker/officeaanglist/app:/var/www/app:rw
       - /home/homura/AList:/AList
-      - /home/homura/officeaanglist/lib:/var/lib/onlyoffice
+      - /mnt/4T/vedio:/vedio
+      - /mnt/4T/DATA:/DATA
+      - /mnt/4T/Download/aria2:/Download/aria2
+      - /home/homura/docker/officeaanglist/lib:/var/lib/onlyoffice
+
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
-      - /home/homura/officeaanglist/conf.d:/etc/nginx/conf.d
+      - /home/homura/docker/officeaanglist/conf.d:/etc/nginx/conf.d
       - /home/homura/ssl/homura.top:/ssl
       
     networks:
