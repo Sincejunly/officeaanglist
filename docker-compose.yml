@@ -46,6 +46,7 @@ services:
 
   qbittorrent-nox:
     image: qbittorrentofficial/qbittorrent-nox:latest
+    restart: always
     container_name: qbittorrent-nox
     tmpfs:
       - /tmp
@@ -58,7 +59,7 @@ services:
       - "6881:6881/udp"
     volumes:
       - "/home/homura/docker/qbittorrent/config:/config"
-      - "/mnt/4T/Download/qbittorrent:/downloads"
+      - "/mnt/4T/Download:/downloads"
     networks:
       - officeaanglist
 
@@ -109,7 +110,7 @@ services:
       - /home/homura/AList:/AList
       - /mnt/4T/vedio:/vedio
       - /mnt/4T/DATA:/DATA
-      - /mnt/4T/Download/aria2:/Download/aria2
+      - /mnt/4T/Download:/downloads
       - /home/homura/docker/officeaanglist/lib:/var/lib/onlyoffice
 
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
