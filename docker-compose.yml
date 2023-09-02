@@ -59,7 +59,7 @@ services:
       - "6881:6881/udp"
     volumes:
       - "/home/homura/docker/qbittorrent/config:/config"
-      - "/mnt/4T/vedio/downloads/qbittorrent:/downloads"
+      - "/mnt/4T/vedio/downloads/qbittorrent:/downloads/qbittorrent"
     networks:
       - officeaanglist
 
