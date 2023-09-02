@@ -59,7 +59,7 @@ services:
       - "6881:6881/udp"
     volumes:
       - "/home/homura/docker/qbittorrent/config:/config"
-      - "/mnt/4T/Download:/downloads"
+      - "/mnt/4T/vedio/downloads/qbittorrent:/downloads"
     networks:
       - officeaanglist
 
@@ -75,6 +75,7 @@ services:
     ports:
       - "8088:80"
       - "83:443"
+      - '6800:6800'
     environment:
       - JWT_ENABLEN=false
       # - PUID=1000
@@ -110,7 +111,7 @@ services:
       - /home/homura/AList:/AList
       - /mnt/4T/vedio:/vedio
       - /mnt/4T/DATA:/DATA
-      - /mnt/4T/Download:/downloads
+      - /mnt/4T/vedio/downloads/aria2:/downloads
       - /home/homura/docker/officeaanglist/lib:/var/lib/onlyoffice
 
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
