@@ -40,7 +40,7 @@ RUN mkdir -p /var/www/app1 \
 
 RUN touch /var/www/app1/aria2/aria2.session \
 	&& { \
-		echo 'dir=/downloads'; \
+		echo 'dir=/downloads/aria2'; \
 		echo 'enable-rpc=true'; \
 		echo 'rpc-allow-origin-all=true'; \
 		echo 'rpc-listen-all=true'; \

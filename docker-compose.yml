@@ -111,7 +111,7 @@ services:
       - /home/homura/AList:/AList
       - /mnt/4T/vedio:/vedio
       - /mnt/4T/DATA:/DATA
-      - /mnt/4T/vedio/downloads/aria2:/downloads
+      - /mnt/4T/vedio/downloads/aria2:/downloads/aria2
       - /home/homura/docker/officeaanglist/lib:/var/lib/onlyoffice
 
       #- /volume1/docker/onlyoffice/db:/var/lib/postgresql
