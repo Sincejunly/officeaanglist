@@ -36,7 +36,7 @@ async function getMyProfile(user,fileName,fileExtension,key) {
       
     let url = await getDomain('url');
 
-
+     
      const docEditor = new DocsAPI.DocEditor("placeholder", {
           "document": {
               "fileType": fileExtension,
@@ -71,5 +71,14 @@ async function getMyProfile(user,fileName,fileExtension,key) {
           "type": "desktop",
       }
       );
+      const AListPath = await getDomain('AListPath');
+      fileExtension = fileName.split('.').pop();
+      const body = {
+          "username": user['username'],
+          "AListPath": AListPath,
+          'fileName': fileName,
+      }
+      
+      await sendRequest(serverAddress+'/savePath','POST',body);
 }
 

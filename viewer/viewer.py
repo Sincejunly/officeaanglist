@@ -34,6 +34,7 @@ outAList = True
 CaptchaPrefix = 'officeaanglist:Captcha:'
 def create_app():
     global AListHost,outAList,origin
+    
     origin = readjson_sync(os.path.join(pydith, 'data.json'))
     app = Quart(__name__, template_folder='auth')
     app.secret_key = "QQ943384135"
@@ -77,7 +78,8 @@ async def add_cors_headers(response):
 # 配置Redis连接
 @app.before_serving
 async def setup():
-    global app,pool,origin
+    global app,pool,origin,event
+    event = asyncio.Event()
     origin = await readjson(os.path.join(pydith, 'data.json'))
     cache = await aioredis.Redis(
         host=origin['redisHost'],
@@ -163,7 +165,7 @@ async def generate_document_key(file_name):
 @app.route('/AListPath', methods=['GET', 'POST'])
 #@login_required
 async def AListPath():
-    global userEditFile,outAList
+    global userEditFile,outAList,event
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
         return html_message.format(request.remote_addr)    
     userU = await request.get_json()
@@ -183,14 +185,23 @@ async def AListPath():
         create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
 
+    
     fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+    if fileTask:
+        
+        if not fileTask['saved']:
+            await event.wait()
+        key = fileTask['key']
+    else:
+        key = await generate_document_key(userU['fileName'])
     
-    key = await generate_document_key(userU['fileName'])
-    
+    return jsonify({'key':key,'farewell':"ok"})
+
+@app.route('/savePath', methods=['GET', 'POST'])
+@login_required
+async def savePath():
+    global userEditFile
     fileType = userU['fileName'][userU['fileName'].rfind('.'):]
-    
-    
-    
     #truePath = "{}/{}".format(root_folder_path, userU['fileName']) if root_folder_path else ''
     if not (user['id'] in userEditFile):
         if outAList:
@@ -222,7 +233,8 @@ async def AListPath():
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":fileType,
-            'truePath':root_folder_path},True)
+            'truePath':root_folder_path,
+            'saved':False},True)
     else:
         await pool.update(
         'x_fileTask',{
@@ -231,10 +243,12 @@ async def AListPath():
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":fileType,
-            'truePath':root_folder_path},True)
+            'truePath':root_folder_path,
+            'saved':False},True)
 
+    return jsonify({'farewell':"ok"})
 
-    return jsonify({'key':key,'farewell':"ok"})
+    
 
 
 async def runCmd(cmd):
@@ -283,13 +297,14 @@ async def save():
     data = await request.get_json()
     if data.get("status") == 2:
         downloadUri = data.get("url")
-        key = await extract_part_from_url(downloadUri, 4)
-        
-        fileTask = await pool.get_row_by_value('x_fileTask','`key`',key[:key.rfind('_')])
+        #key = await extract_part_from_url(downloadUri, 4)
+        #key = data['key']
+        fileTask = await pool.get_row_by_value('x_fileTask','`key`',data['key'])
+  
         fileName = fileTask['fileName']
         truePath = fileTask['truePath']
         key = await generate_document_key(fileName)
-
+        
         path_for_save = truePath + fileName  # 替换为实际保存路径
 
         if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
@@ -309,7 +324,8 @@ async def save():
                 'users':users,'actions':actions,
                 "lastsave":lastsave, \
                 "notmodified":notmodified,"filetype":filetype, \
-                'truePath':truePath},True)
+                'truePath':truePath,
+                'saved':True},True)
             
             # await pool.update('x_fileTask',{'fileName': \
             # fileName, '`key`':key,'truePath':path_for_save},True)
@@ -319,11 +335,15 @@ async def save():
                 await Upload(AListHost, userEditFile[int(data['users'][0])]['userAgent'], 
                 userEditFile[int(data['users'][0])]['Authorization'], path_for_save, 
                 userEditFile[int(data['users'][0])]['File-Path'][fileName])
-
+            event.set()
             #userEditFile.pop(data['users'][0])
         else:
             print("Failed to download the file.")
-
+            event.set()
+    elif data.get('status') == 4:
+        key = data.get('key')
+        await pool.update_value(
+                'x_fileTask','`key`',key,'saved',True)
     return jsonify({'farewell':"ok"})
 
 async def read_stream_and_display(stream, display,websocket):
@@ -457,7 +477,7 @@ async def index():
         #         'Content-Length':'',
         #         'truePath':''
         #         })
-     
+        print(user)
         if isinstance(user, dict):
             if 'password' in user:
                 user.pop('password')
@@ -636,6 +656,7 @@ async def getToken(url, username, password):
 @app.route('/login', methods=['GET', 'POST'])
 async def login():
     global pool
+    print(request.remote_addr)
     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
         return html_message.format(request.remote_addr)
     if request.method == 'POST':

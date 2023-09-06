@@ -63,11 +63,11 @@ WORKDIR /var/www/app1
 RUN chmod +rwx /var/www/app1/* \
 	&& mv /var/www/app1/AriaNg-1.3.6 /var/www/app1/AriaNg \
 	&& cp -r /var/www/app1/Contents.json /var/www/onlyoffice/documentserver/web-apps/apps/documenteditor/main/resources/help/zh \
-	&& rm -rf system \
 	&& mv ./run-document-server.sh /app/ds/run-document-server.sh \
 	&& rm -rf AriaNg-1.3.6 \
 	&& rm -rf service \
 	&& rm -rf Contents.json \
+	&& cp /var/www/app1/ds-docservice.conf /etc/nginx/includes/ds-docservice.conf \
 	&& sed -i 's/;extension=curl/extension=curl/' /etc/php/7.4/cli/php.ini 
 
 

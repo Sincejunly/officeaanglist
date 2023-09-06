@@ -535,7 +535,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   python3 initjson.py
   sleep 5
   if [ -n "$AListdb_us" ] && [ -n "$AListdb_port" ] && [ -n "$AListdb_pw" ] && [ -n "$AListdb_ty" ] && [ -n "$AListdb_host" ] && [ -n "$AListdb_name" ]; then
-    sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList\",|" /var/www/app/AList/data/config.json
+    sed -i "5s|.*|  \"site_url\": \"$DOMAIN/AList/\",|" /var/www/app/AList/data/config.json
     sed -i "8s/.*/    \"type\": \"$AListdb_ty\",/" /var/www/app/AList/data/config.json
     sed -i "9s/.*/    \"host\": \"$(get_ip $AListdb_host)\",/" /var/www/app/AList/data/config.json
     sed -i "10s/.*/    \"port\": $AListdb_port,/" /var/www/app/AList/data/config.json
@@ -553,6 +553,9 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   
   python3 init.py -i -u admin -p admin -d $DOMAIN
 	# 		&& sed -i "58i \          \"callbackUrl\": \"$DOMAIN/callback/\"," /var/www/app/js/yulan.js
+  
+  host=$(echo "$DOMAIN" | grep -oP '(?<=://)[^:/]+')
+  #serverd=$(echo "$DOMAIN" | cut -d'/' -f3)
   if [[ $DOMAIN == "https://"* ]]; then
     # if [ -n "$inReverseProxy" ]; then 
     #   if [ "$inReverseProxy" = true ]; then
@@ -562,10 +565,17 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     # fi
     rm -r /etc/nginx/conf.d/dsssl.conf
     cp -r /var/www/app1/dsssl.conf /etc/nginx/conf.d/
-    host=$(echo "$DOMAIN" | grep -oP '(?<=://)[^:/]+')
     sed -i "s|office.xxx.com|${host//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
-  fi
+  else
     
+    search_text="DOMAIN = segments.slice(0, 3).join('/');"
+    replacement="DOMAIN = $host:5000;"
+   
+    file_path="/var/www/app/viewer/auth/js/login/GetDomain.js"
+
+    sed -i "s|$search_text|$replacement|g" "$file_path"
+  fi
+  
 
 
 
