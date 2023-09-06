@@ -74,8 +74,8 @@ services:
       # - 192.168.0.37
     ports:
       - "8088:80"
+      - '5000:5000'
       - "83:443"
-      - '6800:6800'
     environment:
       - JWT_ENABLEN=false
       - PUID=1000

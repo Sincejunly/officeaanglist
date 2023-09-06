@@ -569,7 +569,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
   else
     
     search_text="DOMAIN = segments.slice(0, 3).join('/');"
-    replacement="DOMAIN = $host:5000;"
+    replacement="DOMAIN = \"http://$host:5000\";"
    
     file_path="/var/www/app/viewer/auth/js/login/GetDomain.js"
 
