@@ -568,12 +568,13 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     sed -i "s|office.xxx.com|${host//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
   else
     
-    search_text="DOMAIN = segments.slice(0, 3).join('/');"
-    replacement="DOMAIN = \"http://$host:5000\";"
+    search_text="auth_manager = QuartAuth()"
+    replacement="auth_manager = QuartAuth(cookie_secure=False)"
    
-    file_path="/var/www/app/viewer/auth/js/login/GetDomain.js"
+    file_path="/var/www/app/viewer/auth/viewer.py"
 
     sed -i "s|$search_text|$replacement|g" "$file_path"
+    
   fi
   
 

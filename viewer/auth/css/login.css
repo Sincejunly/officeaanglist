@@ -25,7 +25,38 @@
         opacity: 0;
       }
     }
-
+    .loader::before {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      top: 0;
+      left: 0;
+      width: 40px; /* 或者你想要的圆形直径 */
+      height: 40px; /* 或者你想要的圆形直径 */
+      backdrop-filter: blur(8px); /* 添加毛玻璃背景 */
+      z-index: -1; /* 使毛玻璃背景处于.loader下面 */
+    }
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      position: fixed; 
+      backdrop-filter: blur(10px);
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     #overlay {
       position: fixed;
       top: 0;

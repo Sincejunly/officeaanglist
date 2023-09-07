@@ -77,6 +77,7 @@ async function getMyProfile(user,fileName,fileExtension,key) {
           "username": user['username'],
           "AListPath": AListPath,
           'fileName': fileName,
+          'key':key
       }
       
       await sendRequest(serverAddress+'/savePath','POST',body);

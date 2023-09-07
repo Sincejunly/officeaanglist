@@ -122,7 +122,10 @@ async def main():
                     do['type'] = 'believe'
                     await pool.update('x_domain', do, True)
                 else:
-                    await pool.update('x_domain', {'Domain': DOMAIN, 'type':'believe'})
+                    id = await pool.getMaxid('x_domain')
+                    if id is None:
+                        id = 0
+                    await pool.update('x_domain', {'`id`':id+1,'Domain': TDOMAIN, 'type':'believe'},True)
 
             break
         except Exception as e:

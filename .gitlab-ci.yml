@@ -5,8 +5,8 @@ services:
 variables:
   di_name: 'officeaanglist'
   dd_name: 'officeaanglist'
-  dd_route: '$d_route/officeaanglist:v0.3'
-  ddd_rout: 'homuras/officeaanglist:v0.3'
+  dd_route: '$d_route/officeaanglist:v0.3.1'
+  ddd_rout: 'homuras/officeaanglist:v0.3.1'
   od_rout: "$d_route/office:7.1.1"
   #PIP_CACHE_DIR: .cache/pip
 
@@ -33,6 +33,6 @@ build:
     - docker push $dd_route
     - docker-compose up -d
   
-    # - docker login -u homuras -p $docker_token
-    # - docker tag $di_name $ddd_rout
-    # - docker push $ddd_rout
+    - docker login -u homuras -p $docker_token
+    - docker tag $di_name $ddd_rout
+    - docker push $ddd_rout

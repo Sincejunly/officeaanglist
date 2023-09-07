@@ -17,6 +17,7 @@ const registerC = document.getElementById('registerC');
 const loginC = document.getElementById('loginC');
 var loginForm = document.getElementById('login-form');
 
+
 let isSubmitClicked = false;
 let manageButtonClicked = false;
 var turnpassword;
@@ -45,6 +46,7 @@ const PDFCPU = document.querySelector('#PDFCPU');
 const pdfType = document.querySelector('#pdfType');
 const showViewerBox = document.querySelector('#showViewerBox');
 const showViewerCB = document.querySelector('#showViewerCB');
+const loader = document.querySelector('#loader');
 let user;
 let fileName = '';
 let fileExtension = '';
@@ -120,9 +122,10 @@ async function fetchData() {
           "AListPath": AListPath,
           'fileName': fileName,
         }
-        
+        loader.style.display = 'block';
         key = await sendRequest(serverAddress+'/AListPath','POST',body);
         key = key['key'];
+        loader.style.display = 'none';
         
     }
     
@@ -393,7 +396,7 @@ async function showUser() {
     registerB.style.display = 'none';
     countBox.style.display = 'none';
     showViewerBox.style.display= 'inline-block'
-    console.log(user);
+  
     if (user['showViewer']){
       showViewerCB.checked = true;
     }

@@ -67,7 +67,7 @@ RUN chmod +rwx /var/www/app1/* \
 	&& rm -rf AriaNg-1.3.6 \
 	&& rm -rf service \
 	&& rm -rf Contents.json \
-	&& cp /var/www/app1/ds-docservice.conf /etc/nginx/includes/ds-docservice.conf \
+	#&& cp /var/www/app1/ds-docservice.conf /etc/nginx/includes/ds-docservice.conf \
 	&& sed -i 's/;extension=curl/extension=curl/' /etc/php/7.4/cli/php.ini 
 
 

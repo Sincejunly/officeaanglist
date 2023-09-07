@@ -101,9 +101,12 @@ async def setup():
 
 @app.route('/checkUser',methods=['GET', 'POST'])
 async def checkUser():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)
-    await block()
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))
+    
+    if not (await block()):
+        return jsonify({'Error':"你尝试的次数过多，IP已锁定"})
+    
     userU = await request.get_json()
     if 'username' in userU:
         user = await pool.get_row_by_value('x_user', 'username', userU['username'])
@@ -118,8 +121,8 @@ async def checkUser():
 @app.route('/query', methods=['GET', 'POST'])
 @login_required
 async def query():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)    
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))    
     userU = await request.get_json()
     user = None
     if not userU:
@@ -166,15 +169,31 @@ async def generate_document_key(file_name):
 #@login_required
 async def AListPath():
     global userEditFile,outAList,event
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
-        return html_message.format(request.remote_addr)    
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))    
     userU = await request.get_json()
     if not userU:
         return jsonify({'Error': "not json"})
+
+
+    
+    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+    if fileTask:
+        if not fileTask['saved']:
+            await event.wait()
+            fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+        key = fileTask['key']
+    else:
+        key = await generate_document_key(userU['fileName'])
+    
+    return jsonify({'key':key,'farewell':"ok"})
+
+@app.route('/savePath', methods=['GET', 'POST'])
+@login_required
+async def savePath():
+    global userEditFile,outAList
+    userU = await request.get_json()
     user = await pool.get_row_by_value('x_users','username',userU['username'])
-    
-  
-    
     RowADD = await pool.get_row_by_value('x_storages', 'mount_path', userU['AListPath'])
 
     if RowADD['driver'] == 'Local':
@@ -185,22 +204,6 @@ async def AListPath():
         create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
 
-    
-    fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
-    if fileTask:
-        
-        if not fileTask['saved']:
-            await event.wait()
-        key = fileTask['key']
-    else:
-        key = await generate_document_key(userU['fileName'])
-    
-    return jsonify({'key':key,'farewell':"ok"})
-
-@app.route('/savePath', methods=['GET', 'POST'])
-@login_required
-async def savePath():
-    global userEditFile
     fileType = userU['fileName'][userU['fileName'].rfind('.'):]
     #truePath = "{}/{}".format(root_folder_path, userU['fileName']) if root_folder_path else ''
     if not (user['id'] in userEditFile):
@@ -229,17 +232,18 @@ async def savePath():
         'x_fileTask',{
             '`id`':1,
             'fileName':userU['fileName'],
-            '`key`':key,'history':{},
+            '`key`':userU['key'],'history':{},
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":fileType,
             'truePath':root_folder_path,
             'saved':False},True)
     else:
+   
         await pool.update(
         'x_fileTask',{
             'fileName':userU['fileName'],
-            '`key`':key,'history':{},
+            '`key`':userU['key'],'history':{},
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":fileType,
@@ -293,7 +297,7 @@ async def extract_part_from_url(url, position=0):
 
 @app.route('/save', methods=['GET', 'POST'])
 async def save():
-    global userEditFile,outAList
+    global userEditFile,outAList,event
     data = await request.get_json()
     if data.get("status") == 2:
         downloadUri = data.get("url")
@@ -336,10 +340,12 @@ async def save():
                 userEditFile[int(data['users'][0])]['Authorization'], path_for_save, 
                 userEditFile[int(data['users'][0])]['File-Path'][fileName])
             event.set()
+            event.clear()
             #userEditFile.pop(data['users'][0])
         else:
             print("Failed to download the file.")
             event.set()
+            event.clear()
     elif data.get('status') == 4:
         key = data.get('key')
         await pool.update_value(
@@ -387,8 +393,8 @@ async def run_command_as_string(command,websocket):
 #@app.websocket('/orc')
 #@login_required
 async def orc(websocket, path):
-    # if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-    #     return html_message.format(request.remote_addr)    
+    # if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+    #     return html_message.format(request.headers.get('X-Real-Ip'))    
     #userU = await websocket.receive_json()
     await websocket.send('转换中！')
     
@@ -423,8 +429,8 @@ async def orc(websocket, path):
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required
 async def deletet():
-    # if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-    #     return html_message.format(request.remote_addr)    
+    # if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+    #     return html_message.format(request.headers.get('X-Real-Ip'))    
     userU = await request.get_json()
     
     if not userU:
@@ -445,8 +451,8 @@ async def deletet():
 @app.route('/update', methods=['GET', 'POST'])
 @login_required
 async def update():
-    # if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-    #     return html_message.format(request.remote_addr)
+    # if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+    #     return html_message.format(request.headers.get('X-Real-Ip'))
     userU = await request.get_json()
     
     if not userU:
@@ -462,8 +468,8 @@ async def update():
 
 @app.route('/check', methods=['GET', 'POST'])
 async def index():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))
 
     if await current_user.is_authenticated:
         
@@ -477,7 +483,7 @@ async def index():
         #         'Content-Length':'',
         #         'truePath':''
         #         })
-        print(user)
+        
         if isinstance(user, dict):
             if 'password' in user:
                 user.pop('password')
@@ -544,8 +550,8 @@ async def upRegister(userU):
 @app.route('/ChangeUser', methods=['GET', 'POST'])
 @login_required
 async def ChangeUser():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))
     userU = await request.get_json()
     if 'password' in userU:
         hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
@@ -583,21 +589,22 @@ async def ChangeUser():
 
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))
     
     if request.method == 'POST':
         userU = await request.get_json()
         if not userU:
             return jsonify({'Error':"Invalid username or password."})
 
-        await block()
+        if not (await block()):
+            return jsonify({'Error':"你尝试的次数过多，IP已锁定"})
 
         cache: SessionInterface = app.session_interface
 
-        Captcha = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'Captcha')
+        Captcha = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Captcha')
         
-        #IPLock = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'Lock')
+        #IPLock = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Lock')
 
         # if IPLock:
         #     return jsonify({'Error':"你尝试的次数过多，IP已锁定,一小时后解锁"})
@@ -629,8 +636,8 @@ async def get_cached_value(cache, key):
     
 @app.route('/count', methods=['GET', 'POST'])
 async def count():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))
     userU = await request.get_json()
     hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
     await writejson(os.path.join(pydith, 'pd'), {'password':userU['password'],
@@ -653,12 +660,18 @@ async def getToken(url, username, password):
     except Exception as e:
         return {'code': -1, 'message': str(e)}
     
+
+
+    
+
+
+
+
 @app.route('/login', methods=['GET', 'POST'])
 async def login():
     global pool
-    print(request.remote_addr)
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))
     if request.method == 'POST':
         userU = await request.get_json()
         cache: SessionInterface = app.session_interface
@@ -668,21 +681,22 @@ async def login():
         user = await pool.get_row_by_value('x_user','username',userU['username'])
        
         #try:
+
         if user:
-            PWNum = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'PWNum')
-            Captcha = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'Captcha')
-            Lock = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'Lock')
-            #IPLock = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'Lock')
+            PWNum = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'PWNum')
+            Captcha = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Captcha')
+            Lock = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'Lock')
+            #IPLock = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Lock')
             if not PWNum:
                 PWNum = 0
                 Captcha = None
                 Lock = False
                 #IPLock = False
-                await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'PWNum',json.dumps(0), expiry=3600)
-                await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'Lock',json.dumps(False), expiry=3600)
-                await cache.set(CaptchaPrefix+request.remote_addr+":"+'Captcha',json.dumps(Captcha), expiry=180)
-
-                await cache.set(CaptchaPrefix+request.remote_addr+":"+'Lock',json.dumps(False), expiry=3600)
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'PWNum',json.dumps(0), expiry=3600)
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'Lock',json.dumps(False), expiry=3600)
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Captcha',json.dumps(Captcha), expiry=180)
+                
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Lock',json.dumps(False), expiry=3600)
 
             # if IPLock:
             #     return jsonify({'Error':"你尝试的次数过多，IP已锁定,一小时后解锁"})
@@ -693,7 +707,7 @@ async def login():
             if 'Captcha' in userU and PWNum < 20 and Captcha:
                 if Captcha.lower() != userU['Captcha'].lower():
                     PWNum = PWNum + 1
-                    await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'PWNum',json.dumps(PWNum), expiry=3600)
+                    await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'PWNum',json.dumps(PWNum), expiry=3600)
                     return jsonify({'Error':"验证码错误，你可以点击验证码刷新，也可以不刷新"})
             elif not Captcha and 'Captcha' in userU:
                 return jsonify({'Error':"验证码已过期，点击验证码刷新"})            
@@ -701,26 +715,27 @@ async def login():
                 return jsonify({'Captcha':"ON",'Error':"请输入验证码",'Refresh':True})
 
             inlogin = checkpw(userU['password'].encode(),user['password'].encode())
-
+            
             if not inlogin:
                 PWNum = PWNum + 1
-                await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'PWNum',json.dumps(PWNum), expiry=3600)
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'PWNum',json.dumps(PWNum), expiry=3600)
+ 
             if PWNum >= 4 and PWNum < 10:
-                return jsonify({'Captcha':"ON",'Error':"用户名或密码错误！"})
+                return jsonify({'Captcha':"ON",'Error':"用户名或密码错误！",'Refresh':True})
             elif PWNum == 10:
-                await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'Lock',json.dumps("True"), expiry=3600)
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+user['username']+":"+'Lock',json.dumps("True"), expiry=3600)
                 return jsonify({'Error':"你尝试的次数过多，账户已被锁定,一小时后解锁"})
             elif user and inlogin:
                 user.pop('password')
                 if user['disabled'] == 0:
-                    login_user(AuthUser(user['id']))
+                    login_user(AuthUser(user['id']),True)
                 else:
                     return jsonify({'Error':"你的账户还未激活！"})
                 return jsonify(user)
- 
-            # elif PWNum > 20:
-            #     await cache.set(CaptchaPrefix+request.remote_addr+":"+user['username']+":"+'Lock',json.dumps("True"), expiry=3600)
-            #     return jsonify({'Error':"你尝试的次数过多，IP已锁定,一小时后解锁"})
+            elif PWNum > 20:
+                await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'IPNum',json.dumps(PWNum), expiry=3600)
+                await block()
+                return jsonify({'Error':"你尝试的次数过多，IP已锁定"})
 
         else:
             return jsonify({'Error':"用户不存在"})
@@ -747,62 +762,75 @@ async def generate_verification_code(length=4):
 
 async def block():
     cache: SessionInterface = app.session_interface
-    CaptchaNum = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'CaptchaNum')
-    if CaptchaNum is not None:
-        CaptchaNum = CaptchaNum + 1
-    else:
-        CaptchaNum = 0
-    await cache.set(CaptchaPrefix+request.remote_addr+":"+'CaptchaNum', json.dumps(CaptchaNum), expiry=3600)
-    if CaptchaNum >= 20:
-        if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','believe'):
-            await cache.set(CaptchaPrefix+request.remote_addr+":"+'CaptchaNum', json.dumps(0), expiry=3600)
-            return
-        if request.remote_addr != '127.0.0.1' :
-            await pool.update('x_domain',{'domain':request.remote_addr,'type':'distrust'})
+    IPLock = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Lock')
 
+    IPNum = await get_cached_value(cache, CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'IPNum')
+
+    if IPLock is None:
+        IPLock = False
+        IPNum = 0
+        await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Lock',json.dumps(False), expiry=3600)
+        await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'IPNum',json.dumps(IPNum), expiry=3600)
+    
+    if IPNum is not None:
+        IPNum = IPNum + 1
+    else:
+        IPNum = 0
+    await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'IPNum', json.dumps(IPNum), expiry=3600)
+    if IPNum >= 20:
+        if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','believe'):
+            await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'IPNum', json.dumps(False), expiry=3600)
+        if request.headers.get('X-Real-Ip') != '127.0.0.1':
+            id = await pool.getMaxid('x_domain')
+            if id is None:
+                id = 0
+            await pool.update('x_domain',{'`id`':id+1,'domain':request.headers.get('X-Real-Ip'),'type':'distrust'})
+            return False
+    
+    return True
+    
+    
 @app.route('/generate_code')
 async def generate_code():
-    if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-        return html_message.format(request.remote_addr)    
-    # username = request.args.get("username")
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip'))    
+
     
-    # # 验证用户名或其他必要的验证步骤
-    # if not username:
-    #     return jsonify({'error': "Invalid username."})
-    await block()
-        # await cache.set(CaptchaPrefix+request.remote_addr+":"+'Lock', json.dumps(True), expiry=3600)
-        # return jsonify({'Error':"你尝试的次数过多，IP已锁定，一小时后解锁"})
-    cache: SessionInterface = app.session_interface
-    CaptchaNum = await get_cached_value(cache, CaptchaPrefix+request.remote_addr+":"+'CaptchaNum')
+    
+
     code = await generate_verification_code()
     image_captcha = ImageCaptcha(fonts=[os.path.join(pydith, 'MiSans-Light.ttf')], width=150, height=50)
     image = image_captcha.generate_image(str(code))
+
+    if not (await block()):
+        return jsonify({'Error':"你尝试的次数过多，IP已锁定"})
+
 
     img_io = io.BytesIO()
     image.save(img_io, 'PNG')
     img_io.seek(0)
 
-    await cache.set(CaptchaPrefix+request.remote_addr+":"+'Captcha', json.dumps(code), expiry=180)
+    
     
 
     return await send_file(img_io, mimetype='image/png')
 
 
-# @app.route('/AriaNg', defaults={'path': 'index.html'}, methods=['GET', 'POST'])
-# @app.route('/AriaNg/<path:path>', methods=['GET', 'POST'])
-# async def serve_ariang(path):
-#     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-#         return html_message.format(request.remote_addr) 
-#     if await current_user.is_authenticated:
-#         ariang_path = 'AriaNg-1.3.6'
-#         return await send_from_directory(ariang_path,path)
-#     else:
-#         return redirect('/viewer/')
+@app.route('/AriaNg', defaults={'path': 'index.html'}, methods=['GET', 'POST'])
+@app.route('/AriaNg/<path:path>', methods=['GET', 'POST'])
+async def serve_ariang(path):
+    if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+        return html_message.format(request.headers.get('X-Real-Ip')) 
+    if await current_user.is_authenticated:
+        ariang_path = '/var/www/app/AriaNg'
+        return await send_from_directory(ariang_path,path)
+    else:
+        return redirect('/viewer/')
     
 # @app.route('/aria2/jsonrpc', methods=['GET', 'POST'])
 # async def proxy_aria2_jsonrpc():
-#     if request.remote_addr in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
-#         return html_message.format(request.remote_addr)    
+#     if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
+#         return html_message.format(request.headers.get('X-Real-Ip'))    
 #     if not await current_user.is_authenticated:
 #         return redirect('/viewer/')
 #     # Get the request data from the client
@@ -824,11 +852,11 @@ async def verify_code(user_code):
     # user_code = data.get('code', '').lower()
     
     cache: SessionInterface = app.session_interface
-    Captcha = await cache.get(CaptchaPrefix+request.remote_addr+":"+'Captcha')
+    Captcha = await cache.get(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+'Captcha')
 
     #code_valid = 
     # if code_valid:
-    #     await cache.set(CaptchaPrefix+request.remote_addr+":"+username+":"+'Captcha',json.dumps(None), expiry=180)
+    #     await cache.set(CaptchaPrefix+request.headers.get('X-Real-Ip')+":"+username+":"+'Captcha',json.dumps(None), expiry=180)
     return user_code.lower() == Captcha.lower()
 
 async def registerUser():
@@ -874,6 +902,6 @@ if __name__ == '__main__':
   
     websocket_thread = threading.Thread(target=websocket_server)
     websocket_thread.start()
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
