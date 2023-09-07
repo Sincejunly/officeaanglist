@@ -571,7 +571,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     search_text="auth_manager = QuartAuth()"
     replacement="auth_manager = QuartAuth(cookie_secure=False)"
    
-    file_path="/var/www/app/viewer/auth/viewer.py"
+    file_path="/var/www/app/viewer/viewer.py"
 
     sed -i "s|$search_text|$replacement|g" "$file_path"
     
