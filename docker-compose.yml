@@ -90,7 +90,7 @@ services:
       - REDIS_SERVER_HOST=redis
       - REDIS_SERVER_PORT=6379
       - REDIS_PASSWORD=115099
-      - DOMAIN=http://192.168.5.4:8088
+      - DOMAIN=${office_domain}
       #是否使用反向代理,如果使用反向代理,请填写https://****.com，并映射/ssl，证书文件应当是fullchain.pem和privkey.pem
       #- AListHost=     使用外部alist
       - AListdb_ty=mysql
