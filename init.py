@@ -69,7 +69,7 @@ if DOMAIN:
         ('aria2_secret', 'QQ943384135'),
         ('iframe_previews', '''{{
             "doc,docx,xls,xlsx,ppt,pptx,pdf,pdfa": {{
-                "office":"{}/viewer?src=$e_url"
+                "office":"{}/viewer/?src=$e_url"
             }},
             "epub": {{
                 "EPUB.js":"https://alist-org.github.io/static/epub.js/viewer.html?url=$e_url"
