@@ -77,7 +77,7 @@ async function inDocEditor(){
   }
 }
 SettingsC.addEventListener('click', async function() {
-  window.location.href = serverAddress+'/user';
+  window.location.href = serverAddress+'/user/';
 });
 async function viewer() {
   isSubmitClicked = true;
@@ -113,6 +113,8 @@ document.addEventListener("DOMContentLoaded", async function() {
 async function fetchData() {
     try {
       user = await sendRequest(serverAddress+'/check','GET');
+
+
       fileName = await getDomain('fileName');
       if(fileName != ''){
         const AListPath = await getDomain('AListPath');
@@ -135,18 +137,23 @@ async function fetchData() {
         await showLogin();
       }
       else if( 'username' in user){
+        
         if(user['disabled'] == 0){
+         
           overlay.classList.remove('hide-overlay');
           overlay.classList.add('show-overlay');
           
           if (user['username']!='guest' && !user['showViewer'])
           {
-       
             await showUser();
           }
-          else if(user['showViewer'] && fileName){
+          else if(user['showViewer'] && fileName && user['username']=='guest'){
             
             await showLogin();
+            await viewer();
+          }
+          else if(user['showViewer'] && fileName && user['username'] !='guest'){
+            await showUser();
             await viewer();
           }
           else{

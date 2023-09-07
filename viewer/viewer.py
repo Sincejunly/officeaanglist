@@ -27,7 +27,7 @@ import sys
 tracemalloc.start()
 pydith = os.path.dirname(os.path.realpath(__file__))
 
-auth_manager = QuartAuth()
+auth_manager = QuartAuth(cookie_secure=False)
 userEditFile = {
 }
 outAList = True
@@ -816,7 +816,7 @@ async def generate_code():
     return await send_file(img_io, mimetype='image/png')
 
 
-@app.route('/AriaNg', defaults={'path': 'index.html'}, methods=['GET', 'POST'])
+@app.route('/AriaNg/', defaults={'path': 'index.html'}, methods=['GET', 'POST'])
 @app.route('/AriaNg/<path:path>', methods=['GET', 'POST'])
 async def serve_ariang(path):
     if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
