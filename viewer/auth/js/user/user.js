@@ -48,6 +48,10 @@ logOut.addEventListener('click',async function(event){
   await sendRequest(window.serverAddress+'/logout','POST',{});
   window.location.href = serverAddress+'/viewer/';
 });
+async function Synchronize(){
+  await sendRequest(window.serverAddress+'/SynUser','POST',{'id':1});
+}
+
 async function addRow(listId,inPut,type=0,database=null,init=false) {
 
   const list = document.getElementById(listId)

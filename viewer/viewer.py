@@ -532,7 +532,7 @@ async def upRegister(userU):
         userU['password'] = hashed_password
         userU['showViewer'] = showViewer
         #update_data = [('username', 'password', 'type'), (userU['username'], hashed_password, userU['type'])]
-        await pool.update('x_user', userU)
+        await pool.update('x_user', userU,True)
     else:
         userU['base_path'] = '/'
         await pool.update('x_users', userU,True)
@@ -586,6 +586,16 @@ async def ChangeUser():
     user['farewell'] = 'ok'
     return jsonify(user)
    
+@app.route('/SynUser',methods=['GET', 'POST'])
+@login_required
+async def Synchronize():
+    userU = await request.get_json()
+    if not userU:
+        return jsonify({'Error':"not json"})
+    if userU['id'] == 1:
+        await registerUser()
+    return jsonify({'farewell':"ok"})
+
 
 @app.route('/register', methods=['GET', 'POST'])
 async def register():
