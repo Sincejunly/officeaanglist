@@ -346,6 +346,10 @@ async def save():
             print("Failed to download the file.")
             event.set()
             event.clear()
+    elif data.get('status') == 1:
+        key = data.get('key')
+        await pool.update_value(
+                'x_fileTask','`key`',key,'saved',True)
     elif data.get('status') == 4:
         key = data.get('key')
         await pool.update_value(
