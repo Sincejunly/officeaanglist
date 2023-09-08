@@ -161,7 +161,7 @@ def create_directory(path):
 async def generate_document_key(file_name):
     allowed_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     seconds_timestamp = str(time.time())
-    key = parse.quote(file_name + seconds_timestamp)[:20]
+    key = parse.quote(seconds_timestamp)[:20]
     key = ''.join(char for char in key if char in allowed_chars)
     return key
 
