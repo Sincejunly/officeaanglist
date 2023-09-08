@@ -78,8 +78,8 @@ async def add_cors_headers(response):
 # 配置Redis连接
 @app.before_serving
 async def setup():
-    global app,pool,origin,event
-    event = asyncio.Event()
+    global app,pool,origin
+
     origin = await readjson(os.path.join(pydith, 'data.json'))
     cache = await aioredis.Redis(
         host=origin['redisHost'],
@@ -168,7 +168,7 @@ async def generate_document_key(file_name):
 @app.route('/AListPath', methods=['GET', 'POST'])
 #@login_required
 async def AListPath():
-    global userEditFile,outAList,event
+    global userEditFile,outAList
     if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'), 'Domain', 'distrust'):
         return html_message.format(request.headers.get('X-Real-Ip'))    
     userU = await request.get_json()
@@ -180,7 +180,7 @@ async def AListPath():
     fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
     if fileTask:
         if not fileTask['saved']:
-            await event.wait()
+            await userEditFile[int(userU['id'])]['event'].wait()
             fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
         key = fileTask['key']
     else:
@@ -218,6 +218,7 @@ async def savePath():
             'Password':user['password'],
             'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
             'truePath':{userU['fileName']:root_folder_path},
+            'event':asyncio.Event()
             #'fileName':{userU['fileName']:}
             })
     else:
@@ -297,7 +298,7 @@ async def extract_part_from_url(url, position=0):
 
 @app.route('/save', methods=['GET', 'POST'])
 async def save():
-    global userEditFile,outAList,event
+    global userEditFile,outAList
     data = await request.get_json()
     if data.get("status") == 2:
         downloadUri = data.get("url")
@@ -339,21 +340,23 @@ async def save():
                 await Upload(AListHost, userEditFile[int(data['users'][0])]['userAgent'], 
                 userEditFile[int(data['users'][0])]['Authorization'], path_for_save, 
                 userEditFile[int(data['users'][0])]['File-Path'][fileName])
-            event.set()
-            event.clear()
+            userEditFile[int(data['users'][0])]['event'].set()
+            userEditFile[int(data['users'][0])]['event'].clear()
+            userEditFile.pop(int(data['users'][0]))
             #userEditFile.pop(data['users'][0])
         else:
             print("Failed to download the file.")
-            event.set()
-            event.clear()
+
     elif data.get('status') == 1:
-        key = data.get('key')
-        await pool.update_value(
-                'x_fileTask','`key`',key,'saved',True)
+        userEditFile[int(data['users'][0])]['event'].set()
+        userEditFile[int(data['users'][0])]['event'].clear()
     elif data.get('status') == 4:
         key = data.get('key')
+        userEditFile[int(data['users'][0])]['event'].set()
+        userEditFile[int(data['users'][0])]['event'].clear()
         await pool.update_value(
                 'x_fileTask','`key`',key,'saved',True)
+        userEditFile.pop(int(data['users'][0]))
     return jsonify({'farewell':"ok"})
 
 async def read_stream_and_display(stream, display,websocket):
@@ -511,12 +514,6 @@ async def index():
             user = {}
         return jsonify(user)
 
-        
-
-    return jsonify({
-        'empty':await pool.is_table_empty('x_user'),
-        'farewell':'ok'
-        })
 
 async def upRegister(userU):
     hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
