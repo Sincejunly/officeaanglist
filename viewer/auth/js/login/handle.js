@@ -123,6 +123,7 @@ async function fetchData() {
           "username": user['username'],
           "AListPath": AListPath,
           'fileName': fileName,
+          'id':user['id']
         }
         loader.style.display = 'block';
         key = await sendRequest(serverAddress+'/AListPath','POST',body);
