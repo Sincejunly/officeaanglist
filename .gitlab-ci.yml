@@ -27,10 +27,10 @@ build:
 
     - docker-compose down
     #- docker rmi $dd_route
-    - docker build --build-arg od_rout=$od_rout -t $di_name .
-    - docker login -u homura -p $lab_token $d_route
-    - docker tag $di_name $dd_route
-    - docker push $dd_route
+    # - docker build --build-arg od_rout=$od_rout -t $di_name .
+    # - docker login -u homura -p $lab_token $d_route
+    # - docker tag $di_name $dd_route
+    # - docker push $dd_route
     - docker-compose up -d
   
     # - docker login -u homuras -p $docker_token
