@@ -92,9 +92,13 @@ async function addRow(listId,inPut,type=0,database=null,init=false) {
 
   }
   
-  var id = await sendRequest(window.serverAddress+'/query','POST',{'table':inPut, 'id':1})
+  var id = await sendRequest(window.serverAddress+'/checkUser','POST',{'id':1})
+  
   if (id === null){
     id = 1;
+  }
+  else{
+    id = id['id'];
   }
 
   if (database === null && inPut === 'x_domain'){

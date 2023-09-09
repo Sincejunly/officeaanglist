@@ -89,6 +89,7 @@ async function handleStatusCode(response) {
 
 async function sendRequest(url, methods, data = "", headers = {'Content-Type': 'application/json'}, needjson = true) {
   try {
+    var results;
     const requestOptions = {
       method: methods,
       headers: headers,
@@ -106,11 +107,16 @@ async function sendRequest(url, methods, data = "", headers = {'Content-Type': '
       window.location.href = response.url;
     } else {
       const contentType = response.headers.get('content-type');
+
       if (contentType && contentType.includes('text/html')) {
         const result = await response.text();
-        document.open();
-        document.write(result);
-        document.close();
+        const parsedResult = JSON.parse(result);
+        if (parsedResult.error != 0)
+        {
+          document.open();
+          document.write(result);
+          document.close();
+        }
       } else {
         if (needjson) {
           const result = await response.json();

@@ -36,8 +36,29 @@ async function getMyProfile(user,fileName,fileExtension,key) {
       
     let url = await getDomain('url');
 
-     
+     var onDownloadAs = async function (event) {
+        var url = event.data.url;
+        var body = {
+          'url':url,
+          'status':10
+        }
+        await sendRequest(serverAddress+'/callback/','POST',body);
+        //console.log("ONLYOFFICE Document Editor create file: " + url);
+      };
+    var onDocumentStateChange = function (event) {
+        if (event.data) {
+          var fileType = event.data.fileType;
+          docEditor.downloadAs(fileType);
+        } else {
+            console.log("Changes are collected on document editing service");
+        }
+    };
      const docEditor = new DocsAPI.DocEditor("placeholder", {
+          "events":{
+            "onDownloadAs": onDownloadAs,
+            "onDocumentStateChange": onDocumentStateChange,
+          },
+          "lang": "zh-CN",
           "document": {
               "fileType": fileExtension,
               "permissions": {
@@ -71,6 +92,7 @@ async function getMyProfile(user,fileName,fileExtension,key) {
           "type": "desktop",
       }
       );
+      
       const AListPath = await getDomain('AListPath');
       fileExtension = fileName.split('.').pop();
       const body = {
@@ -79,7 +101,7 @@ async function getMyProfile(user,fileName,fileExtension,key) {
           'fileName': fileName,
           'key':key
       }
-      
       await sendRequest(serverAddress+'/savePath','POST',body);
+      
 }
 

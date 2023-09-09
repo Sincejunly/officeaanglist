@@ -134,7 +134,7 @@ async def query():
                 continue
             else:
                 arrange = key
-
+        
         if not user:
             user = await pool.get_row_by_value(userU['table'], arrange, userU[arrange])
     elif(len(userU) == 3 and 'id' in userU):
@@ -158,7 +158,7 @@ def create_directory(path):
 
 
 
-async def generate_document_key(file_name):
+async def generate_document_key():
     allowed_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     seconds_timestamp = str(time.time())
     key = parse.quote(seconds_timestamp)[:20]
@@ -175,24 +175,22 @@ async def AListPath():
     if not userU:
         return jsonify({'Error': "not json"})
 
-
-    
     fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+    
     if fileTask:
         if not fileTask['saved']:
-            await userEditFile[int(userU['id'])]['event'].wait()
-            fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
-        key = fileTask['key']
+            key = fileTask['key_old']
+        else:
+            key = fileTask['key']
     else:
-        key = await generate_document_key(userU['fileName'])
-    
+        key = await generate_document_key()
+    print(key)
+    await upUserEditFile(userU,key);
+
     return jsonify({'key':key,'farewell':"ok"})
 
-@app.route('/savePath', methods=['GET', 'POST'])
-@login_required
-async def savePath():
-    global userEditFile,outAList
-    userU = await request.get_json()
+async def upUserEditFile(userU,key):
+    global userEditFile,pool,outAList
     user = await pool.get_row_by_value('x_users','username',userU['username'])
     RowADD = await pool.get_row_by_value('x_storages', 'mount_path', userU['AListPath'])
 
@@ -204,47 +202,60 @@ async def savePath():
         create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
 
-    fileType = userU['fileName'][userU['fileName'].rfind('.'):]
+    
     #truePath = "{}/{}".format(root_folder_path, userU['fileName']) if root_folder_path else ''
-    if not (user['id'] in userEditFile):
+    if not (key in userEditFile):
         if outAList:
             alisttoken = await getToken(AListHost, user['username'], user['password'])
         else:
             alisttoken = {'data':{'token':''}}
-        userEditFile.setdefault(user['id'],{
+        userEditFile.setdefault(key,{
             'userAgent':request.headers.get('User-Agent'),                   
             'Authorization':alisttoken['data']['token'],
             'File-Path':{userU['fileName']:parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))},
             'Password':user['password'],
             'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
             'truePath':{userU['fileName']:root_folder_path},
-            'event':asyncio.Event()
             #'fileName':{userU['fileName']:}
             })
     else:
-        userEditFile[user['id']]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
-        userEditFile[user['id']]['Password'] = user['password']
-        userEditFile[user['id']]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
-        userEditFile[user['id']]['truePath'][userU['fileName']]=root_folder_path
-        #userEditFile[user['id']]['fileName'] = userU['fileName']
+        userEditFile[key]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
+        userEditFile[key]['Password'] = user['password']
+        userEditFile[key]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
+        userEditFile[key]['truePath'][userU['fileName']]=root_folder_path
     
+
+@app.route('/savePath', methods=['GET', 'POST'])
+@login_required
+async def savePath():
+    global userEditFile,outAList
+    userU = await request.get_json()
+
+        #userEditFile[user['id']]['fileName'] = userU['fileName']
+    root_folder_path = userEditFile[userU['key']]['truePath'][userU['fileName']]
+    fileType = userU['fileName'][userU['fileName'].rfind('.'):]
     if await pool.is_table_empty('x_fileTask'):
         await pool.update(
         'x_fileTask',{
             '`id`':1,
             'fileName':userU['fileName'],
-            '`key`':userU['key'],'history':{},
+            '`key`':userU['key'],
+            'key_old':userU['key'],
+            'history':{},
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":fileType,
             'truePath':root_folder_path,
             'saved':False},True)
     else:
-   
+        #fileTask = await pool.get_row_by_value('x_fileTask','fileName',userU['fileName'])
+        # fileTask['key'] = userU['key']
         await pool.update(
         'x_fileTask',{
             'fileName':userU['fileName'],
-            '`key`':userU['key'],'history':{},
+            '`key`':userU['key'],
+            'key_old':userU['key'],
+            'history':{},
             'users':[],'actions':[],
             "lastsave":"", \
             "notmodified":False,"filetype":fileType,
@@ -296,67 +307,68 @@ async def extract_part_from_url(url, position=0):
     # Return the part at the specified position (default: 0)
     return parts[position]
 
+async def uphi(data):
+    global userEditFile
+    fileTask = await pool.get_row_by_value('x_fileTask','key_old',data['key'])
+
+    fileName = fileTask['fileName']
+    truePath = fileTask['truePath']
+
+    userEditFile.pop(data['key'])
+    key = await generate_document_key()
+    
+    path_for_save = truePath + fileName  # 替换为实际保存路径
+
+    history = data.get("history") if data.get("history") else {}
+    users = data.get('users') if data.get('users') else []
+    actions = data.get('actions') if data.get('actions') else []
+    lastsave = data.get("lastsave") if data.get("lastsave") else ""
+    notmodified = data.get("notmodified") if data.get("notmodified") else False
+    filetype = data.get("filetype") if data.get("filetype") else ""
+    await pool.update(
+        'x_fileTask',{
+        'fileName': fileName, \
+        '`key`':key,'key_old':key,
+        'history':history, \
+        'users':users,'actions':actions,
+        "lastsave":lastsave, \
+        "notmodified":notmodified,"filetype":filetype, \
+        'truePath':truePath,
+        'saved':True
+        },True)
+
+
 @app.route('/save', methods=['GET', 'POST'])
 async def save():
     global userEditFile,outAList
     data = await request.get_json()
-    if data.get("status") == 2:
+    status = data.get("status")
+
+    if status == 2:
+        await uphi(data)
+
+    elif status == 10 or status == 6:
         downloadUri = data.get("url")
-        #key = await extract_part_from_url(downloadUri, 4)
-        #key = data['key']
-        fileTask = await pool.get_row_by_value('x_fileTask','`key`',data['key'])
-  
+        key = await extract_part_from_url(downloadUri, 4)
+        key = key[:key.find('_')]
+        fileTask = await pool.get_row_by_value('x_fileTask','key_old',key)
+
         fileName = fileTask['fileName']
         truePath = fileTask['truePath']
-        key = await generate_document_key(fileName)
-        
-        path_for_save = truePath + fileName  # 替换为实际保存路径
-
+        path_for_save = truePath + fileName
         if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
             #key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
-            history = data.get("history") if data.get("history") else {}
-            users = data.get('users') if data.get('users') else []
-            actions = data.get('actions') if data.get('actions') else []
-            lastsave = data.get("lastsave") if data.get("lastsave") else ""
-            notmodified = data.get("notmodified") if data.get("notmodified") else False
-            filetype = data.get("filetype") if data.get("filetype") else ""
-
-
-            await pool.update(
-                'x_fileTask',{
-                'fileName': fileName, \
-                '`key`':key,'history':history, \
-                'users':users,'actions':actions,
-                "lastsave":lastsave, \
-                "notmodified":notmodified,"filetype":filetype, \
-                'truePath':truePath,
-                'saved':True},True)
-            
-            # await pool.update('x_fileTask',{'fileName': \
-            # fileName, '`key`':key,'truePath':path_for_save},True)
-
             if outAList:
-
-                await Upload(AListHost, userEditFile[int(data['users'][0])]['userAgent'], 
-                userEditFile[int(data['users'][0])]['Authorization'], path_for_save, 
-                userEditFile[int(data['users'][0])]['File-Path'][fileName])
-            userEditFile[int(data['users'][0])]['event'].set()
-            userEditFile[int(data['users'][0])]['event'].clear()
-            userEditFile.pop(int(data['users'][0]))
-            #userEditFile.pop(data['users'][0])
+                await Upload(AListHost, userEditFile[key]['userAgent'], 
+                userEditFile[key]['Authorization'], path_for_save, 
+                userEditFile[key]['File-Path'][fileName])
+            key = await generate_document_key()
+            await pool.update_value('x_fileTask','fileName',fileName,'`key`',key)
         else:
             print("Failed to download the file.")
-
-    elif data.get('status') == 1:
-        userEditFile[int(data['users'][0])]['event'].set()
-        userEditFile[int(data['users'][0])]['event'].clear()
-    elif data.get('status') == 4:
+    elif status == 4:
         key = data.get('key')
-        userEditFile[int(data['users'][0])]['event'].set()
-        userEditFile[int(data['users'][0])]['event'].clear()
-        await pool.update_value(
-                'x_fileTask','`key`',key,'saved',True)
-        userEditFile.pop(int(data['users'][0]))
+        userEditFile.pop(key)
     return jsonify({'farewell':"ok"})
 
 async def read_stream_and_display(stream, display,websocket):
@@ -536,6 +548,7 @@ async def upRegister(userU):
         await pool.update('x_user', userU,True)
     else:
         userU['base_path'] = '/'
+        print(userU)
         await pool.update('x_users', userU,True)
         userU['password'] = hashed_password
         userU['showViewer'] = showViewer
@@ -554,6 +567,7 @@ async def ChangeUser():
     if request.headers.get('X-Real-Ip') in await getAlltype(await pool.getAllrow('x_domain'),'Domain','distrust'):
         return html_message.format(request.headers.get('X-Real-Ip'))
     userU = await request.get_json()
+    print(userU)
     if 'password' in userU:
         hashed_password = hashpw(userU['password'].encode(), gensalt()).decode()
     
