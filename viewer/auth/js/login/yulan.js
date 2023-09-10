@@ -35,14 +35,20 @@ async function getMyProfile(user,fileName,fileExtension,key) {
 
       
     let url = await getDomain('url');
-
+    var count = 0;
      var onDownloadAs = async function (event) {
         var url = event.data.url;
         var body = {
           'url':url,
           'status':10
         }
-        await sendRequest(serverAddress+'/callback/','POST',body);
+        count = count + 1;
+        if(count == 10)
+        {
+          count = 0;
+          await sendRequest(serverAddress+'/callback/','POST',body);
+        }
+        
         //console.log("ONLYOFFICE Document Editor create file: " + url);
       };
     var onDocumentStateChange = function (event) {

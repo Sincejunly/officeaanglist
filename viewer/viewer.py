@@ -313,11 +313,16 @@ async def uphi(data):
 
     fileName = fileTask['fileName']
     truePath = fileTask['truePath']
-
+    downloadUri = data.get("url")
     userEditFile.pop(data['key'])
     key = await generate_document_key()
     
     path_for_save = truePath + fileName  # 替换为实际保存路径
+    if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
+        if outAList:
+            await Upload(AListHost, userEditFile[key]['userAgent'], 
+            userEditFile[key]['Authorization'], path_for_save, 
+            userEditFile[key]['File-Path'][fileName])
 
     history = data.get("history") if data.get("history") else {}
     users = data.get('users') if data.get('users') else []
@@ -357,13 +362,12 @@ async def save():
         truePath = fileTask['truePath']
         path_for_save = truePath + fileName
         if await runCmd(f"wget -O {path_for_save} -q -N '{downloadUri}'"):
-            #key = await generate_document_key(userEditFile[int(data['users'][0])]['fileName'])
             if outAList:
                 await Upload(AListHost, userEditFile[key]['userAgent'], 
                 userEditFile[key]['Authorization'], path_for_save, 
                 userEditFile[key]['File-Path'][fileName])
             key = await generate_document_key()
-            await pool.update_value('x_fileTask','fileName',fileName,'`key`',key)
+            await pool.update_value('x_fileTask','fileName',fileName,'key',key)
         else:
             print("Failed to download the file.")
     elif status == 4:
