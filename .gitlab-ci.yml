@@ -17,7 +17,7 @@ variables:
 #   key: $CI_PROJECT_ID
 include:
   #https://gitlab.homura.top:70/homura/officeaanglist.git
-  - remote: 'https://gitlab.homura.top:70/homura/officeaanglist/confound/.gitlab-ci.yml'
+  - remote: 'https://gitlab.homura.top:70/homura/officeaanglist/-/confound/.gitlab-ci.yml'
 
 stages:
   - build
