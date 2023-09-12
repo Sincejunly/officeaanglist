@@ -16,7 +16,7 @@ variables:
 #     #- .cache/apt/
 #   key: $CI_PROJECT_ID
 include:
-  - project: 'officeaanglist'
+  - project: 'homura/officeaanglist'
     ref: confound
     file: '.gitlab-ci.yml'
 
