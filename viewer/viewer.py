@@ -184,7 +184,7 @@ async def AListPath():
             key = fileTask['key']
     else:
         key = await generate_document_key()
-    print(key)
+    
     await upUserEditFile(userU,key);
 
     return jsonify({'key':key,'farewell':"ok"})
@@ -222,9 +222,12 @@ async def upUserEditFile(userU,key):
         create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
     fullAListPath = "{}/{}".format(userU['AAListPath'], userU['fileName'])
-    print(fullAListPath,root_folder_path)
+    
     fullFilePath = await montageStr(root_folder_path,fullAListPath)
+    root_folder_path = fullFilePath[:fullFilePath.rfind('/')] + '/'
+    
     #truePath = "{}/{}".format(root_folder_path, userU['fileName']) if root_folder_path else ''
+   
     if not (key in userEditFile):
         if outAList:
             alisttoken = await getToken(AListHost, user['username'], user['password'])
