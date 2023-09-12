@@ -100,10 +100,12 @@ async function getMyProfile(user,fileName,fileExtension,key) {
       );
       
       const AListPath = await getDomain('AListPath');
+      const AAListPath = await getDomain('AAListPath');
       fileExtension = fileName.split('.').pop();
       const body = {
           "username": user['username'],
           "AListPath": AListPath,
+          'AAListPath':AAListPath,
           'fileName': fileName,
           'key':key
       }

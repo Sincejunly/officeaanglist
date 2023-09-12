@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>文件分块上传示例</title>
+</head>
+<body>
+    <h1>文件分块上传示例</h1>
+    <input type="file" id="file-input">
+    <button onclick="uploadFile()">上传文件</button>
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const progressBar = document.getElementById('progress-bar');
+
+        const chunkSize = 1024 * 1024; // 1MB
+        const maxThreads = 4; // 最大线程数
+
+        async function uploadFile() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const totalChunks = Math.ceil(file.size / chunkSize);
+            const chunkPromises = [];
+
+            for (let i = 0; i < totalChunks; i += maxThreads) {
+                const promises = [];
+                for (let j = i; j < Math.min(i + maxThreads, totalChunks); j++) {
+                    const start = j * chunkSize;
+                    const end = Math.min((j + 1) * chunkSize, file.size);
+                    const chunk = file.slice(start, end);
+                    const formData = new FormData();
+                    formData.append('file', chunk, file.name); // 传递文件名
+                    promises.push(uploadChunk(formData));
+                }
+                await Promise.all(promises);
+            }
+
+            alert('文件上传成功！');
+        }
+
+        async function uploadChunk(formData) {
+            const response = await fetch('http://127.0.0.1:5000/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const progressData = await response.json();
+                const percentComplete = progressData.progress;
+                progressBar.style.width = percentComplete + '%';
+            } else {
+                alert('文件上传失败！');
+                throw new Error('上传失败');
+            }
+        }
+    </script>
+</body>
+</html>

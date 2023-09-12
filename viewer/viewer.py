@@ -189,6 +189,26 @@ async def AListPath():
 
     return jsonify({'key':key,'farewell':"ok"})
 
+async def montageStr(str1,str2):
+    # 使用'/'字符将字符串分割成列表
+    list1 = str1.split('/')
+    list2 = str2.split('/')
+    list1 = [item for item in list1 if item != ""]
+    list2 = [item for item in list2 if item != ""]
+    # 初始化一个空列表来存储相同的部分
+    common_parts = []
+    s_parts = []
+    
+    # 找到相同的部分
+    for part1, part2 in zip(list1, list2):
+        if part1 != part2:
+            s_parts.append(part1)
+            break
+
+    result = '/'+'/'.join(s_parts + list2)
+    return result
+
+
 async def upUserEditFile(userU,key):
     global userEditFile,pool,outAList
     user = await pool.get_row_by_value('x_users','username',userU['username'])
@@ -201,28 +221,30 @@ async def upUserEditFile(userU,key):
         outAList = True
         create_directory('fileCahe')
         root_folder_path = 'fileCahe/'
-
-    
+    fullAListPath = "{}/{}".format(userU['AAListPath'], userU['fileName'])
+    print(fullAListPath,root_folder_path)
+    fullFilePath = await montageStr(root_folder_path,fullAListPath)
     #truePath = "{}/{}".format(root_folder_path, userU['fileName']) if root_folder_path else ''
     if not (key in userEditFile):
         if outAList:
             alisttoken = await getToken(AListHost, user['username'], user['password'])
         else:
             alisttoken = {'data':{'token':''}}
+        
         userEditFile.setdefault(key,{
             'userAgent':request.headers.get('User-Agent'),                   
             'Authorization':alisttoken['data']['token'],
-            'File-Path':{userU['fileName']:parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))},
+            'File-Path':parse.quote("{}/{}".format(userU['AAListPath'], userU['fileName'])),
             'Password':user['password'],
-            'Content-Length':str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName']))),
-            'truePath':{userU['fileName']:root_folder_path},
+            'Content-Length':str(os.path.getsize(fullFilePath)),
+            'truePath':root_folder_path,
             #'fileName':{userU['fileName']:}
             })
     else:
-        userEditFile[key]['File-Path'][userU['fileName']] = parse.quote("{}/{}".format(userU['AListPath'], userU['fileName']))
+        userEditFile[key]['File-Path'] = parse.quote("{}/{}".format(userU['AAListPath'], userU['fileName']))
         userEditFile[key]['Password'] = user['password']
-        userEditFile[key]['Content-Length']=str(os.path.getsize("{}/{}".format(root_folder_path, userU['fileName'])))
-        userEditFile[key]['truePath'][userU['fileName']]=root_folder_path
+        userEditFile[key]['Content-Length']=str(os.path.getsize(fullFilePath))
+        userEditFile[key]['truePath']=root_folder_path
     
 
 @app.route('/savePath', methods=['GET', 'POST'])
@@ -232,7 +254,7 @@ async def savePath():
     userU = await request.get_json()
 
         #userEditFile[user['id']]['fileName'] = userU['fileName']
-    root_folder_path = userEditFile[userU['key']]['truePath'][userU['fileName']]
+    root_folder_path = userEditFile[userU['key']]['truePath']
     fileType = userU['fileName'][userU['fileName'].rfind('.'):]
     if await pool.is_table_empty('x_fileTask'):
         await pool.update(
@@ -322,7 +344,7 @@ async def uphi(data):
         if outAList:
             await Upload(AListHost, userEditFile[key]['userAgent'], 
             userEditFile[key]['Authorization'], path_for_save, 
-            userEditFile[key]['File-Path'][fileName])
+            userEditFile[key]['File-Path'])
 
     history = data.get("history") if data.get("history") else {}
     users = data.get('users') if data.get('users') else []
@@ -365,7 +387,7 @@ async def save():
             if outAList:
                 await Upload(AListHost, userEditFile[key]['userAgent'], 
                 userEditFile[key]['Authorization'], path_for_save, 
-                userEditFile[key]['File-Path'][fileName])
+                userEditFile[key]['File-Path'])
             key = await generate_document_key()
             await pool.update_value('x_fileTask','fileName',fileName,'key',key)
         else:
@@ -426,7 +448,7 @@ async def orc(websocket, path):
             return jsonify({'Error':"not json"})
         
         userU = json.loads(userU)
-        truPath = userEditFile[userU['id']]['truePath'][userU['fileName']]
+        truPath = userEditFile[userU['id']]['truePath']
       
         fileNameP = userU['fileName'][:userU['fileName'].rfind('.')]
 

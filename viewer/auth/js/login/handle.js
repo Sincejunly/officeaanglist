@@ -118,10 +118,13 @@ async function fetchData() {
       fileName = await getDomain('fileName');
       if(fileName != ''){
         const AListPath = await getDomain('AListPath');
+        const AAListPath = await getDomain('AAListPath');
+        console.log(fileName);
         fileExtension = fileName.split('.').pop();
         const body = {
           "username": user['username'],
           "AListPath": AListPath,
+          'AAListPath':AAListPath,
           'fileName': fileName,
           'id':user['id']
         }

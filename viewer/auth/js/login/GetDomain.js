@@ -19,10 +19,13 @@ async function getDomain(range='none'){
     DOMAIN = segments.slice(0, segments.length - 1).join('/'); 
   }else if(range == 'fileName'){
     DOMAIN = segments[segments.length - 1];
-  }else if(range == 'AListPath'){
+  }else if(range == 'AAListPath'){
     DOMAIN = segments.slice(4, segments.length - 1).join('/');
-
-  }else if(range == 'url'){
+  }
+  else if(range == 'AListPath'){
+    DOMAIN = segments.slice(4, 6).join('/');
+  }
+  else if(range == 'url'){
     DOMAIN = url;
   }
   return DOMAIN;
