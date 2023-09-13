@@ -566,16 +566,16 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     rm -r /etc/nginx/conf.d/dsssl.conf
     cp -r /var/www/app1/dsssl.conf /etc/nginx/conf.d/
     sed -i "s|office.xxx.com|${host//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
-  else
+  # else
     
-    search_text="auth_manager = QuartAuth()"
-    replacement="auth_manager = QuartAuth(cookie_secure=False)"
+  #   search_text="auth_manager = QuartAuth()"
+  #   replacement="auth_manager = QuartAuth(cookie_secure=False)"
    
-    file_path="/var/www/app/viewer/viewer.py"
+  #   file_path="/var/www/app/viewer/viewer.py"
 
-    sed -i "s|$search_text|$replacement|g" "$file_path"
+  #   sed -i "s|$search_text|$replacement|g" "$file_path"
     
-  fi
+  # fi
   
 
 

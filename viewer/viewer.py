@@ -27,7 +27,7 @@ import sys
 tracemalloc.start()
 pydith = os.path.dirname(os.path.realpath(__file__))
 
-auth_manager = QuartAuth()
+auth_manager = QuartAuth(cookie_secure=False)
 userEditFile = {
 }
 outAList = True
