@@ -69,7 +69,7 @@ RUN chmod +rwx /var/www/app1/* \
 	&& rm -rf Contents.json \
 	&& rm -rf system \
 	&& python3 confound_js.py viewer/auth/js \
-	&& pyarmor gen -r viewer.py --output /var/www/app1/viewer.py \
+	&& pyarmor gen -r viewer/viewer.py --output /var/www/app1/viewer.py \
 	#&& cp /var/www/app1/ds-docservice.conf /etc/nginx/includes/ds-docservice.conf \
 	&& sed -i 's/;extension=curl/extension=curl/' /etc/php/7.4/cli/php.ini 
 
