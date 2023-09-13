@@ -566,6 +566,7 @@ if [ ! -f "/var/www/app/AList/AListInit" ]; then
     rm -r /etc/nginx/conf.d/dsssl.conf
     cp -r /var/www/app1/dsssl.conf /etc/nginx/conf.d/
     sed -i "s|office.xxx.com|${host//\//\\/}|g" /etc/nginx/conf.d/dsssl.conf
+  fi
   # else
     
   #   search_text="auth_manager = QuartAuth()"
