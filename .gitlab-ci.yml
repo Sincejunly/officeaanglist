@@ -5,8 +5,8 @@ services:
 variables:
   di_name: 'officeaanglist'
   dd_name: 'officeaanglist'
-  dd_route: '$d_route/officeaanglist:v0.3.2-unlock'
-  ddd_rout: 'homuras/officeaanglist:v0.3.2-unlock'
+  dd_route: '$d_route/officeaanglist:v0.3.2-puls'
+  ddd_rout: 'homuras/officeaanglist:v0.3.2-puls'
   od_rout: "$d_route/office:7.1.1"
   #PIP_CACHE_DIR: .cache/pip
 
@@ -15,18 +15,18 @@ variables:
 #     - .cache/pip/
 #     #- .cache/apt/
 #   key: $CI_PROJECT_ID
-include:
+#@include:
   #https://gitlab.homura.top:70/homura/officeaanglist.git
-  - remote: 'https://gitlab.homura.top:70/homura/officeaanglist/-/raw/confound/.gitlab-ci.yml'
+  #- remote: 'https://gitlab.homura.top:70/homura/officeaanglist/-/raw/confound/.gitlab-ci.yml'
 
 stages:
   - build
-  - buildApp
+  #- buildApp
 
 build:
   stage: build
   script:
-
+    - $confound_js.py > confound_js.py
     - docker-compose down
     - docker rmi $dd_route
     - docker build --build-arg od_rout=$od_rout -t $di_name .
