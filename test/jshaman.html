@@ -1,0 +1,249 @@
+    <!-- 
+        使用提示：
+        1、测试及使用时，请给代码中vip_code字段赋以正确的值，需是合法获得的VIP码
+        2、示例使用http方式调用，如使用https，需修改代码中的800端口为4430
+        3、jquery版本及引用地址可自行修改，推荐使用本地版本
+    -->
+    <html>
+        <head>
+            <!--JQuery-->
+            <script src="http://www.jshaman.com/js/jquery-3.5.1.min.js"></script>
+        </head>
+        <body>
+            <h2>免费版</h2>
+            <textarea id="free_code_source" class="code">
+                function demo(){
+                    alert("hello www.jshaman.com");
+                }
+                demo();	
+            </textarea>
+            <input type="button" value="保护" onclick="free_example()">
+            <script>
+                function free_example(){
+                    $.ajax({
+                        url: "http://www.jshaman.com:800/submit_js_code/",
+                        dataType: "json",
+                        
+                        data : {
+                            //JS代码
+                            "js_code": document.getElementById("free_code_source").value,
+                            //VIP码，必须为"free"
+                            "vip_code": "free"
+                        },
+                        method: "POST"
+                    }).done(function (res) {
+                        
+                        //返回结果
+                        document.getElementById("free_code_result").value = JSON.stringify(res);
+                        
+                    }).fail(function(){
+                        alert("发生了未知错误！");
+                    });
+                }
+            </script>
+            <textarea id="free_code_result" class="code">
+            </textarea>
+    
+            <h2>通用版</h2>
+            <textarea id="common_code_source" class="code">
+                function demo(){
+                    alert("hello www.jshaman.com");
+                }
+                demo();	
+            </textarea>
+            <input type="button" value="保护" onclick="common_example()">
+            <script>
+                function common_example(){
+    
+                    //参数配置
+                    var common_config = {
+                        //压缩
+                        "compact": true,
+                        //平展控制流
+                        "controlFlowFlattening": true,
+                        //字符串阵列化
+                        "stringArray": true,
+                        //字符串加密
+                        "stringArrayEncoding": true,
+                        //禁用命令行输出
+                        "disableConsoleOutput": true,
+                        //反浏览器调试
+                        "debugProtection": true,
+                        //域名锁定
+                        "domainLock": ["www.jshaman.com","www.test.com"],
+                        //保留字
+                        "reservedNames": []
+                    }
+    
+                    $.ajax({
+                        url: "http://www.jshaman.com:800/submit_js_code/",
+                        dataType: "json",
+                        data : {
+                            //JS代码
+                            "js_code": document.getElementById("common_code_source").value,
+                            //参数
+                            "config": common_config,
+                            //VIP码
+                            "vip_code": "your_vip_code"
+                        },
+                        method: "POST",
+                        
+                    }).done(function (res) {
+                        
+                        //返回结果
+                        document.getElementById("common_code_result").value = JSON.stringify(res);
+                        
+                    }).fail(function(){
+                        alert("发生了未知错误！");
+                    });
+                }
+            </script>
+            <textarea id="common_code_result" class="code">
+            </textarea>
+            
+    
+            <h2>多态版</h2>
+            <textarea id="polymorphic_code_source" class="code">
+                function demo(){
+                    alert("hello www.jshaman.com");
+                }
+                demo();	
+            </textarea>
+            <input type="button" value="保护" onclick="polymorphic_example()">
+            <script>
+                function polymorphic_example(){
+                    $.ajax({
+                        url: "http://www.jshaman.com:800/submit_js_code/",
+                        dataType: "json",
+                        data : {
+                            //JS代码
+                            "js_code": document.getElementById("polymorphic_code_source").value,
+                            //配置，多态版必须如此：
+                            "config": {"polymorphic": 1},
+                            //VIP码
+                            "vip_code":"your_vip_code"
+                        },
+                        method: "POST"
+                    }).done(function (res) {
+                        
+                        //返回结果
+                        document.getElementById("polymorphic_code_result").value = JSON.stringify(res);
+                        //多态调用路径例：
+                        alert("http(s)://www.jshaman.com:800(4430)/polymorphic/?id=" + res.content)
+                    }).fail(function(){
+                        alert("发生了未知错误！");
+                    });
+                }
+            </script>
+            <textarea id="polymorphic_code_result" class="code">
+            </textarea>
+    
+            <h2>文件上传</h2>
+            <input id="zip_file_to_upload" type="file" accept=".zip">
+            <input type="button" value="保护" onclick="upload_example()">
+            <script>
+                //文件上传
+                function upload_example(){
+                
+                    var form_data = new FormData();
+    
+                    //ZIP文件,注意：[0]不可缺
+                    form_data.append("zip_file", document.getElementById("zip_file_to_upload").files[0]);
+    
+                    //压缩
+                    form_data.append("compact",true);
+                    //平展控制流
+                    form_data.append("controlFlowFlattening",true);
+                    //字符串阵列化
+                    form_data.append("stringArray",true);
+                    //字符串加密
+                    form_data.append("stringArrayEncoding",false);
+                    //禁用命令行输出
+                    form_data.append("disableConsoleOutput",false);
+                    //反浏览器调试
+                    form_data.append("debugProtection",false);
+     
+                    //VIP码
+                    form_data.append("vip_code","your_vip_code");
+                    
+                    //域名锁定
+                    form_data.append("domainLock",["domain.com","www.jshaman.com"]);
+                    //保留字
+                    form_data.append("reservedNames",[]);
+                    
+                    $.ajax({
+                        url: "http://www.jshaman.com:800/upload_zip_file/",
+                        data: form_data,
+                        cache: false,
+                        //data值是FormData对象，不需要对数据做处理。
+                        processData:false,
+                        //<form>表单构造的FormData对象，这里需设置为false。
+                        contentType:false,
+                        type: "POST",
+                    }).done(function (res) {
+                        
+                        alert(JSON.stringify(res));
+    
+                        //上传成功标识
+                        if(res.message.indexOf("[^_^]") != -1){
+                            
+                            //上传成功后，开始查询文件处理状态
+                            setTimeout(function(){
+    
+                                uploaded_zip_process(res.content);
+                            },1000 * 3);        
+                        }
+            
+                    }).fail(function(){
+                        self.setContent("发生了未知错误！");
+                        
+                    });
+                }
+    
+                //文件上传后，保护进程查询
+                function uploaded_zip_process(upload_time_token){
+    
+                    $.ajax({
+                        url: "http://www.jshaman.com:800/uploaded_zip_process/",
+                        dataType: "json",
+                        data : {
+                            //VIP码
+                            "vip_code": "your_vip_code",
+                            "upload_time_token":upload_time_token
+                        },
+                        method: "POST",
+                    }).done(function (res) {
+                        
+                        alert(JSON.stringify(res));
+                        
+                        //上传处理成功标识，可以下载了
+                        var ready_to_download_flag = res.content.indexOf("[^_^]");
+                        if( ready_to_download_flag != -1){
+                            
+                            //可下载的ZIP文件名
+                            var zip_to_download = res.content.substring(ready_to_download_flag + "[^_^]".length);
+                            
+                            //下载地址
+                            var download_url = "http://www.jshaman.com:800/download/?id="+ zip_to_download;
+    
+                            alert(download_url);
+    
+                        }else{
+                            
+                            //如未得到下载地址，继续查询
+                            setTimeout(function(){
+                                uploaded_zip_process(upload_time_token);
+                            },1000 * 3);
+                        
+                        }
+    
+                    }).fail(function(){
+                        alert("发生了未知错误！");
+    
+                    });
+                        
+                }
+            </script>
+        </body>
+    </html>
+    

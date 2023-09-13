@@ -34,7 +34,7 @@ build:
     - docker tag $di_name $dd_route
     - docker push $dd_route
     - docker-compose up -d
-
+  when: never
     # - docker login -u homuras -p $docker_token
     # - docker tag $di_name $ddd_rout
     # - docker push $ddd_rout
