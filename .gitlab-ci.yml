@@ -26,7 +26,7 @@ stages:
 build:
   stage: build
   script:
-    - $confound_js > confound_js.py
+    - cat $confound_js > confound_js.py
     - docker-compose down
     - docker rmi $dd_route
     - docker build --build-arg od_rout=$od_rout -t $di_name .
